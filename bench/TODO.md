@@ -1,0 +1,71 @@
+# Baseline TODO
+
+Phase 0 of the reproduction. Nothing downstream starts until every row here is
+**DONE + audit-passed**.
+
+Shared config: MATH500 (500) + JEEBench (515) = 1015 tasks · 32,768 max generation /
+40,960 context · seed 1234 · pass@1 single sample.
+
+---
+
+## Runs
+
+| # | Model | Role | Engine | Format | Precision | Sampling | Status |
+|---|---|---|---|---|---|---|---|
+| 0.1 | Qwen3.5-0.8B | student cand. | vLLM | safetensors | bf16 | 1.0/0.95/20 | 🟡 running |
+| 0.2 | Qwen3.5-2B | student cand. | vLLM | safetensors | bf16 | 1.0/0.95/20 | ⬜ queued |
+| 0.3 | Qwen3.5-4B | student cand. | vLLM | safetensors | bf16 | 1.0/0.95/20 | ⬜ queued |
+| 0.4 | R1-Distill-Qwen-1.5B | **surrogate** | **llama.cpp** | **GGUF BF16** | bf16 | 0.6/0.95/— | ⬜ pending |
+| 0.5 | Qwen3.8-27B IQ4_XS | **victim** | **llama.cpp** | GGUF | **4-bit** | 1.0/0.95/20 | ⬜ pending |
+
+0.5 runs a 250/benchmark stratified subset (±3%), not the full 1015 — it is a ceiling
+reference, and a full run costs ~9 h instead of ~2 h.
+
+## Checklist
+
+- [x] Build eval harness (`bench/eval_baseline.py`) — vLLM path
+- [x] Build audit (`bench/audit_results.py`) — truncation / extraction / calibration gates
+- [x] Build GGUF harness (`bench/eval_victim_gguf.py`) — llama.cpp HTTP path
+- [x] Fix generation cap 16k → 32k (16k was binding: 71% truncation on the 4B)
+- [x] Add seed 1234, matching the paper's eval invocation
+- [x] Save raw generated text so failed extractions are recoverable
+- [x] Download surrogate `DeepSeek-R1-Distill-Qwen-1.5B-BF16.gguf` (3.4 GB)
+- [ ] **0.1** Qwen3.5-0.8B → audit
+- [ ] **0.2** Qwen3.5-2B → audit
+- [ ] **0.3** Qwen3.5-4B → audit
+- [ ] **0.4** surrogate on llama.cpp → audit + **calibration gate**
+- [ ] **0.5** victim on llama.cpp → audit
+- [ ] Write the headroom table into `docs/08`
+- [ ] **DECIDE:** student model (0.8B / 2B / 4B)
+- [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
+- [ ] **DECIDE:** surrogate stays 1.5B, or step up to 7B
+
+## Gates — a run is not accepted until it passes
+
+1. **Truncation < 10%.** Above that the score measures the token cap. (16k run failed this:
+   0.8B 37%, 2B 26%, 4B 71%.)
+2. **`no_answer` on *completed* generations ≈ 0.** Non-zero means a real extraction bug.
+   Truncated rows don't count — being cut off before `\boxed{}` isn't a parsing failure.
+3. **No JEEBench question type at exactly 0%** with n≥20 — that signals a grading bug.
+4. **Calibration (0.4 only): within ~8 pts of paper Table 6** — MATH500 81.4, JEEBench 32.6.
+   *If this fails, every other run is invalid and gets redone.*
+
+## Decision rules
+
+- **Student:** highest JEEBench headroom that still terminates reliably. The 0.8B is likely out —
+  at 16k it managed 11.3% with a 13,734-token median, i.e. it fails to converge rather than
+  merely being weak.
+- **FFT vs LoRA:** 0.8B (~7 GB) and 2B (~15 GB) fit full fine-tuning on 24 GB; 4B (~28 GB) does
+  not. Picking 0.8B/2B removes our single riskiest deviation from the paper.
+- **Surrogate step-up:** if 0.4 lands *below* the chosen student on JEEBench, add
+  R1-Distill-Qwen-7B (F16 GGUF, 14.19 GiB). At 16k the surrogate was below the 2B
+  (30.5 vs 45.8), so this is likely to trigger.
+
+## Housekeeping
+
+- [x] Deleted superseded victim quants Q6_K / Q4_K_M / Q5_K_M — measurements recorded in
+      `docs/08`, IQ4_XS is the decided pick. Reclaimed ~57 GB (disk had hit 99%).
+- [ ] **Delete placeholder** `bench/results/DeepSeek-R1-Distill-Qwen-1.5B.jsonl` — it is a
+      skip-marker that keeps the vLLM runner from claiming 0.4, **not a result file**.
+- [ ] 16k results archived in `bench/results/v1-16k/` — keep for the cap-effect comparison.
+- Disk: 43 GB free. HF cache is 91 GB but mostly other projects; `~/.cache/uv` is 43 GB.

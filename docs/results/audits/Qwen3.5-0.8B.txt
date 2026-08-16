@@ -1,0 +1,17 @@
+
+======================================================================
+Qwen3.5-0.8B   n=1015
+======================================================================
+  JEEBench  acc= 20.2%  (completed-only  20.4%)  truncated=  2.1%  no_answer|completed= 0.0%  tokens med=14098 p95= 26833
+  MATH500   acc= 45.6%  (completed-only  48.2%)  truncated=  5.8%  no_answer|completed= 0.2%  tokens med= 3130 p95= 32768
+  JEEBench by type:
+    Integer          n=  82  acc= 20.7%
+    MCQ              n= 110  acc= 43.6%
+    MCQ(multiple)    n= 186  acc= 13.4%
+    Numeric          n= 137  acc= 10.2%
+
+  note: raw text saved (1015/1015 rows) — regradable offline
+  ** PASSED — no red flags **
+
+======================================================================
+1/1 runs passed validation

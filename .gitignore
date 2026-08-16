@@ -1,12 +1,17 @@
-# Python-generated files
-__pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-
-# Virtual environments
-.venv
-
+# secrets — will hold the OpenAI key for the API-victim track
 .env
+.env.*
+!.env.example
+
+# virtualenvs
+.venv*/
+
+# raw eval outputs — 18-34 MB each because they embed full generated text.
+# Summaries and audit reports live in docs/results/ instead.
+bench/results/**/*.jsonl
+
+# eval logs (contain \r progress bars)
+bench/logs*/
+
+__pycache__/
+*.pyc
