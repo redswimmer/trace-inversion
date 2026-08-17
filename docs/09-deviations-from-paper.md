@@ -114,7 +114,7 @@ cross-family student as a check.
 
 | # | Item | Paper (from repo) | Ours | Why |
 |---|---|---|---|---|
-| 7.1 | Eval sampling | uniform temp 0.7 / top_p 0.9 / rep 1.05 | per-family recommended (Qwen3.5 1.0/0.95/k20; R1-Distill 0.6/0.95) | Off-spec sampling penalizes models unfairly; recorded so it can be re-run uniformly if needed |
+| 7.1 | Eval sampling | generation pinned at temp 0.7 / top_p 0.9 / rep 1.05; **eval sampling unspecified** | **paper's generation values throughout** | See §7.7 — an earlier deviation to vendor defaults was corrected |
 | 7.2 | `max_new_tokens` | 8192 | 16384 for baselines | Smoke test truncated 4/5 JEEBench items at 2048 — capping would measure the cap |
 | 7.3 | Victim concurrency | n/a (8 GPUs) | 32 (hard ceiling — recurrent-state cache OOMs at 40) | Measured, see `08` |
 | 7.4 | Dataset mirror | `llamafactory/OpenThoughts-114k` | same | Canonical `open-thoughts/` repo has an incompatible schema |
@@ -176,3 +176,48 @@ Worth stating explicitly, since matching the paper where possible is what makes 
   (Answer-only / Summary+Answer / Surrogate-Trace / Synthesized-Trace / Victim-Trace oracle)
 - Same three-stage pipeline and training objectives
 - Same LR schedule and warmup ratio
+
+
+### 7.7 Sampling: corrected deviation, and a finding that contradicted the fix
+
+**What went wrong.** The eval harness was written before the paper's repo was analysed, so sampling
+came from the Qwen model card (`temp 1.0 / top_p 0.95 / top_k 20`, no repetition penalty). The
+paper's values (`0.7 / 0.9 / rep 1.05`) were later recovered into `docs/07` but never wired into
+the code. This was an ordering accident, not a considered tradeoff — no reason existed to prefer a
+vendor default when the goal is comparability with the paper's tables.
+
+Note the paper pins sampling only for **generation**; its eval invocation passes just
+`pretrained`, `tensor_parallel_size`, `gpu_memory_utilization`, `batch_size 16`, `seed 1234`, so
+eval sampling falls through to Evalchemy defaults. We now use the paper's generation values for
+eval too — not because they match (there is nothing to match) but so the whole project runs one
+protocol instead of two.
+
+**The finding.** The switch was expected to fix the 2B's degenerate looping. It did the opposite:
+
+| Qwen3.5-2B, JEEBench | card sampling (1.0 / 0.95, no penalty) | paper sampling (0.7 / 0.9 / 1.05) |
+|---|---|---|
+| Truncated | 154 | **221** |
+| Clear loops (>5 repeats of own answer) | 84 | **144** |
+| Median repeats | 3,636 | 3,521 |
+| JEEBench accuracy | 47.0% | **47.8%** |
+| MATH500 accuracy | 77.8% | **79.0%** |
+
+**Why:** the dominant variable is temperature, not the penalty. Lowering 1.0 → 0.7 makes decoding
+greedier, and greedy decoding is *more* prone to degenerate repetition — once inside a `\boxed{AC}`
+cycle, lower temperature makes escape less likely. A 1.05 penalty shifts logits ~5% against a loop
+being reinforced every step; far too weak to break it.
+
+The causal story behind the original diagnosis ("the paper uses a repetition penalty, we don't,
+we loop") was therefore backwards. Temperature governs loop entry; 1.05 barely touches it.
+
+**Resolution:** keep the paper's sampling — accuracy improved on both benchmarks (completed-only
+51.2 → 55.3 JEEBench, 82.8 → 86.0 MATH500) and it matches their protocol. Treat looping as a
+separate problem, and **revisit only after the first trained checkpoint**: SFT on cleanly
+terminating traces is exactly the behaviour that should fix it, so tuning sampling now risks
+solving a problem that will not exist.
+
+**Watch for asymmetry.** If training reduces looping, part of any measured gain is the model
+learning to terminate rather than to reason. Legitimate as an effect of distillation, but it must
+be reported as such — compare truncation rates pre/post, not just accuracy.
+
+Results under card sampling archived at `bench/results/v2-cardsampling/`.

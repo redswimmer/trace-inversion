@@ -62,7 +62,7 @@ note "server up ($(nvidia-smi --query-gpu=memory.used --format=csv,noheader))"
 .venv-vllm/bin/python bench/eval_victim_gguf.py \
     --url "$URL" --out "bench/results/${TAG}.jsonl" \
     --n-per-bench 0 --concurrency "${SLOTS}" \
-    --max-tokens 32768 --temperature 0.6 --top-p 0.95 --top-k -1 \
+    --max-tokens 32768 --temperature 0.7 --top-p 0.9 --top-k -1 --repetition-penalty 1.05 \
     > "bench/logs/${TAG}.log" 2>&1
 rc=$?
 

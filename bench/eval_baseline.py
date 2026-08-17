@@ -127,11 +127,15 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=8192)
     ap.add_argument("--gpu-frac", type=float, default=0.90)
     ap.add_argument("--max-len", type=int, default=16384)
-    # sampling differs per model family: Qwen3.5 thinking wants 1.0/0.95/20,
-    # R1-Distill wants 0.6/0.95 and no top-k
-    ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--top-p", type=float, default=0.95)
-    ap.add_argument("--top-k", type=int, default=20)
+    # Match the paper's generation settings (their repo pins these on every
+    # vllm_infer.py call). The paper specifies no eval sampling at all, so we
+    # use their generation values throughout rather than inventing a second
+    # protocol. Vendor model-card defaults were used earlier by accident and
+    # caused degenerate repetition (no penalty) — see docs/09.
+    ap.add_argument("--temperature", type=float, default=0.7)
+    ap.add_argument("--top-p", type=float, default=0.9)
+    ap.add_argument("--top-k", type=int, default=-1)
+    ap.add_argument("--repetition-penalty", type=float, default=1.05)
     # the paper's eval passes --seed 1234 (their eval is seeded, their training
     # is not); match it so runs are reproducible
     ap.add_argument("--seed", type=int, default=1234)
@@ -161,6 +165,7 @@ def main():
     # single sample = pass@1, matching the paper's protocol
     sp = SamplingParams(temperature=args.temperature, top_p=args.top_p,
                         top_k=args.top_k, max_tokens=args.max_tokens,
+                        repetition_penalty=args.repetition_penalty,
                         seed=args.seed)
     outs = llm.generate(prompts, sp)
 

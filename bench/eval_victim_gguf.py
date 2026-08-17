@@ -41,11 +41,12 @@ def stratified(tasks, n_per_bench, seed=0):
     return picked.to_dict("records")
 
 
-def one(task, url, max_tokens, temp, top_p, top_k, timeout):
+def one(task, url, max_tokens, temp, top_p, top_k, timeout, rep_pen=1.05):
     body = {
         "messages": [{"role": "user", "content": task["prompt"]}],
         "max_tokens": max_tokens, "temperature": temp,
-        "top_p": top_p, "top_k": top_k, "stream": False,
+        "top_p": top_p, "top_k": top_k, "repetition_penalty": rep_pen,
+        "stream": False,
     }
     try:
         r = requests.post(f"{url}/v1/chat/completions", json=body, timeout=timeout)
@@ -83,9 +84,11 @@ def main():
     ap.add_argument("--concurrency", type=int, default=32,
                     help="must not exceed llama-server's -np")
     ap.add_argument("--max-tokens", type=int, default=16384)
-    ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--top-p", type=float, default=0.95)
-    ap.add_argument("--top-k", type=int, default=20)
+    # paper's generation settings; see eval_baseline.py
+    ap.add_argument("--temperature", type=float, default=0.7)
+    ap.add_argument("--top-p", type=float, default=0.9)
+    ap.add_argument("--top-k", type=int, default=-1)
+    ap.add_argument("--repetition-penalty", type=float, default=1.05)
     ap.add_argument("--timeout", type=int, default=1800)
     args = ap.parse_args()
 
@@ -102,7 +105,8 @@ def main():
     rows, done = [], 0
     with ThreadPoolExecutor(max_workers=args.concurrency) as ex:
         futs = [ex.submit(one, t, args.url, args.max_tokens, args.temperature,
-                          args.top_p, args.top_k, args.timeout) for t in tasks]
+                          args.top_p, args.top_k, args.timeout,
+                          args.repetition_penalty) for t in tasks]
         for f in futs:
             rows.append(f.result())
             done += 1
