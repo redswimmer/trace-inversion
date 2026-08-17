@@ -21,15 +21,14 @@ if [[ -f bench/results/DeepSeek-R1-Distill-Qwen-1.5B.jsonl ]] && \
   note "removed placeholder skip-marker"
 fi
 
-note "waiting for the vLLM queue to release the GPU"
+note "checking GPU is free"
 while pgrep -f eval_baseline.py > /dev/null; do sleep 60; done
-sleep 30   # let VRAM drain
 note "GPU free: $(nvidia-smi --query-gpu=memory.used --format=csv,noheader)"
 
 # model_file | tag | n_per_bench (0 = all) | temp | top_p | top_k | ctx | slots
 RUNS=(
-  "DeepSeek-R1-Distill-Qwen-1.5B-BF16.gguf|DeepSeek-R1-Distill-Qwen-1.5B|0|0.6|0.95|-1|40960|16"
-  "Qwen3.8-27B-IQ4_XS.gguf|Qwen3.8-27B-IQ4_XS|250|1.0|0.95|20|40960|8"
+  "DeepSeek-R1-Distill-Qwen-1.5B-BF16.gguf|DeepSeek-R1-Distill-Qwen-1.5B-gguf|0|0.6|0.95|-1|32768|12"
+  "Qwen3.8-27B-IQ4_XS.gguf|Qwen3.8-27B-IQ4_XS|250|1.0|0.95|20|32768|6"
 )
 
 for spec in "${RUNS[@]}"; do

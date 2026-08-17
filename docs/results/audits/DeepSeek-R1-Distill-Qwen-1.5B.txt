@@ -1,0 +1,21 @@
+
+======================================================================
+DeepSeek-R1-Distill-Qwen-1.5B   n=1015
+======================================================================
+  JEEBench  acc= 32.0%  (completed-only  33.9%)  truncated=  5.4%  no_answer|completed= 0.6%  tokens med= 8345 p95= 32768
+  MATH500   acc= 83.0%  (completed-only  85.4%)  truncated=  2.8%  no_answer|completed= 0.0%  tokens med= 2675 p95= 20647
+  JEEBench by type:
+    Integer          n=  82  acc= 31.7%
+    MCQ              n= 110  acc= 50.0%
+    MCQ(multiple)    n= 186  acc= 25.3%
+    Numeric          n= 137  acc= 27.0%
+
+  CALIBRATION vs paper Table 6:
+    MATH500   ours= 83.0%  paper= 81.4%  delta= +1.6  [OK]
+    JEEBench  ours= 32.0%  paper= 32.6%  delta= -0.6  [OK]
+
+  note: raw text saved (1015/1015 rows) — regradable offline
+  ** PASSED — no red flags **
+
+======================================================================
+1/1 runs passed validation

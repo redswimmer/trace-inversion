@@ -61,24 +61,39 @@ def load_tasks(limit=None):
 
 
 def extract_boxed(text):
-    """Last \\boxed{...} in the text, brace-balanced."""
-    i = text.rfind("\\boxed{")
-    if i == -1:
+    """Extract the model's final answer.
+
+    Prefers the last \\boxed{...} (brace-balanced). Falls back to an
+    'ANSWER: x' line, which R1-Distill emits in preference to \\boxed{}
+    regardless of the prompt — without this, ~10% of its completed
+    generations score as wrong when they actually answered.
+    """
+    if not text:
         return None
-    j, depth = i + 7, 1
-    while j < len(text) and depth:
-        if text[j] == "{":
-            depth += 1
-        elif text[j] == "}":
-            depth -= 1
-        j += 1
-    return text[i + 7 : j - 1].strip() if depth == 0 else None
+    i = text.rfind("\\boxed{")
+    if i != -1:
+        j, depth = i + 7, 1
+        while j < len(text) and depth:
+            if text[j] == "{":
+                depth += 1
+            elif text[j] == "}":
+                depth -= 1
+            j += 1
+        if depth == 0:
+            return text[i + 7 : j - 1].strip()
+
+    m = re.findall(r"(?:^|\n)\s*(?:\*\*)?ANSWER(?:\*\*)?\s*[:=]\s*(.+)", text,
+                   re.IGNORECASE)
+    if m:
+        return m[-1].strip().rstrip(".").strip("*").strip()
+    return None
 
 
 def grade(pred, gold, typ):
-    if pred is None:
+    # pred may arrive as NaN (float) after a pandas round-trip, not None
+    if pred is None or not isinstance(pred, str) or not pred.strip():
         return False
-    pred, gold = pred.strip(), gold.strip()
+    pred, gold = pred.strip(), str(gold).strip()
 
     if typ in ("MCQ", "MCQ(multiple)"):
         # compare as letter sets so order and separators don't matter

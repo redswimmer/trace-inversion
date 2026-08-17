@@ -23,16 +23,22 @@ from eval_baseline import load_tasks, extract_boxed, grade  # noqa: E402
 
 
 def stratified(tasks, n_per_bench, seed=0):
-    """Sample within (bench, type) so the mix mirrors the full set."""
+    """Sample within (bench, type) so the mix mirrors the full set.
+
+    Avoids groupby.apply: pandas 3 drops the grouping column from the applied
+    frame, which silently strips 'type' and breaks grading downstream.
+    """
     df = pd.DataFrame(tasks)
     out = []
-    for b, g in df.groupby("bench"):
+    for b, g in df.groupby("bench", sort=False):
         frac = min(1.0, n_per_bench / len(g))
-        take = (g.groupby("type", group_keys=False)
-                 .apply(lambda x: x.sample(max(1, round(len(x) * frac)),
-                                           random_state=seed)))
-        out.append(take)
-    return pd.concat(out).to_dict("records")
+        for _, sub in g.groupby("type", sort=False):
+            k = max(1, round(len(sub) * frac))
+            out.append(sub.sample(min(k, len(sub)), random_state=seed))
+    picked = pd.concat(out)
+    assert {"bench", "id", "type", "gold", "prompt"} <= set(picked.columns), \
+        f"stratified() lost columns: {set(picked.columns)}"
+    return picked.to_dict("records")
 
 
 def one(task, url, max_tokens, temp, top_p, top_k, timeout):
@@ -51,9 +57,12 @@ def one(task, url, max_tokens, temp, top_p, top_k, timeout):
         fin = d["choices"][0].get("finish_reason", "")
         ntok = d.get("usage", {}).get("completion_tokens", 0)
     except Exception as e:
-        return {**{k: task[k] for k in ("bench", "id", "type", "gold")},
+        # must not raise: a crash here hides the real request error
+        return {"bench": task.get("bench"), "id": task.get("id"),
+                "type": task.get("type"), "gold": task.get("gold"),
                 "pred": None, "correct": False, "gen_tokens": 0,
-                "truncated": False, "finish_reason": f"ERROR: {e}", "text": ""}
+                "truncated": False, "finish_reason": f"ERROR: {type(e).__name__}: {e}",
+                "text": ""}
 
     pred = extract_boxed(text)
     return {**{k: task[k] for k in ("bench", "id", "type", "gold")},

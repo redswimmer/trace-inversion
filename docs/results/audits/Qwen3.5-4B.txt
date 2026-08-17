@@ -1,0 +1,19 @@
+
+======================================================================
+Qwen3.5-4B   n=1015
+======================================================================
+  JEEBench  acc= 73.8%  (completed-only  90.3%)  truncated= 21.7%  no_answer|completed= 0.2%  tokens med=21859 p95= 32768
+  MATH500   acc= 91.4%  (completed-only  99.8%)  truncated=  9.2%  no_answer|completed= 0.0%  tokens med= 7197 p95= 32768
+  JEEBench by type:
+    Integer          n=  82  acc= 80.5%
+    MCQ              n= 110  acc= 87.3%
+    MCQ(multiple)    n= 186  acc= 68.3%
+    Numeric          n= 137  acc= 66.4%
+
+  note: raw text saved (1015/1015 rows) — regradable offline
+
+  ** 1 PROBLEM(S) — DO NOT ACCEPT AS-IS **
+     - JEEBench: 21.7% truncated — report the completed-only figure (90.3%) alongside
+
+======================================================================
+0/1 runs passed validation

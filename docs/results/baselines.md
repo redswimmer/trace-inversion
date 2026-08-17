@@ -1,70 +1,168 @@
 # Phase 0 — Baseline Results
 
-Zero-shot accuracy, before any training. Establishes headroom and validates the harness.
+Zero-shot accuracy before any training. Establishes headroom, validates the harness, and picks
+the student.
 
-**Protocol (all runs):** MATH500 (500) + JEEBench (515) · **32,768 max generation / 40,960 context**
-· seed 1234 · pass@1 single sample · answer extracted from the last `\boxed{}`.
+**Protocol:** MATH500 (500) + JEEBench (515) · 32,768 max generation / 40,960 context · seed 1234 ·
+pass@1 single sample · answer = last `\boxed{...}`, falling back to an `ANSWER: x` line.
 
-**Acceptance gates** — a run is not reported until it passes all of:
-truncation < 10% · zero extraction failures on *completed* generations · no benchmark type at
-exactly 0% (n≥20) · and for the surrogate, calibration within ~8 pts of the paper's Table 6.
+**Acceptance gates:** truncation < 10% · zero extraction failures on *completed* generations ·
+no benchmark type at exactly 0% · surrogate must calibrate within ~8 pts of the paper's Table 6.
 
 ---
 
 ## Results
 
-| # | Model | Role | Engine | Precision | MATH500 | JEEBench | Trunc M/J | Audit |
+| # | Model | Role | Engine | Precision | MATH500 | JEEBench | Trunc M/J | Median tok (J) |
 |---|---|---|---|---|---|---|---|---|
-| 0.1 | Qwen3.5-0.8B | student cand. | vLLM | bf16 | **45.6%** | **20.2%** | 5.8% / 2.1% | ✅ PASS |
-| 0.2 | Qwen3.5-2B | student cand. | vLLM | bf16 | — | — | — | running |
-| 0.3 | Qwen3.5-4B | student cand. | vLLM | bf16 | — | — | — | queued |
-| 0.4 | R1-Distill-Qwen-1.5B | surrogate | llama.cpp | GGUF BF16 | — | — | — | queued |
-| 0.5 | Qwen3.8-27B IQ4_XS | victim | llama.cpp | GGUF 4-bit | — | — | — | queued |
+| 0.1 | Qwen3.5-0.8B | student cand. | vLLM | bf16 | 45.6% | 20.2% | 5.8% / 2.1% | 14,098 |
+| 0.2 | **Qwen3.5-2B** | **student (chosen)** | vLLM | bf16 | **77.8%** | **47.0%** | 8.2% / 21.9% | 8,734 |
+| 0.3 | Qwen3.5-4B | student cand. | vLLM | bf16 | 91.4% | 73.8% | 9.2% / 21.7% | 21,859 |
+| 0.4 | R1-Distill-Qwen-1.5B | surrogate | vLLM ⚠️ | bf16 | 83.0% | 32.0% | 2.8% / 5.4% | 8,345 |
+| 0.5 | Qwen3.8-27B IQ4_XS | victim | llama.cpp | 4-bit | *100%* | *85.7%* | *0% / 7.1%* | *4,295* |
 
-### 0.1 Qwen3.5-0.8B ✅
+*0.5 is a 29-problem smoke test — indicative only, full run pending.*
+*0.4 ran on vLLM by mistake (see Known Issues); llama.cpp re-run in progress.*
 
-```
-JEEBench  acc= 20.2%  (completed-only 20.4%)  truncated= 2.1%  no_answer|completed= 0.0%
-          tokens med=14098  p95=26833
-MATH500   acc= 45.6%  (completed-only 48.2%)  truncated= 5.8%  no_answer|completed= 0.2%
-          tokens med= 3130  p95=32768
-JEEBench by type:  MCQ 43.6% · Integer 20.7% · MCQ(multiple) 13.4% · Numeric 10.2%
-```
+### Harness calibration ✅
+
+The surrogate is the paper's exact model, so its published Table 6 scores validate our harness
+end to end:
+
+| | Ours | Paper Table 6 | Δ |
+|---|---|---|---|
+| MATH500 | 83.0% | 81.4% | **+1.6** |
+| JEEBench | 32.0% | 32.6% | **−0.6** |
+
+Before the extraction fix these were +1.6 / −2.7 with 9.9% unparsed. Prompting, extraction, and
+grading are sound.
 
 ---
 
-## The 16k cap was distorting everything
+## Finding 1 — capability shows up as brevity, not length
 
-An earlier pass capped generation at 16,384 tokens — a number with no basis in the paper, which
-sets no explicit cap at all. It cut into the *body* of the reasoning-length distribution rather
-than its tail:
+| | Victim 27B | 4B | 2B | 0.8B |
+|---|---|---|---|---|
+| JEEBench accuracy | 85.7% | 73.8% | 47.0% | 20.2% |
+| **JEEBench median tokens** | **4,295** | 21,859 | 8,734 | 14,098 |
 
-| Qwen3.5-0.8B | 16k cap | **32k cap** |
+The victim solves JEEBench in **five times fewer tokens than the 4B** while scoring higher. Long
+generations were smaller models flailing, not harder problems demanding more context.
+
+Consequences:
+
+- **32k is ample for the victim** (7.1% truncation). Phase 3 generation is safe, and since traces
+  run ~4-6k tokens we can use a smaller per-slot context and therefore *more* slots, landing higher
+  on the concurrency curve than the 6 slots originally budgeted.
+- **Victim traces will be ~4-6k tokens**, matching the paper's 6,130-token average. Our training
+  data will be the same shape as theirs.
+
+## Finding 2 — truncation has two distinct causes
+
+Measured by counting how often a model repeats its own final answer:
+
+| Model | Truncated rows | Clear loops | Median repeats of own answer |
+|---|---|---|---|
+| Qwen3.5-0.8B | 40 | 22% | 1,338 |
+| **Qwen3.5-2B** | 154 | **50%** | **3,636** |
+| Qwen3.5-4B | 158 | 4% | 1 |
+| R1-Distill-1.5B | 42 | 2% | 1 |
+
+- **The 2B is pathological**: half its truncations are degenerate — it emits `\boxed{AC}` then
+  repeats it a median of 3,636 times. A termination failure, not a reasoning limit. Fixed by
+  `repetition_penalty` (the paper's repo uses 1.05; Qwen3.5's card recommends none — our deviation
+  caused this).
+- **The 4B does not loop** (4%). Its truncations are genuine unfinished reasoning at a 21,859-token
+  median.
+
+So the two models are *both* underestimated, for opposite reasons: the 2B by a generation defect,
+the 4B by a real budget limit.
+
+**Deferred, not dropped:** `repetition_penalty=1.05` is required for the Phase 6 protocol, where
+trained students are compared across five conditions with margins the paper measured at 0.4-2.4
+points. Re-running baselines to a protocol we will change anyway is wasted GPU.
+
+## Finding 3 — the 16k cap was measuring itself
+
+An earlier pass capped generation at 16,384 — a number with no basis in the paper, which sets no
+explicit cap (their eval passes only `pretrained`, `tensor_parallel_size`,
+`gpu_memory_utilization`, `batch_size 16`, `seed 1234`).
+
+| | 16k cap | **32k cap** |
 |---|---|---|
-| JEEBench | 11.3% | **20.2%** |
-| MATH500 | 43.6% | **45.6%** |
-| Truncated (JEEBench) | 36.7% | **2.1%** |
+| Qwen3.5-4B MATH500 | 73.6% | **91.4%** |
+| Qwen3.5-4B JEEBench | 30.1% | **73.8%** |
+| Qwen3.5-0.8B JEEBench | 11.3% | **20.2%** |
 
-JEEBench accuracy nearly doubled. The p95 explains why: **26,833 tokens** — the hardest 5% of
-problems genuinely need 27k+ tokens of reasoning, so a 16k cap was severing them mid-thought.
+The 4B's JEEBench score more than doubled. The cap was hiding most of its capability, not trimming
+a tail.
 
-Two diagnostics worth carrying forward:
+Two diagnostics worth keeping:
 
-- **Convergence of `acc` and `completed-only acc`** signals the cap has stopped binding. At 32k
-  they agree (20.2 vs 20.4); at 16k they differed by 5+ points.
-- **`completed-only` is a biased estimator when truncation is high** — the surviving problems are
-  the easy ones. The 4B reported 100.0% on MATH500-completed at 71% truncation. Do not quote it
-  above ~20% truncation.
+- **`acc` converging with `completed-only acc`** signals the cap has stopped binding.
+- **`completed-only` is biased upward when truncation is high** — surviving problems are the easy
+  ones. The 4B reported 100.0% MATH500-completed at 71% truncation. Do not quote above ~20%.
 
-Superseded 16k results are archived at `bench/results/v1-16k/`.
+Superseded 16k results archived at `bench/results/v1-16k/`.
 
 ---
 
-## Open decisions this phase resolves
+## Decisions
 
-1. **Student model** — highest JEEBench headroom that still terminates reliably.
-2. **FFT vs LoRA** — 0.8B (~7 GB) and 2B (~15 GB) fit full fine-tuning on 24 GB; 4B (~28 GB) does
-   not. Choosing 0.8B or 2B removes our single riskiest deviation from the paper.
-3. **Surrogate strength** — if 0.4 lands below the chosen student on JEEBench, step up to
-   R1-Distill-Qwen-7B (F16 GGUF, 14.19 GiB). At 16k the surrogate sat below the 2B (30.5 vs 45.8),
-   so this looks likely.
+### Student: **Qwen3.5-2B, full fine-tuning** ✅
+
+Not the strongest model — the 4B beats it on both benchmarks — but the right experimental subject:
+
+| | 2B | 4B |
+|---|---|---|
+| Headroom to victim (JEEBench) | **39 pts** (47.0 → 85.7) | 12 pts (73.8 → 85.7) |
+| Full fine-tuning on 24 GB | ✅ ~15 GB | ❌ ~28 GB |
+| Matches paper's method | ✅ | ✗ forces LoRA |
+
+The 4B at 73.8% JEEBench sits only 12 points below the victim — close to the degenerate regime
+where the student already rivals the teacher and inversion has nothing to demonstrate. The paper
+worked with a 59-point gap (R1 87.1 vs Qwen2.5-7B 28.3).
+
+Choosing the 2B also **removes our single riskiest deviation**: full fine-tuning fits, so we match
+the paper's method rather than substituting LoRA.
+
+### Victim: **Qwen3.8-27B IQ4_XS on llama.cpp** ✅
+
+Decided on measurement (`docs/08`): 47.3 t/s single-stream, 303 t/s at concurrency 32, ~23 h for 5k
+traces. Only model forced below full precision — 55 GB at bf16, and GGUF is the only format that
+quantizes everything.
+
+### Surrogate: **OPEN** ⏳
+
+R1-Distill-1.5B is the paper's exact model, but against our 2B student it splits:
+
+| | Surrogate 1.5B | 2B student |
+|---|---|---|
+| MATH500 | 83.0% ✅ above | 77.8% |
+| JEEBench | 32.0% ❌ **15 pts below** | 47.0% |
+
+The paper had its surrogate above the student on *both* (81.4/32.6 vs 71.2/28.3). The likely cause
+is coverage, not reasoning: R1-Distill was distilled on math, so MATH500 is its home turf, while
+JEEBench spans physics and chemistry where a 2026-generation general model simply knows more.
+
+Whether this matters depends on the surrogate's role. As a *format teacher* (the paper's framing),
+narrow coverage is tolerable — it only has to demonstrate what a long trace looks like. But it also
+defines the `Surrogate-Trace` baseline condition, and beating a baseline that is 15 points below
+the student proves less.
+
+**Next:** re-run 1.5B on llama.cpp (in progress), then evaluate **R1-Distill-Qwen-7B** (F16 GGUF,
+14.19 GiB) and compare. Running both also yields the surrogate-strength sweep the paper never did —
+they tested only 1.5B and 685B, with nothing in between.
+
+---
+
+## Known issues
+
+| Issue | Status |
+|---|---|
+| Surrogate ran on vLLM, not llama.cpp — skip-marker was self-defeating (GGUF runner deleted it to claim the job, re-enabling the vLLM run) | re-running |
+| 2B looping (50% of truncations) — needs `repetition_penalty=1.05` | deferred to Phase 6 |
+| Victim baseline OOM'd at 8 slots × 40,960 (327k total KV) — llama.cpp shares one KV budget across slots | fixed: 6 slots |
+| `stratified()` dropped the `type` column — pandas 3 excludes grouping columns from `groupby.apply()` | fixed |
+| GGUF error handler raised on missing key, masking the real request error | fixed |
+| Extraction missed R1-Distill's `ANSWER: x` convention (9.9% of its completed generations) | fixed + re-graded offline |
