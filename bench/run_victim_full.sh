@@ -10,9 +10,6 @@ STATUS=bench/logs/STATUS-victim.txt
 mkdir -p bench/logs bench/results; : > "$STATUS"
 note(){ echo "[$(date +%H:%M:%S)] $*" | tee -a "$STATUS"; }
 
-note "waiting for the 1.5B surrogate run to finish"
-while pgrep -f run_gguf_baselines.sh > /dev/null; do sleep 120; done
-sleep 30
 note "GPU free: $(nvidia-smi --query-gpu=memory.used --format=csv,noheader)"
 
 note "BEGIN ${TAG} ctx=${CTX} slots=${SLOTS} FULL 1015"

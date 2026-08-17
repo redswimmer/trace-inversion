@@ -18,21 +18,26 @@ no benchmark type at exactly 0% · surrogate must calibrate within ~8 pts of the
 | 0.1 | Qwen3.5-0.8B | student cand. | vLLM | bf16 | 45.6% | 20.2% | 5.8% / 2.1% | 14,098 |
 | 0.2 | **Qwen3.5-2B** | **student (chosen)** | vLLM | bf16 | **77.8%** | **47.0%** | 8.2% / 21.9% | 8,734 |
 | 0.3 | Qwen3.5-4B | student cand. | vLLM | bf16 | 91.4% | 73.8% | 9.2% / 21.7% | 21,859 |
-| 0.4 | R1-Distill-Qwen-1.5B | surrogate | vLLM ⚠️ | bf16 | 83.0% | 32.0% | 2.8% / 5.4% | 8,345 |
+| 0.4a | R1-Distill-Qwen-1.5B | surrogate | vLLM | bf16 | 83.0% | 32.0% | 2.8% / 5.4% | 8,345 |
+| 0.4b | R1-Distill-Qwen-1.5B | **surrogate (accepted)** | **llama.cpp** | GGUF BF16 | **84.0%** | **32.6%** | 1.6% / 3.3% | 8,347 |
 | 0.5 | Qwen3.8-27B IQ4_XS | victim | llama.cpp | 4-bit | *100%* | *85.7%* | *0% / 7.1%* | *4,295* |
 
 *0.5 is a 29-problem smoke test — indicative only, full run pending.*
-*0.4 ran on vLLM by mistake (see Known Issues); llama.cpp re-run in progress.*
+*0.4a ran on vLLM by mistake; 0.4b is the accepted llama.cpp run. Both shown — they agree within ~1 pt, which is our only direct measurement of the engine split.*
 
 ### Harness calibration ✅
 
 The surrogate is the paper's exact model, so its published Table 6 scores validate our harness
 end to end:
 
-| | Ours | Paper Table 6 | Δ |
+| | vLLM | llama.cpp | Paper Table 6 |
 |---|---|---|---|
-| MATH500 | 83.0% | 81.4% | **+1.6** |
-| JEEBench | 32.0% | 32.6% | **−0.6** |
+| MATH500 | 83.0% | **84.0%** | 81.4% (Δ +2.6) |
+| JEEBench | 32.0% | **32.6%** | 32.6% (**Δ 0.0**) |
+
+The two engines agree within ~1 point on the same weights at the same precision — the only direct
+evidence we have that the split-engine arrangement (victim on llama.cpp, students on vLLM) costs
+nothing measurable.
 
 Before the extraction fix these were +1.6 / −2.7 with 9.9% unparsed. Prompting, extraction, and
 grading are sound.
@@ -166,3 +171,5 @@ they tested only 1.5B and 685B, with nothing in between.
 | `stratified()` dropped the `type` column — pandas 3 excludes grouping columns from `groupby.apply()` | fixed |
 | GGUF error handler raised on missing key, masking the real request error | fixed |
 | Extraction missed R1-Distill's `ANSWER: x` convention (9.9% of its completed generations) | fixed + re-graded offline |
+| **`math_verify` silently degraded to string matching inside worker threads** — it uses SIGALRM timeouts and `signal.signal()` only works in the main thread. Cost **14.6 pts** on MATH500 (68.4 → 84.0) and looked like an engine difference | fixed: grade in main thread after the pool drains |
+| Two chained runners hung in `pgrep` wait loops, GPU idle ~50 min — caused by editing a running script (bash reads incrementally) | fixed: single sequential driver + watchdog |

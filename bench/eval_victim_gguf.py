@@ -60,13 +60,16 @@ def one(task, url, max_tokens, temp, top_p, top_k, timeout):
         # must not raise: a crash here hides the real request error
         return {"bench": task.get("bench"), "id": task.get("id"),
                 "type": task.get("type"), "gold": task.get("gold"),
-                "pred": None, "correct": False, "gen_tokens": 0,
+                "pred": None, "gen_tokens": 0,
                 "truncated": False, "finish_reason": f"ERROR: {type(e).__name__}: {e}",
                 "text": ""}
 
-    pred = extract_boxed(text)
+    # NOTE: deliberately does NOT grade here. math_verify uses SIGALRM timeouts
+    # and signal.signal() only works in the main thread, so grading inside this
+    # worker silently falls back to string matching (cost: 14.6 pts on MATH500).
+    # Grading happens in main() after the pool drains.
     return {**{k: task[k] for k in ("bench", "id", "type", "gold")},
-            "pred": pred, "correct": grade(pred, task["gold"], task["type"]),
+            "pred": extract_boxed(text),
             "gen_tokens": ntok, "truncated": fin == "length",
             "finish_reason": fin, "text": text}
 
@@ -108,6 +111,9 @@ def main():
                       f"{done}/{len(tasks)}", flush=True)
 
     df = pd.DataFrame(rows)
+    # main-thread grading: math_verify's signal-based timeout is unavailable in
+    # worker threads and degrades to string matching without raising visibly
+    df["correct"] = [grade(r.pred, r.gold, r.type) for r in df.itertuples()]
     df.to_json(args.out, orient="records", lines=True)
 
     errs = df.finish_reason.astype(str).str.startswith("ERROR").sum()
