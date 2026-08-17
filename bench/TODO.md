@@ -69,3 +69,24 @@ reference, and a full run costs ~9 h instead of ~2 h.
       skip-marker that keeps the vLLM runner from claiming 0.4, **not a result file**.
 - [ ] 16k results archived in `bench/results/v1-16k/` — keep for the cap-effect comparison.
 - Disk: 43 GB free. HF cache is 91 GB but mostly other projects; `~/.cache/uv` is 43 GB.
+
+## Standing practice: sweep concurrency before every generation run
+
+`bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx> [slots...]` probes slot counts with
+`llama-batched-bench` and writes a table to `docs/results/sweeps/`.
+
+**Why it is mandatory, not optional:** optimal slot count is inversely related to model size, and
+arithmetic gets it wrong. The 1.5B surrogate was sized at 12 slots from memory math and ran ~4 h at
+**48-55% GPU utilization** on 9.1 GB of 24 — latency-bound, badly under-parallelized. A 27B
+saturates on a handful of slots; a 1.5B needs dozens.
+
+**The constraint to respect:** `-c` is the *total* KV budget split across `-np` slots, so slots and
+per-slot context trade directly. Per-slot context must still cover the longest generation expected
+(the victim's longest observed was 32,534 tokens), or long requests fail. When throughput is still
+climbing at the largest slot count that fits, the ceiling is memory rather than compute.
+
+Applies to:
+- [x] 0.6 R1-Distill-7B baseline — wired into `run_surrogate_7b.sh`
+- [ ] Phase 1 surrogate trace generation (5k traces) — biggest payoff, small model, many slots
+- [ ] Phase 3 victim trace generation (5k traces, ~23 h) — where a 2x miss costs a day
+- [ ] Phase 4 inversion generation
