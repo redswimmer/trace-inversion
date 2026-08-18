@@ -22,7 +22,7 @@ full precision.
 | **Surrogate** `V'` (arm 2) | `DeepSeek-R1-Distill-Qwen-1.5B` | BF16 3.32 GiB | llama.cpp | bf16 | no |
 | **Compressor** `C'` | `Qwen/Qwen3.5-4B` | safetensors | vLLM | bf16 | no (zero-shot) |
 | **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 | **yes** |
-| **Student** `S` | `Qwen/Qwen3.5-2B` *(pending baselines)* | safetensors | TRL → vLLM | bf16 | **yes** |
+| **Student** `S` | `Qwen/Qwen3.5-2B` | safetensors | TRL → vLLM | bf16 (**full FT**) | **yes** |
 
 **Both surrogates run** — decided on Phase 0 measurements. The 1.5B sits 15 pts *below* the student
 on JEEBench (32.6 vs 47.8), inverting the paper's ordering; the 7B clears it by 12.8 and sits
@@ -31,23 +31,31 @@ paper never did (they tested only 1.5B and 685B).
 
 ---
 
-## Phase 0 — Baselines *(in progress)*
+## Phase 0 — Baselines ✅ COMPLETE
 
-Establishes headroom and validates the harness before anything is trained.
+Full results and analysis in `docs/results/baselines.md`.
 
-| # | Model | Engine | Precision | Tasks | Status |
-|---|---|---|---|---|---|
-| 0.1 | Qwen3.5-0.8B | vLLM | bf16 | MATH500 + JEEBench | running |
-| 0.2 | Qwen3.5-2B | vLLM | bf16 | " | queued |
-| 0.3 | Qwen3.5-4B | vLLM | bf16 | " | queued |
-| 0.4 | R1-Distill-1.5B | vLLM | bf16 | " | queued — **harness calibration** |
-| 0.5 | Qwen3.8-27B IQ4_XS | llama.cpp | 4-bit | 250-problem subset | after GPU frees |
+| # | Model | Role | Engine | Precision | MATH500 | JEEBench | Audit |
+|---|---|---|---|---|---|---|---|
+| 0.1 | Qwen3.5-0.8B | student cand. | vLLM | bf16 | 45.6% | 20.2% | ✅ (card sampling) |
+| 0.2 | **Qwen3.5-2B** | **student** | vLLM | bf16 | **79.0%** | **47.8%** | ⚠️ looping, deferred |
+| 0.3 | Qwen3.5-4B | student cand. | vLLM | bf16 | 91.4% | 73.8% | ✅ (card sampling) |
+| 0.4 | R1-Distill-1.5B | surrogate arm 2 | llama.cpp | GGUF BF16 | 84.0% | 32.6% | ✅ **calibration** |
+| 0.5 | **Qwen3.8-27B IQ4_XS** | **victim** | llama.cpp | GGUF 4-bit | **98.8%** | **86.2%** | ✅ |
+| 0.6 | **R1-Distill-7B** | **surrogate** | llama.cpp | GGUF F16 | **92.6%** | **60.6%** | ✅ |
 
-Shared: 32,768 max generation / 40,960 context, seed 1234, pass@1.
-Sampling: Qwen3.5 `1.0 / 0.95 / k20`; R1-Distill `0.6 / 0.95 / no top-k`.
+Protocol: 1015 tasks · 32,768 max gen / 40,960 ctx · seed 1234 · pass@1 ·
+paper sampling `temp 0.7 / top_p 0.9 / rep 1.05`.
 
-**Gate:** 0.4 must reproduce the paper's Table 6 (MATH500 81.4, JEEBench 32.6) within ~8 points, or
-every other number is suspect. **Decides:** which student, and whether FFT is possible.
+**Gate passed:** the surrogate reproduces the paper's Table 6 — JEEBench 32.6 vs their 32.6,
+MATH500 84.0 vs 81.4. Harness validated end to end.
+
+**Measured headroom, student → victim:** MATH500 +19.8 pts, JEEBench +38.4 pts. Both benchmarks
+have room. The 4B would have left only ~12 pts on JEEBench, which is why it lost despite scoring
+higher.
+
+**Ordering achieved:** student 47.8 < surrogate 60.6 < victim 86.2 on JEEBench — the regime the
+paper's argument requires.
 
 ---
 
@@ -55,7 +63,7 @@ every other number is suspect. **Decides:** which student, and whether FFT is po
 
 | Step | Model | Engine | Output |
 |---|---|---|---|
-| 1.1 | Surrogate | llama.cpp | 5k reasoning traces `t'` + answers `y'` on OpenThoughts split A |
+| 1.1 | Surrogate **7B**, then **1.5B** | llama.cpp | 5k traces `t'` + answers `y'` each, on OpenThoughts split A |
 | 1.2 | Compressor Qwen3.5-4B | vLLM | summaries `b'` from each `t'` (zero-shot, prompt `π`) |
 
 Yields `D₂ = {(x', y', b', t')}` — the inverter's training set.
@@ -64,7 +72,7 @@ Yields `D₂ = {(x', y', b', t')}` — the inverter's training set.
 its two few-shot exemplars were never released. Validate against Table 1's style statistics
 (median ~592 tokens, bold headers ~93%, first-person ~97%, LaTeX ~72%).
 
-Est. ~2 h.
+Est. ~4 h for both surrogates. **Sweep concurrency first** (`bench/sweep_concurrency.sh`).
 
 ## Phase 2 — Train the inverter *(paper Stage 1 cont.)*
 
@@ -87,7 +95,9 @@ The victim's real traces `t` are **withheld from the attack** and used only for 
 `Victim-Trace` oracle baseline and (b) Table 2 fidelity scoring. This is what a local victim buys
 that no API victim can.
 
-Est. **~23 h** — the single largest cost. At 303 t/s measured, 5k × ~5k tokens.
+Est. **~10-15 h** — revised down from 23 h. The victim's measured median is only 3,484 tokens
+(JEEBench) / 593 (MATH500), not the ~5k assumed. Its p95 is 17,795, so per-slot context can drop
+below 32k to buy more slots. **Sweep first at 16k/slot.**
 
 ## Phase 4 — Invert *(paper Stage 2 cont.)*
 
@@ -123,14 +133,14 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 
 | Phase | Est. |
 |---|---|
-| 0 Baselines | ~11 h |
-| 1 Surrogate data | ~2 h |
-| 2 Inverter training | ~14 h |
+| 0 Baselines | ~30 h *(actual, incl. re-runs)* |
+| 1 Surrogate data (**2 surrogates**) | ~4 h |
+| 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
 | 3 **Victim queries** | **~23 h** |
 | 4 Inversion | ~4 h |
 | 5 Student training | ~20 h |
 | 6 Evaluation | ~8 h |
-| **Total** | **~82 h** (~3.5 days of GPU time) |
+| **Total** | **~120 h** (~5 days of GPU time) |
 
 Every individual stage fits an overnight run. Phase 3 dominates; if it needs cutting, the paper's
 own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and 2k would halve it
