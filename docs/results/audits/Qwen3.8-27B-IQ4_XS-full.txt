@@ -1,0 +1,17 @@
+
+======================================================================
+Qwen3.8-27B-IQ4_XS-full   n=1015
+======================================================================
+  JEEBench  acc= 86.2%  (completed-only  86.5%)  truncated=  0.4%  no_answer|completed= 0.6%  tokens med= 3484 p95= 17795
+  MATH500   acc= 98.8%  (completed-only  98.8%)  truncated=  0.0%  no_answer|completed= 0.4%  tokens med=  593 p95=  9596
+  JEEBench by type:
+    Integer          n=  82  acc= 87.8%
+    MCQ              n= 110  acc= 98.2%
+    MCQ(multiple)    n= 186  acc= 93.0%
+    Numeric          n= 137  acc= 66.4%
+
+  note: raw text saved (1015/1015 rows) — regradable offline
+  ** PASSED — no red flags **
+
+======================================================================
+1/1 runs passed validation

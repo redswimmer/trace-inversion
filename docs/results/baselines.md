@@ -16,13 +16,12 @@ no benchmark type at exactly 0% · surrogate must calibrate within ~8 pts of the
 | # | Model | Role | Engine | Precision | MATH500 | JEEBench | Trunc M/J | Median tok (J) |
 |---|---|---|---|---|---|---|---|---|
 | 0.1 | Qwen3.5-0.8B | student cand. | vLLM | bf16 | 45.6% | 20.2% | 5.8% / 2.1% | 14,098 |
-| 0.2 | **Qwen3.5-2B** | **student (chosen)** | vLLM | bf16 | **77.8%** | **47.0%** | 8.2% / 21.9% | 8,734 |
+| 0.2 | **Qwen3.5-2B** | **student (chosen)** | vLLM | bf16 | **79.0%** | **47.8%** | 14.2% / 29.1% | 6,384 |
 | 0.3 | Qwen3.5-4B | student cand. | vLLM | bf16 | 91.4% | 73.8% | 9.2% / 21.7% | 21,859 |
 | 0.4a | R1-Distill-Qwen-1.5B | surrogate | vLLM | bf16 | 83.0% | 32.0% | 2.8% / 5.4% | 8,345 |
 | 0.4b | R1-Distill-Qwen-1.5B | **surrogate (accepted)** | **llama.cpp** | GGUF BF16 | **84.0%** | **32.6%** | 1.6% / 3.3% | 8,347 |
-| 0.5 | Qwen3.8-27B IQ4_XS | victim | llama.cpp | 4-bit | *100%* | *85.7%* | *0% / 7.1%* | *4,295* |
+| 0.5 | **Qwen3.8-27B IQ4_XS** | **victim (accepted)** | llama.cpp | GGUF 4-bit | **98.8%** | **86.2%** | 0.0% / 0.4% | 3,484 |
 
-*0.5 is a 29-problem smoke test — indicative only, full run pending.*
 *0.4a ran on vLLM by mistake; 0.4b is the accepted llama.cpp run. Both shown — they agree within ~1 pt, which is our only direct measurement of the engine split.*
 
 ### Harness calibration ✅
@@ -136,6 +135,25 @@ the paper's method rather than substituting LoRA.
 Decided on measurement (`docs/08`): 47.3 t/s single-stream, 303 t/s at concurrency 32, ~23 h for 5k
 traces. Only model forced below full precision — 55 GB at bf16, and GGUF is the only format that
 quantizes everything.
+
+### Headroom — measured, both models on the paper's sampling
+
+| | 2B student | Victim 27B | Gap |
+|---|---|---|---|
+| MATH500 | 79.0% | **98.8%** | **19.8 pts** |
+| JEEBench | 47.8% | **86.2%** | **38.4 pts** |
+
+Both benchmarks have real room. The 4B would have left only ~12 pts on JEEBench — the margin that
+disqualified it.
+
+Victim truncation is **essentially zero** (2 rows of 1015) and its p95 is 17,795 tokens against a
+32k cap, so the cap is comfortably non-binding for Phase 3 trace generation. With the median at
+3,484, per-slot context could drop well below 32k, buying more slots and directly speeding the
+~23 h generation job — worth a sweep at 16k/slot before Phase 3.
+
+Soft spot to watch: JEEBench **Numeric 66.4%** against MCQ's 98.2%. The grader allows ±0.01 on
+numerics, so this is probably genuine difficulty, but it is also where a tolerance bug would hide.
+Spot-check before Phase 6.
 
 ### Surrogate: **OPEN** ⏳
 
