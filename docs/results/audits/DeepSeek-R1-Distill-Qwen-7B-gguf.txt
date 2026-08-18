@@ -1,0 +1,17 @@
+
+======================================================================
+DeepSeek-R1-Distill-Qwen-7B-gguf   n=1015
+======================================================================
+  JEEBench  acc= 60.6%  (completed-only  61.2%)  truncated=  1.0%  no_answer|completed= 0.2%  tokens med= 5576 p95= 19417
+  MATH500   acc= 92.6%  (completed-only  93.2%)  truncated=  0.6%  no_answer|completed= 0.0%  tokens med= 2251 p95= 11525
+  JEEBench by type:
+    Integer          n=  82  acc= 67.1%
+    MCQ              n= 110  acc= 80.9%
+    MCQ(multiple)    n= 186  acc= 51.1%
+    Numeric          n= 137  acc= 53.3%
+
+  note: raw text saved (1015/1015 rows) — regradable offline
+  ** PASSED — no red flags **
+
+======================================================================
+1/1 runs passed validation

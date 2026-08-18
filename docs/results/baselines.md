@@ -21,6 +21,7 @@ no benchmark type at exactly 0% · surrogate must calibrate within ~8 pts of the
 | 0.4a | R1-Distill-Qwen-1.5B | surrogate | vLLM | bf16 | 83.0% | 32.0% | 2.8% / 5.4% | 8,345 |
 | 0.4b | R1-Distill-Qwen-1.5B | **surrogate (accepted)** | **llama.cpp** | GGUF BF16 | **84.0%** | **32.6%** | 1.6% / 3.3% | 8,347 |
 | 0.5 | **Qwen3.8-27B IQ4_XS** | **victim (accepted)** | llama.cpp | GGUF 4-bit | **98.8%** | **86.2%** | 0.0% / 0.4% | 3,484 |
+| 0.6 | **R1-Distill-Qwen-7B** | **surrogate (primary)** | llama.cpp | GGUF F16 | **92.6%** | **60.6%** | 0.6% / 1.0% | 5,576 |
 
 *0.4a ran on vLLM by mistake; 0.4b is the accepted llama.cpp run. Both shown — they agree within ~1 pt, which is our only direct measurement of the engine split.*
 
@@ -155,27 +156,36 @@ Soft spot to watch: JEEBench **Numeric 66.4%** against MCQ's 98.2%. The grader a
 numerics, so this is probably genuine difficulty, but it is also where a tolerance bug would hide.
 Spot-check before Phase 6.
 
-### Surrogate: **OPEN** ⏳
+### Surrogate: **R1-Distill-Qwen-7B primary, 1.5B retained** ✅
 
-R1-Distill-1.5B is the paper's exact model, but against our 2B student it splits:
+The 7B is the only candidate satisfying the ordering the paper had — student < surrogate < victim —
+on *both* benchmarks:
 
-| | Surrogate 1.5B | 2B student |
+| | 1.5B | **7B** |
 |---|---|---|
-| MATH500 | 83.0% ✅ above | 77.8% |
-| JEEBench | 32.0% ❌ **15 pts below** | 47.0% |
+| Above student, MATH500 | ✅ +5.0 | ✅ **+13.6** |
+| Above student, JEEBench | ❌ **−15.2** | ✅ **+12.8** |
+| Below victim, both | ✅ | ✅ |
 
-The paper had its surrogate above the student on *both* (81.4/32.6 vs 71.2/28.3). The likely cause
-is coverage, not reasoning: R1-Distill was distilled on math, so MATH500 is its home turf, while
-JEEBench spans physics and chemistry where a 2026-generation general model simply knows more.
+On JEEBench the 7B lands almost exactly midway between student and victim (47.8 → **60.6** → 86.2).
+That is the regime the paper's argument requires: a surrogate strong enough to demonstrate
+long-form reasoning, but clearly weaker than the victim, so inversion still adds something over
+distilling the surrogate directly.
 
-Whether this matters depends on the surrogate's role. As a *format teacher* (the paper's framing),
-narrow coverage is tolerable — it only has to demonstrate what a long trace looks like. But it also
-defines the `Surrogate-Trace` baseline condition, and beating a baseline that is 15 points below
-the student proves less.
+Why the 1.5B stays as a second arm rather than being dropped:
 
-**Next:** re-run 1.5B on llama.cpp (in progress), then evaluate **R1-Distill-Qwen-7B** (F16 GGUF,
-14.19 GiB) and compare. Running both also yields the surrogate-strength sweep the paper never did —
-they tested only 1.5B and 685B, with nothing in between.
+- it is the paper's **exact** model, preserving comparability with their headline configuration
+- it is our validated calibration reference (JEEBench 32.6 vs their 32.6)
+- the paper tested only 1.5B and 685B — a 450× gap with nothing between. Three points
+  (1.5B / 7B / 27B) on identical benchmarks answers **how inversion quality scales with surrogate
+  strength**, which §7 explicitly leaves open
+
+Cost: one extra Phase 1 generation run (~1-2 h at 1.5B) and one extra inverter training. The
+surrogate axis becomes a deliberate two-point sweep rather than a single choice needing defence.
+
+Why the 1.5B fails on JEEBench but wins on MATH500: coverage, not reasoning. R1-Distill was
+distilled on math, so MATH500 is its home turf, while JEEBench spans physics and chemistry where a
+2026-generation general model simply knows more.
 
 ---
 

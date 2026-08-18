@@ -18,15 +18,16 @@ full precision.
 | Role | Model | Format | Engine | Precision | Trained? |
 |---|---|---|---|---|---|
 | **Victim** `V` | `unsloth/Qwen3.8-27B-GGUF` → `IQ4_XS` | GGUF 14.62 GiB | llama.cpp | **4-bit** (forced — 55 GB at bf16) | no |
-| **Surrogate** `V'` | `DeepSeek-R1-Distill-Qwen-1.5B` | bf16 3.6 GB | vLLM (baseline) / llama.cpp (generation) | bf16 | no |
-| *Surrogate #2 (conditional)* | `DeepSeek-R1-Distill-Qwen-7B` | F16 14.19 GiB | llama.cpp | F16 | no |
+| **Surrogate** `V'` (primary) | `DeepSeek-R1-Distill-Qwen-7B` | F16 14.19 GiB | llama.cpp | F16 | no |
+| **Surrogate** `V'` (arm 2) | `DeepSeek-R1-Distill-Qwen-1.5B` | BF16 3.32 GiB | llama.cpp | bf16 | no |
 | **Compressor** `C'` | `Qwen/Qwen3.5-4B` | safetensors | vLLM | bf16 | no (zero-shot) |
 | **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 | **yes** |
 | **Student** `S` | `Qwen/Qwen3.5-2B` *(pending baselines)* | safetensors | TRL → vLLM | bf16 | **yes** |
 
-Surrogate #2 triggers only if the 1.5B baseline lands **below** the chosen student on JEEBench
-(it did at 16k: 30.5% vs 45.8%). 14B is available at Q4_K_M 8.37 GiB but would put the surrogate in
-a different precision class — a last resort.
+**Both surrogates run** — decided on Phase 0 measurements. The 1.5B sits 15 pts *below* the student
+on JEEBench (32.6 vs 47.8), inverting the paper's ordering; the 7B clears it by 12.8 and sits
+midway to the victim. Running both turns a forced choice into the surrogate-strength sweep the
+paper never did (they tested only 1.5B and 685B).
 
 ---
 
