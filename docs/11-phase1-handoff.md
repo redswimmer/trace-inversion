@@ -144,37 +144,60 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 
 ---
 
-## 5. Conventions — these were learned the hard way
+## 5. Conventions — keyed to when they fire
 
-**Sweep concurrency before every generation run.** `bench/sweep_concurrency.sh <model.gguf>
-<per_slot_ctx> [slots...]`. Optimal slots is inversely related to model size and arithmetic gets it
-badly wrong: the 1.5B was sized at 12 slots by hand and ran 4 h at 48-55% GPU utilization. The
-sweep chose 8 slots for the 7B (274 t/s) over my guess. Note `-c` is the **total** KV budget shared
-across `-np` slots, so slots and per-slot context trade directly, and per-slot context must still
-cover the longest generation expected.
+> **This project's failure mode is silent wrongness, not loud breakage.** Five separate Phase 0 bugs
+> — a dropped pandas column, a masked exception handler, an unrecognized answer format, a
+> thread-local signal handler, and a self-invented token cap — each produced *believable numbers
+> with no error anywhere*. Nothing crashed. Every rule below exists to make one class of that
+> visible. When in doubt, prefer the check that would have caught a wrong number over the one that
+> saves time.
 
-**Verify a model loads before committing to a long run.** A silent OOM at model load left the GPU
-idle ~9 h. `llama-server` exits non-zero and the driver moves on; nothing shouts.
+### Before launching any generation or eval run
 
-**Never edit a running bash script.** Bash reads scripts incrementally, so editing shifts its file
-offset mid-execution. This hung two chained runners for ~50 min. Kill, edit, relaunch.
+| Check | Command / rule | What it prevents |
+|---|---|---|
+| Sweep concurrency | `bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx>` | Running 4 h at 50% GPU utilization. Optimal slots is inversely related to model size; arithmetic gets it wrong. `-c` is the **total** KV budget split across `-np` slots, and per-slot context must still cover the longest expected generation. |
+| Verify the model loads | Start `llama-server`, poll `/health`, kill it | A silent OOM at load once left the GPU idle ~9 h. The server exits non-zero and drivers move on without shouting. |
+| Smoke test ~30 items | `--n-per-bench 15` or `--limit 5` | Catches harness bugs for minutes instead of hours. Both the `type`-column bug and the masked exception surfaced this way. |
+| Confirm disk headroom | `df -h /` | 27 GB free. See the checkpoint policy below. |
+| Start the watchdog | `bench/watchdog.sh` | Restarts a stalled driver within ~15 min. |
 
-**Grade in the main thread.** `math_verify` uses SIGALRM and `signal.signal()` fails outside the
-main thread, so grading inside a `ThreadPoolExecutor` silently degrades to string matching — it
-cost 14.6 points on MATH500 and looked like an engine difference. `bench/eval_victim_gguf.py`
-collects in workers and grades in `main()`; keep it that way.
+### While a run is in flight
 
-**Save raw generated text.** Every grading or extraction fix then applies retroactively for free
-(`bench/regrade.py`), instead of costing a regeneration.
+| Rule | Why |
+|---|---|
+| **Never edit a running bash script** | Bash reads scripts incrementally; editing shifts its file offset mid-execution. This hung two chained runners for ~50 min. Kill → edit → relaunch. |
+| Don't coordinate runners through files | A skip-marker that one runner deleted to claim a job re-enabled it in another queue, sending the surrogate to the wrong engine. Use one sequential driver. |
+| Check progress is actually visible | Don't `grep -v` the progress bar out of the log, and remember `\r` needs `tr '\r' '\n'` to read. |
 
-**Run the audit before believing any number.** `bench/audit_results.py` gates on truncation,
-extraction failures on *completed* generations, per-type zeros, and calibration. Three bugs in
-Phase 0 produced plausible-looking numbers with no error anywhere.
+### Writing or changing harness code
 
-**Watchdog.** `bench/watchdog.sh` restarts a stalled driver within ~15 min. Start it alongside any
-long unattended run.
+| Rule | Why |
+|---|---|
+| **Grade in the main thread** | `math_verify` uses SIGALRM and `signal.signal()` fails outside the main thread, so grading inside a `ThreadPoolExecutor` silently degrades to string matching. Cost 14.6 pts on MATH500 and looked like an engine difference. Collect in workers, grade in `main()`. |
+| **Always save raw generated text** | Every later grading or extraction fix then applies retroactively for free via `bench/regrade.py`, instead of costing a regeneration. Three fixes have already been free because of this. |
+| Exception handlers must not raise | A handler that threw on a missing key masked the real request error and produced 20 minutes of useless GPU time with a misleading traceback. |
+| Where the paper specifies a value, use it | Deviating needs a stated reason in `docs/09`. Vendor defaults were once used by accident and caused degenerate looping. |
 
----
+### After a run, before believing any number
+
+| Check | Command | Gate |
+|---|---|---|
+| Audit | `bench/audit_results.py <file>.jsonl` | truncation <10% · zero extraction failures on **completed** generations · no benchmark type at exactly 0% · calibration within ~8 pts where a reference exists |
+| Sanity-check the grader | Sample rows marked wrong and read them | Catches false negatives. On the 4B only 1 of 500 was misgraded, and inspection confirmed the grader was right. |
+| Record it | `docs/results/` + commit | Raw `.jsonl` is gitignored (20-45 MB each); commit summaries and audits. |
+
+### Disk policy for Phases 2 and 5
+
+Seven 2B student checkpoints at ~4.6 GB each is ~32 GB against 27 GB free. Inverters are free
+(Qwen3.5-4B cannot full-fine-tune on 24 GB, so it is LoRA and adapters are ~100 MB).
+
+**Train → evaluate → delete the checkpoint**, keeping metrics and raw eval outputs. Peak usage
+becomes one checkpoint instead of seven.
+
+Consequence: re-evaluating later means retraining, so **settle the eval protocol before Phase 5
+starts**. That is an additional reason to resolve the sampling/looping question first.
 
 ## 6. Open items carried into later phases
 
