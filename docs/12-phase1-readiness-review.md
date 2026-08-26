@@ -213,19 +213,40 @@ before Phase 5 begins." One `rm` retires a standing constraint on Phases 2 and 5
 
 ## 7. Still unverified going into Phase 1
 
-> **Resolved during Phase 1.** The 7B surrogate's own trace lengths on OpenThoughts measure
-> (n=503, mid-run): **median 3,987 trace tokens** against R1's reference **4,379** — **9.0% shorter**
-> — with cap-hit 31.4% against the reference 25.5%. Close enough to call the surrogate a reasonable
-> stand-in, but it is *not* a match: our distribution is shorter at the median while hitting the cap
-> **more** often, i.e. more bimodal than R1's. A distill that either finishes quickly or runs away is
-> the expected shape, and it is worth carrying into Phase 2 rather than reading as equivalence.
+> **Resolved during Phase 1**, and measured **paired**: OpenThoughts ships R1's own `<think>`
+> trace for every row, so our generation and the reference exist for the *same prompt*. Every
+> earlier comparison here was unpaired — our rows against a differently drawn reference sample —
+> which let prompt difficulty leak into the result. Paired, n=524 mid-run:
 >
-> **Corrected.** This entry first read "median 4,317 … within 1.4%", quoting `gen_tokens` —
-> **trace + answer** — against a reference that counts the `<think>` **trace only**. Answers run a
-> median 386 tokens here, so the comparison was inflated by roughly its whole width and made a 9%
-> gap look like a 1.4% match. Compare trace-to-trace. Medians *are* comparable across the cap
-> (capping is order-preserving below 8192); means are not (4,583 vs 6,005), because ours is
-> truncated and the reference is uncapped ground truth.
+> | | ours | R1 | delta |
+> |---|---:|---:|---:|
+> | **median, KEPT (both < cap)** | **2,698** | **2,894** | **−6.8%** |
+> | median, all rows | 4,009 | 4,182 | −4.1% |
+> | p25, kept | 1,313 | 1,662 | −21.0% |
+> | p75, kept | 4,038 | 4,394 | −8.1% |
+> | p75/p25, kept (dispersion) | 3.08 | 2.64 | — |
+> | cap-hit, same prompts | 30.7% | 25.2% | — |
+>
+> **The KEPT row is the headline** — that set is what `D₂` contains. Our surrogate runs ~7% shorter
+> at the median, is shorter on **65.1%** of individual prompts, and is **more dispersed below the
+> cap** while crossing the cap more often. Short-and-spread at the low end, crossing more at the
+> high end. Close enough to be a reasonable stand-in; not equivalent.
+>
+> **What cannot be claimed:** anything about our tail's *shape* past 8192. R1's p90 over all rows is
+> **13,437** — far beyond our cap — so our distribution is **censored** there, not measured. We know
+> the crossing *rate* (30.7% vs 25.2%) and nothing else. An earlier draft of this entry called ours
+> a "fatter runaway tail"; that is not supportable under censoring.
+>
+> **Independent validation of §2's sampling:** R1's cap-hit on these exact 524 prompts is **25.2%**,
+> against the **25.5% ± 2.5** that §2 estimated from a completely different 2,000-row cluster sample.
+> Two disjoint samples, same answer.
+>
+> **Corrected twice.** This entry first read "median 4,317 … within 1.4%", quoting `gen_tokens` —
+> **trace + answer** — against a reference counting the `<think>` **trace only**; answers run a
+> median ~390 tokens, so the comparison was inflated by about the width of the gap it claimed to
+> measure. The fix to that was still unpaired and compared our capped rows against an uncapped
+> reference, giving −9.0%. Pairing, and applying the same cap to both sides, gives −6.8%. Compare
+> trace-to-trace, on the same prompts, under the same cap.
 >
 > Also resolved: **swept throughput does not predict realized throughput.** The 7B swept 1,192 gen
 > t/s at 32 slots and sustains ~430-555 in the real run — ~2.4x optimistic, because

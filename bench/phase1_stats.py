@@ -43,6 +43,48 @@ def dist(xs, label):
             f"max={int(xs.max())}")
 
 
+def paired_reference(rows, tk, cap):
+    """Compare our traces to R1's ground truth ON THE SAME PROMPTS.
+
+    Every earlier comparison here was unpaired — our rows against a differently
+    drawn reference sample — so prompt difficulty varied between the two sides and
+    landed in the answer. Pairing removes that entirely: OpenThoughts already ships
+    R1's own <think> trace for each row, so row i has both.
+
+    Report the KEPT comparison (both sides under the cap) as the headline: that set
+    is what D2 actually contains. Above the cap our distribution is CENSORED, not
+    measured — we know how often we cross 8192, never how far we would have gone —
+    so no claim about our tail's shape past the cap is supportable.
+    """
+    from datasets import load_dataset
+    ds = load_dataset("llamafactory/OpenThoughts-114k", split="train")
+    ref = ds.select([r["idx"] for r in rows])
+    ours, r1 = [], []
+    for r, row in zip(rows, ref):
+        a = row["messages"][2]["content"]
+        t = a.split("</think>")[0].replace("<think>", "", 1) if "</think>" in a else a
+        r1.append(len(tk.encode(t)))
+        ours.append(len(tk.encode(r["trace"])))
+    ours, r1 = np.array(ours), np.array(r1)
+    keep = (~np.array([r["capped"] for r in rows])) & (r1 <= cap)
+
+    q = lambda x, p: int(np.percentile(x, p))
+    print(f"\n=== paired against R1's ground truth, identical prompts (n={len(rows)}) ===")
+    print(f"{'':24s}{'ours':>9s}{'R1':>9s}{'delta':>9s}")
+    for lbl, m in (("all rows", np.ones(len(rows), bool)),
+                   ("KEPT (both < cap)", keep)):
+        o, g = ours[m], r1[m]
+        print(f"  {lbl}  n={int(m.sum())}")
+        for p in (25, 50, 75, 90):
+            print(f"    p{p:<21d}{q(o,p):>9d}{q(g,p):>9d}{100*(q(o,p)/q(g,p)-1):>8.1f}%")
+        print(f"    p75/p25 (dispersion){q(o,75)/q(o,25):>13.2f}{q(g,75)/q(g,25):>9.2f}")
+    print(f"\n  cap-hit      ours {100*np.mean([r['capped'] for r in rows]):.1f}%   "
+          f"R1 on the same prompts {100*np.mean(r1 > cap):.1f}%")
+    print(f"  ours shorter on {100*np.mean(ours < r1):.1f}% of prompts")
+    print(f"  R1 p90 over all rows is {q(r1,90)}, past our {cap} cap: our tail is")
+    print(f"  censored there, so only the CROSSING RATE is comparable, not tail shape.")
+
+
 def traces(rows, tk, cap):
     n = len(rows)
     capped = [r for r in rows if r["capped"]]
@@ -152,12 +194,18 @@ def main():
                     help="same family/vocab as the 7B; docs/12 §2 measured 6,005 with it")
     ap.add_argument("--summary-tokenizer", default="Qwen/Qwen3.5-4B",
                     help="the compressor's own tokenizer")
+    ap.add_argument("--paired", action="store_true",
+                    help="also compare against R1's ground-truth trace for the SAME "
+                         "prompts (traces mode only) — removes prompt-difficulty variance")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.file)]
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
     if args.mode == "traces":
-        traces(rows, tok(args.trace_tokenizer), args.cap)
+        tk = tok(args.trace_tokenizer)
+        traces(rows, tk, args.cap)
+        if args.paired:
+            paired_reference(rows, tk, args.cap)
     else:
         ok = summaries(rows, tok(args.summary_tokenizer))
         sys.exit(0 if ok else 1)
