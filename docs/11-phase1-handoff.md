@@ -133,7 +133,10 @@ we use 5k each. Persist the split indices to disk so Phase 3 cannot accidentally
 3. **Draft the compression prompt `π`** and validate against Table 1 on ~200 traces. Iterate here,
    not at 5k scale.
 4. **Compress all 5k** with `Qwen3.5-4B` on vLLM. Est. ~1-1.5 h.
-5. **Repeat 1, 2 and 4 for the 1.5B arm.** Est. ~4-6 h + ~1.5 h.
+5. **Repeat 1, 2 and 4 for the 1.5B arm.** Est. ~6-7 h + ~1.5 h. **Probe its cap-hit on ~200 rows first**
+   (~10 min) and size the run from the measured rate, not from the 7B's. The 1.5B is more verbose on every
+   Phase 0 measurement, and at 44.4% cap-hit a 9,000-row split A is exactly exhausted. Split A now holds
+   **16,000** indices for this reason — sized for the worst arm, not the best.
 6. Commit `docs/results/phase1.md` with trace-length stats, cap-hit rates, and the Table 1 style
    comparison.
 

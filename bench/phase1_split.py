@@ -30,6 +30,13 @@ def main():
     ap.add_argument("--seed", type=int, default=20260826)
     ap.add_argument("--splits", default="bench/phase1/splits.json")
     ap.add_argument("--prompts-a", default="bench/results/phase1/promptsA.jsonl")
+    ap.add_argument("--extend-a", type=int, default=0,
+                    help="grow split A to this total, APPEND-ONLY: existing A indices "
+                         "and their order are preserved, new ones are drawn from beyond "
+                         "A∪B so B stays disjoint and untouched. Safe to run while a "
+                         "generation job holds the prompts file — that file is read once "
+                         "at startup, and a resumed job simply sees more rows and still "
+                         "stops at --target-kept.")
     args = ap.parse_args()
 
     ds = load_dataset(REPO, split="train")
@@ -40,6 +47,20 @@ def main():
     B = sorted(int(i) for i in perm[args.n : 2 * args.n])
     assert not (set(A) & set(B)), "splits overlap"
 
+    # Split A is sized for the WORST arm, not the best. The 1.5B is more verbose than
+    # the 7B on every Phase 0 measurement, and generation stops at 5,000 *kept*, so a
+    # high cap-hit consumes indices fast: at 44.4% a 9,000-row A is exactly exhausted,
+    # and the 1.5B is projected well past that. Indices cost nothing — 113,957 rows
+    # exist and both splits together use a fraction.
+    extra = []
+    if args.extend_a:
+        need = args.extend_a - args.n
+        assert need > 0, f"--extend-a {args.extend_a} is not larger than --n {args.n}"
+        extra = sorted(int(i) for i in perm[2 * args.n : 2 * args.n + need])
+        assert not (set(extra) & (set(A) | set(B))), "extension overlaps A or B"
+        A = A + extra
+        print(f"extending A by {len(extra)} fresh indices (from beyond A∪B) -> {len(A)}")
+
     (ROOT / args.splits).parent.mkdir(parents=True, exist_ok=True)
     (ROOT / args.splits).write_text(json.dumps(
         {"repo": REPO, "n_rows": len(ds), "seed": args.seed,
@@ -47,7 +68,12 @@ def main():
 
     # A's prompts, in the permutation's (random) order so a partial generation run is
     # still an unbiased sample of the corpus rather than a block of one source.
+    # Extension rows keep their permutation order too and land AFTER the original
+    # 0..n-1 block, so the existing file is a prefix of the new one — a resumed or
+    # rerun job sees identical rows in identical order, then more.
     order = {int(i): k for k, i in enumerate(perm[: args.n])}
+    order.update({int(i): args.n + k for k, i in enumerate(perm[2 * args.n:
+                                                                2 * args.n + len(extra)])})
     rows = []
     for i, r in zip(A, ds.select(A)):
         msgs = r["messages"]
