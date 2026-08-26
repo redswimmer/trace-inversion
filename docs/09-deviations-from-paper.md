@@ -129,6 +129,7 @@ cross-family student as a check.
 | 7.2 | `max_new_tokens` | 8192 | 16384 for baselines | Smoke test truncated 4/5 JEEBench items at 2048 — capping would measure the cap |
 | 7.3 | Victim concurrency | n/a (8 GPUs) | 32 (hard ceiling — recurrent-state cache OOMs at 40) | Measured, see `08` |
 | 7.4 | Dataset mirror | `llamafactory/OpenThoughts-114k` | same | Canonical `open-thoughts/` repo has an incompatible schema |
+| 7.8 | Surrogate system prompt | repo injects the R1-Distill prompt; **paper never mentions it** | **same as the repo** — not the near-identical one the OpenThoughts rows carry | `07` §3: it is part of what makes the surrogate emit long traces, so it must not be left to chance. See `11` §3 |
 | 7.5 | Split inference engine | vLLM only | victim on llama.cpp, everything else on vLLM | see below |
 | 7.6 | Generation cap | none set (Evalchemy defaults) | **32,768 tokens / 40,960 context**, seed 1234 | see below |
 

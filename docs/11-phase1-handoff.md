@@ -132,6 +132,24 @@ temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_new_tokens 8192 �
 We deviated from these once by accident in Phase 0 (used Qwen model-card defaults) and it cost a
 day. **Where the paper specifies a value, use it; deviating needs a stated reason.**
 
+#### Which system prompt — decide this before generating, it sets trace length
+
+There are **two** near-identical candidates and no doc previously said which to use:
+
+| Source | Text |
+|---|---|
+| The paper's repo, `step0_data_preprocess/preprocess_r1_distill.py` | "Your role as an assistant involves thoroughly exploring questions through a systematic long thinking process…" |
+| The OpenThoughts row itself, `messages[0]` (identical across all rows) | "You are an assistant that thoroughly explores questions through a systematic long thinking process before providing the final precise and accurate solutions…" |
+
+**Use the repo's.** It is what generated the paper's reference behaviour, and `07` §3 records that
+it "is part of what makes the surrogate emit long traces." It is not mentioned in the paper at all,
+so the code is the only source. Recover the **exact** string from the repo — `07` §3 quotes it
+truncated — and commit it next to `π`.
+
+**This interacts with the cap-hit STOP band.** Omitting the system prompt, or substituting the
+dataset's, shortens traces and pushes cap-hit *below* the expected ~25%. If cap-hit comes in under
+10%, suspect the system prompt before concluding the surrogate is misbehaving.
+
 #### `max_new_tokens 8192` binds on ~a quarter of traces — drop the rows that hit it
 
 Two corrections to what this section used to say (full detail in `12` §2):
