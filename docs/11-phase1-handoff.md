@@ -217,6 +217,18 @@ the whole point of `π` is matching that distribution:
 Measure with light regex heuristics, as they did. Iterate on ~200 traces until all four land, then
 run the full 5k.
 
+**The stated length and the measured length are supposed to disagree — do not "fix" it.** Appendix B
+instructs "roughly 600-900 tokens," and Table 1 reports the resulting medians as 537 and 592. The
+instruction is an **over-ask the model undershoots by 10-15%**, not a description of the output.
+π has two levers that both take token counts — the instruction, and the few-shot exemplars — so:
+
+- keep the **instruction** at the paper's 600-900 verbatim; it is the calibrated over-ask
+- size the **exemplars** to the Table 1 medians; they carry the calibration
+- move **one lever at a time**, so a missed band tells you which one moved it
+
+Lowering both applies the undershoot twice and lands near 450-480 — under the acceptance band, and
+it presents as a prompt-quality problem when it is really a units error.
+
 **Why this matters more than it looks:** `π` defines the summaries the inverter trains on. A
 distribution mismatch here propagates through Phase 2 (inverter training), Phase 4 (inversion), and
 Phase 5 (student training). It is the highest-leverage artifact in the project and the one with the
