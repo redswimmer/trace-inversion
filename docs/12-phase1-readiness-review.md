@@ -203,9 +203,22 @@ before Phase 5 begins." One `rm` retires a standing constraint on Phases 2 and 5
 
 ## 7. Still unverified going into Phase 1
 
+> **Resolved during Phase 1.** The 7B surrogate's own trace lengths on OpenThoughts now measure
+> (n=165, mid-run): **median 4,317** against R1's reference **4,379** — within **1.4%**, with
+> cap-hit 27.9% against the reference 25.5%. The surrogate reproduces the reference length
+> distribution, which is the strongest single validation of the setup so far. Means are *not*
+> comparable (4,773 vs 6,005): ours is truncated at the 8192 cap, R1's reference is uncapped
+> ground truth. Compare medians only.
+>
+> Also resolved: **swept throughput does not predict realized throughput.** The 7B swept 1,192 gen
+> t/s at 32 slots and sustains ~430-555 in the real run — ~2.4x optimistic, because
+> `llama-batched-bench` batches at identical depth while `llama-server` batches ragged. Probe
+> length (`-ntg`) accounts for only 6.1% of the gap. **Use a sweep to rank slot counts, never to
+> build a time budget.** Phase 1 is therefore **~29-31 h**, not the ~15-18 h in §4 — the §4 sweep
+> reasoning was right about slot count and wrong about wall clock.
+
 | Item | Blocks |
 |---|---|
 | TRL / peft installed and `06` §4.10 smoke test run | Phase 2 |
-| Trace lengths **our surrogates** produce on OpenThoughts (R1's were the proxy) | measured during Phase 1 step 2 |
 | Compression throughput for Qwen3.5-4B on vLLM | Phase 1 step 4 |
 | 1.5B concurrency at 10,240/slot | Phase 1 step 5 |

@@ -146,9 +146,18 @@ it "is part of what makes the surrogate emit long traces." It is not mentioned i
 so the code is the only source. Recover the **exact** string from the repo — `07` §3 quotes it
 truncated — and commit it next to `π`.
 
-**This interacts with the cap-hit STOP band.** Omitting the system prompt, or substituting the
-dataset's, shortens traces and pushes cap-hit *below* the expected ~25%. If cap-hit comes in under
-10%, suspect the system prompt before concluding the surrogate is misbehaving.
+**Measured effect — smaller than first claimed.** This paragraph originally said a missing system
+prompt would push cap-hit below 10%. Both arms have since been run:
+
+| | cap-hit |
+|---|---|
+| without the system prompt (n=30 smoke) | 23.3% |
+| with it (n=165, still climbing) | 27.9% |
+
+The direction is right — the system prompt does lengthen traces — but the effect is **~5-8 pp, not a
+collapse**. Keep the prompt for fidelity, because it is what the repo does; do **not** treat it as
+the first suspect if cap-hit ever comes in very low. That diagnostic was speculation and the
+measurement did not support it.
 
 #### `max_new_tokens 8192` binds on ~a quarter of traces — drop the rows that hit it
 

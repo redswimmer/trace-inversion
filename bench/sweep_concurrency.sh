@@ -10,12 +10,21 @@
 # so slots and per-slot context trade directly. Per-slot context must still
 # cover the longest generation you expect, or long requests fail.
 #
-# SWEEP AT THE GENERATION LENGTH YOU WILL ACTUALLY USE. Per-token attention cost
-# grows with KV depth, so a short probe measures the latency-bound regime and
-# overstates sustained throughput — badly. The Phase 1 7B sweep at -ntg 512
-# promised 1,270 t/s; the real workload at an 8192-token cap decoded ~8x slower.
-# Allocating the right per-slot KV is only half the fix; the probe has to spend
-# it too. NTG defaults to 4096; set it near your median generation.
+# Probe length costs ~6%, but SWEPT AND REALIZED ARE DIFFERENT NUMBERS (~2.4x).
+# Measured on the 7B at ctx 10240: -ntg 512 gives 1,270 gen t/s and -ntg 4096
+# gives 1,192, so KV depth alone costs only 6.1% at 32 slots. NTG stays a knob
+# because 6% is real, but it is NOT the big term.
+#
+# The big term is that llama-batched-bench runs N sequences at IDENTICAL depth —
+# a perfectly rectangular batch — while llama-server runs them at RAGGED depths
+# under continuous batching. The real 7B run sustained ~430-555 t/s against a
+# swept 1,192: about 2.4x optimistic. GPU sat at 37-47% utilization with all 32
+# slots busy, not CPU-bound, not swapping, no context shift — consistent with the
+# ragged-batch attention path, on this Vulkan build, being the limit.
+#
+# So: use a sweep to pick SLOT COUNT, which it ranks correctly. Do NOT use its
+# absolute t/s to build a time budget. Budget from the first 30 minutes of the
+# real run with a full queue. NTG defaults to 4096; set it near your median.
 #
 # Usage: [NTG=<gen_tokens>] bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx> [slots...]
 set -uo pipefail

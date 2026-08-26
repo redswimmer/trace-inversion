@@ -142,13 +142,13 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | Phase | Est. |
 |---|---|
 | 0 Baselines | ~30 h *(actual, incl. re-runs)* |
-| 1 Surrogate data (**2 surrogates**) | **~15-18 h** *(was ~4 h — see `12` §4)* |
+| 1 Surrogate data (**2 surrogates**) | **~29-31 h** *(measured mid-run; see `12` §7)* |
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
 | 3 **Victim queries** | **~10-15 h** |
 | 4 Inversion | ~4 h |
 | 5 Student training | ~20 h |
 | 6 Evaluation | ~8 h |
-| **Total** | **~120-135 h** (~5-6 days of GPU time) |
+| **Total** | **~135-150 h** (~6 days of GPU time) |
 
 Every individual stage fits an overnight run. **Phase 2 now dominates** (~28 h), with Phase 5 next;
 Phase 3 dropped to ~10-15 h once the victim's real trace lengths were measured. If generation needs
