@@ -2,14 +2,15 @@
 
 Read docs/11-phase1-handoff.md then docs/12-phase1-readiness-review.md. Both are current: the plan's known errors were found and fixed in commit a7c4629, and every number in them was measured on this machine. Trust them and build — do not re-audit the plan.
 
-After EACH numbered step, post a checkpoint line to the transcript. This is how progress gets audited, so make the numbers concrete:
+REPORTING. After EACH numbered step, and on every STOP condition below, send a checkpoint to the supervising session with SendMessage({to: "phase-1-boss", message: "..."}) — that session is auditing you and will send back guidance. Print the same line in your own transcript. Make the numbers concrete:
   CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+If SendMessage reports that phase-1-boss is gone, keep printing checkpoints and carry on; do not block on it.
 
 1. DATA. Load llamafactory/OpenThoughts-114k (the `messages` column — NOT `conversations`). Draw disjoint splits A (surrogate) and B (victim, Phase 3), >=6,800 rows each (over-draw B too; indices are free and Phase 3 will drop capped rows the same way), persist indices to disk. Checkpoint must print len(A), len(B), len(A & B), and row 0's keys.
 
 2. GENERATE, 7B ARM. Serve `-np 32 -c 327680` (10,240/slot; already swept at 1,270 gen t/s). Sampling temp 0.7 / top_p 0.9 / rep 1.05 / max_new_tokens 8192. Generate ~6,700 rows, DROP every row that hit the cap, keep ~5,000. Save raw generated text to disk. Checkpoint: rows generated, cap-hit %, rows kept, median and mean trace tokens, wall clock, effective t/s. Expected cap-hit ~25%; if it lands outside 10-40% STOP and report, because the surrogate is then not behaving like the reference distribution.
 
-3. COMPRESSION PROMPT π. Write it from scratch (paper v2 Appendix B; its exemplars do not exist anywhere). Validate on ~200 traces against all four Table 1 statistics: median tokens 540-590, bold-header sections >90%, first-person prose >95%, LaTeX >70%. Checkpoint all four measured numbers on every iteration. When all four pass, post the checkpoint plus the prompt text and give me one turn to object before running at 5k scale; if I have not replied by your next turn, proceed and note that it went unreviewed. π defines every summary the inverter trains on and a mismatch propagates through Phases 2, 4 and 5.
+3. COMPRESSION PROMPT π. Write it from scratch (paper v2 Appendix B; its exemplars do not exist anywhere). Validate on ~200 traces against all four Table 1 statistics: median tokens 540-590, bold-header sections >90%, first-person prose >95%, LaTeX >70%. Checkpoint all four measured numbers on every iteration. When all four pass, SendMessage the checkpoint plus the full prompt text to phase-1-boss and give it one turn to object before running at 5k scale; if no reply arrives by your next turn, proceed and note that it went unreviewed. π defines every summary the inverter trains on and a mismatch propagates through Phases 2, 4 and 5.
 
 4. COMPRESS. Run π over both arms with Qwen3.5-4B on vLLM. Checkpoint: rows summarised, the four Table 1 stats at full scale, throughput.
 
@@ -27,4 +28,4 @@ CONSTRAINTS
 - Disk is 26 GB free; run df -h before any download.
 - Work on a branch off phase1-readiness. Commit after each completed step.
 
-STOP and ask me if: an audit gate fails twice, cap-hit is outside 10-40%, π cannot hit all four Table 1 stats within 5 iterations, or a step exceeds its estimate by 2x. Otherwise keep going without prompting me.
+STOP, SendMessage phase-1-boss, and ask if: an audit gate fails twice, cap-hit is outside 10-40%, π cannot hit all four Table 1 stats within 5 iterations, or a step exceeds its estimate by 2x. Otherwise keep going without prompting me.
