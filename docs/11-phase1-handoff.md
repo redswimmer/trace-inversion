@@ -53,6 +53,30 @@ is 55 GB.
 
 ---
 
+## 1a. Where the paper's verbatim prompts actually live
+
+**Before reconstructing any prompt from a description, look here.** Three of the paper's
+Appendix B prompts are transcribed verbatim in `docs/01`, while `07`, `09` and this document
+carry only paraphrases and commentary about them:
+
+| Artifact | Verbatim text | Paraphrased in |
+|---|---|---|
+| Compression prompt `π` | **`01` §6.4** | `02`, `11` §4 |
+| Zero-shot inversion, **with** summaries | **`01` §7.2** | `07` §2.3, `09` row 6.2 |
+| Zero-shot inversion, **no** summaries | **`01` §7.3** | `07` §2.3 |
+
+This cost a full rewrite in Phase 1. `π` was reconstructed from `02`'s paraphrase because §4 of
+this document said the prompt "exists only in its PDF" — true of the PDF, false of this repo. The
+reconstruction contradicted the original.
+
+**Read `01` §7.4 before using the inversion prompts.** They are labelled *zero-shot* — they define
+the paper's **baseline**, not the fine-tuned inverter's conditioning format, which the paper never
+specifies. Phase 2 gets the baseline's format for free and still has to choose the trained
+inverter's. Having the text makes that a smaller decision, not a solved one; and `09` row 6.2's
+format-mismatch fix now applies to a prompt that can be diffed rather than described.
+
+---
+
 ## 2. What Phase 1 produces
 
 The inverter's training set. Per the paper's Stage 1 (§4.1):
@@ -198,6 +222,24 @@ traces may fix it." **The premise only holds if the traces terminate.**
 
 Record the cap-hit rate per arm and report it — the paper never published one.
 
+**The old 10-40% "stop and investigate" band is retired.** It was set before the comparison could
+be paired, on the guess that a large gap from the reference meant a misbehaving surrogate. Paired
+on identical prompts, R1's own cap-hit is **25.2%** and the 7B's is **~32%** — measured,
+understood, and the expected shape for a distill. Crossing 33% confirms what pairing already said.
+
+What actually binds is the row budget, since generation stops at 5,000 *kept*:
+
+| cap-hit | rows needed | vs split A (9,000) |
+|---:|---:|---|
+| 33% | 7,463 | fine |
+| 40% | 8,333 | fine |
+| **44.4%** | **8,999** | **exhausts split A** |
+
+So run through 33% without stopping. **Investigate if cap-hit approaches 42%, or if it *jumps*
+rather than drifts** — a discontinuity means something changed mid-run, which is the real anomaly
+the original band was reaching for. A slow drift upward is the drain bias (short generations finish
+first), not a signal.
+
 ---
 
 ## 4. The hard part: the compression prompt `π`
@@ -321,6 +363,23 @@ error output, which is the point: this is the same failure shape as the five Pha
 | **A retraction is not done until you have grepped for the number** | `grep -rn '<the number>' docs/ bench/` | Fixing the claim where you found it leaves every copy. One retracted throughput figure survived in **three** docs, including the handoff a future session reads first — corrected in one section while the stale copy sat in the section people actually open. Same shape twice in Phase 1: the `~8×` probe-depth claim, and `15-18 h`. **Grep every number in the retracted claim, including the one in its conclusion — not only the ones in its evidence.** A revised `4.6×` survived in a section *heading* because the search was for the figures that claim produced (`15-18 h`, `7.8 h`, `1,270`) rather than for the claim itself. A heading is where a claim outlives its data. |
 | **A verification tool that cries wolf costs the same as one that misses** | check the hit count for plausibility before acting on it | Two independent markdown checks written here both counted `**` per *line* and flagged ~20 and ~80 "unbalanced bold" hits. Every one was false: bold legitimately wraps across a line break. Counting per paragraph gives zero. Acting on either list would have burned a cycle mid-run chasing nothing, and the next real signal from that tool would have been ignored. |
 | **Results files hold measurements; interpretation goes in a doc that gets revised** | — | A sweep file carried the prose *"a 4.6× throughput gain … the largest single speedup available anywhere in this project"* — written before any realized number existed, inside a file otherwise containing only measurements. Realized-over-realized it was ~1.8×. An opinion in a results file is where a reader least expects one, and it does not get revisited when the measurement that would refute it arrives. |
+
+#### Before believing a comparison between two numbers
+
+Every rule here comes from one Phase 1 bug and its repeats: a reported "median 4,317 vs 4,379,
+within 1.4%" that was `gen_tokens` (**trace + answer**) against a reference counting the `<think>`
+**trace only**. It survived my check and a reviewer's, because the number was plausible. The
+corrected figure is −6.8%. The same confusion then reappeared in the reviewer's *verification*
+code within the hour, which is why this is a class and not an incident.
+
+| Rule | Why |
+|---|---|
+| **Prefer the engine's own signal over anything you recompute** | This is the one that would have prevented every instance. Our `capped` flag was correct only because it took `finish_reason == "length"` straight from llama-server, which knows what it truncated — right by inheritance, not insight. Both hand-rolled reimplementations (median comparison, and a re-derived cap-hit that printed 0.0%) were wrong, in the same way, from the same ambiguity. |
+| **State the units of both numbers before stating the gap** | `gen_tokens` and trace-tokens are both "tokens". One English word, two quantities, two code paths — the harness splits trace and answer because `D₂` needs them apart; the API returns their sum for free. Nothing in either name distinguishes them. |
+| **"Is it biased?" is downstream of "is it the same measurement?"** | The reviewer explicitly audited the *subtle* confound — that means are not comparable across a cap — while never checking whether the two medians measured the same thing at all. Checking a comparison for bias before checking that both sides measure the same quantity is backwards. |
+| **Pair when both sides exist for the same input** | OpenThoughts ships R1's own trace for every row, so each prompt has both. Every earlier comparison was unpaired and let prompt difficulty leak in. Pairing also made the drop decomposable — 33% of our drops are prompts R1 completes fine — which no unpaired sample could show. |
+| **Validate the instrument on a known input first** | The Table 1 rulers were run against π's own exemplars before any model output: 100% headers, 100% first-person, 100% LaTeX, 0 numbered lists. A `$…$`-only LaTeX regex would have scored 0% on a prompt that emits `\( … \)`, and the cycle would have gone to debugging π. |
+| **When a doc says an artifact is unavailable, grep for it before believing that** | `π`'s verbatim text sat in `01` §6.4 while `11` §4 said it existed "only in its PDF". Both of us then trusted a downstream summary about what an upstream doc contained — the reviewer while explicitly hunting for that text, by following the citations already present instead of searching for the artifact. Following citations is how you confirm an absence that is not there. |
 
 ### Disk policy for Phases 2 and 5
 
