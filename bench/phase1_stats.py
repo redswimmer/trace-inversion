@@ -84,6 +84,32 @@ def paired_reference(rows, tk, cap):
     print(f"  R1 p90 over all rows is {q(r1,90)}, past our {cap} cap: our tail is")
     print(f"  censored there, so only the CROSSING RATE is comparable, not tail shape.")
 
+    # The drop is not neutral. Pairing lets us split "hard prompt" from "this
+    # surrogate ran away here", which an unpaired sample cannot do. D2 is built from
+    # the survivors, so whatever is idiosyncratic to the surrogate leaves the
+    # inverter's training distribution — while Phase 4 serves it on split B, which is
+    # essentially unfiltered (the victim truncated 0.0-0.4% in Phase 0). That is a
+    # train/serve shift introduced by our own drop policy. Measured, not assumed.
+    ours_drop = np.array([r["capped"] for r in rows])
+    r1_drop = r1 > cap
+    both = int((ours_drop & r1_drop).sum())
+    only_ours = int((ours_drop & ~r1_drop).sum())
+    only_r1 = int((~ours_drop & r1_drop).sum())
+    n = len(rows)
+    print(f"\n  drop decomposition (why D2 loses the rows it loses)")
+    print(f"    we drop                          {int(ours_drop.sum()):5d} / {n}  "
+          f"= {100*ours_drop.mean():.1f}% of prompts")
+    print(f"    R1 would drop, same prompts      {int(r1_drop.sum()):5d}")
+    print(f"    both (genuinely long prompts)    {both:5d}")
+    print(f"    OURS ONLY — R1 completes these   {only_ours:5d}  "
+          f"= {100*only_ours/max(int(ours_drop.sum()),1):.0f}% of our drops, "
+          f"{100*only_ours/n:.1f}% of all prompts")
+    print(f"    R1 only — we complete these      {only_r1:5d}")
+    print(f"    -> D2 is the surviving {100*(1-ours_drop.mean()):.0f}%; the OURS-ONLY share leaves")
+    print(f"       the inverter's training set for reasons specific to this surrogate.")
+    print(f"       Cross-arm overlap (7B vs 1.5B drops) separates 'hard prompt' from")
+    print(f"       'this surrogate loops here' — free, both arms run anyway.")
+
 
 def traces(rows, tk, cap):
     n = len(rows)
