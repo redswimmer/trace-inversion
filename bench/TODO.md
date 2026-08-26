@@ -35,6 +35,13 @@ reference, and a full run costs ~9 h instead of ~2 h.
 - [ ] **0.3** Qwen3.5-4B → audit
 - [ ] **0.4** surrogate on llama.cpp → audit + **calibration gate**
 - [ ] **0.5** victim on llama.cpp → audit
+- [ ] `docs/results/phase1.md` must cite `~/trace-inversion-bench/archive/traces-7b-partial-1130rows.jsonl`
+      as the **noise-floor instrument** — the only same-surrogate, same-prompt, same-settings re-draw we have.
+      The 7B-vs-1.5B drop overlap must be read against its ~15% same-model floor, or a disagreement that the
+      SAME surrogate produces against itself gets attributed to surrogate identity.
+- [ ] `docs/results/phase1.md` must state that the paired comparison is **stochastic on our side only** —
+      OpenThoughts ships one fixed R1 trace per row, so ~4 pts of any reported gap is our own resampling
+      before a surrogate difference is visible.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
