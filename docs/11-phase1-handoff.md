@@ -202,8 +202,16 @@ Record the cap-hit rate per arm and report it — the paper never published one.
 
 ## 4. The hard part: the compression prompt `π`
 
-**The paper's v2 prompt exists only in its PDF (Appendix B), and its two few-shot exemplars were
-never released.** The repo predates that prompt and uses a *structurally opposite* format —
+**The prompt text is transcribed verbatim in `docs/01` §6.4 — use it. Only the two few-shot
+exemplars were never released.**
+
+> This line previously read *"the paper's v2 prompt exists only in its PDF (Appendix B)"*, which is
+> true of the PDF but not of this repo: `01` §6.4 carries the full text. π was reconstructed from
+> `02`'s paraphrase before anyone checked, and the reconstruction contradicted the original — it
+> invented a "no closing sentence that announces a conclusion" rule, while Appendix B explicitly
+> lists *"or the final consolidation"* as an allowed section move. A paraphrase also dropped the
+> short-trace/long-trace length guidance and *"do not restate the final boxed answer unless the
+> reasoning naturally concludes with it."* **Check `01` before reconstructing anything.** The repo predates that prompt and uses a *structurally opposite* format —
 numbered bullets, where v2 explicitly forbids numbered lists. You must write `π` from scratch.
 
 The v2 prompt asks for: 3-6 short sections, each opening with a bold markdown header on its own

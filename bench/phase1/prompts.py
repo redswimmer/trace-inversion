@@ -45,26 +45,36 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # pi -- the compression prompt, run by C' = Qwen3.5-4B.
 #
-# RECONSTRUCTED, not verbatim. Paper v2's Appendix B gives the spec in prose but the
-# prompt text is only in the PDF, and its "two few-shot exemplars of the target style
-# (one algebra/number theory and one geometry, ~600 tokens each), drawn from
-# GPT-5-mini's own summaries" were never released (docs/02, docs/11 §4). The exemplars
-# below are written from scratch to the spec.
+# The SYSTEM PROMPT IS VERBATIM from paper v2 Appendix B, transcribed into
+# docs/01 §6.4 and extracted from there programmatically, never retyped.
 #
-# Spec, from Appendix B: 3-6 sections, each opening with a short bold markdown header
-# on its own line followed by a 2-5 sentence paragraph; no numbered lists, no bullets;
-# first-person present tense, tentative/exploratory; one meaningful reasoning move per
-# section; inline LaTeX where the original used math; no meta-commentary; roughly
-# 600-900 tokens.
+# It was reconstructed from a paraphrase first. docs/11 §4 says the prompt "exists
+# only in its PDF", and docs/02's summary of it reads like a spec, so pi was written
+# to that spec before anyone checked docs/01. The verbatim text differs in ways a
+# paraphrase cannot carry:
+#   - "or the final consolidation" is an ALLOWED section move. The reconstruction had
+#     invented "no closing sentence that announces a conclusion", which contradicts it.
+#   - length guidance for very short and very long traces ("produce fewer sections
+#     rather than padding" / "prefer adding depth over adding more sections"), which
+#     matters because our traces span ~200-8192 tokens.
+#   - "Do not restate the final boxed answer unless the reasoning naturally concludes
+#     with it" -- absent from every paraphrase.
+#   - the meta-commentary rule is narrow: about following instructions, apologising,
+#     or mentioning that you are summarising. Not a general ban on conclusions.
+#   - `\boxed` is named as an example LaTeX command, and the voice examples are given
+#     as literal strings ("I need to...", "I'm now realizing...").
 #
-# Note the tension in the paper's own numbers: the spec says 600-900 tokens, but the
-# Table 1 medians it reports are 537 (their C') and 592 (GPT-5.4 mini). The stated
-# target is what the prompt says; the measured median is what we validate against.
-# The exemplars are sized near 590 tokens so they pull toward the measured value.
+# ONLY THE TWO EXEMPLARS ARE OURS. The paper's "two few-shot exemplars of the target
+# style (one algebra/number theory and one geometry, ~600 tokens each), drawn from
+# GPT-5-mini's own summaries" were never released (docs/01 §6.4, docs/11 §4). Both are
+# written from scratch, sized near the Table 1 medians (537/592) while the verbatim
+# instruction keeps its 600-900 -- those disagree by design, see docs/11 §4.
 #
-# Acceptance is Table 1 (docs/11 §4): median tokens 540-590, bold-header sections
-# >90%, first-person prose >95%, LaTeX >70%. Measured by bench/phase1_stats.py.
+# Acceptance is Table 1: median tokens 540-590, bold-header sections >90%,
+# first-person prose >95%, LaTeX >70%. Measured by bench/phase1_stats.py.
 # --------------------------------------------------------------------------------
+
+PI_SYSTEM_VERBATIM = 'You are summarizing a long chain-of-thought trace into a short, first-person "inner-monologue\nrecap" that mirrors the style of GPT-5 mini\'s internal reasoning summaries.\n\nGiven a `<think>...</think>` trace, produce a recap with these properties:\n\n**Structure.** Write 3 to 6 short sections. Each section begins with a short bold markdown header\non its own line, like `**Setting up the integral**` or `**Checking the edge case**`, and is\nfollowed by one short paragraph (2–5 sentences). Do NOT use numbered lists (1., 2.) and do NOT use\nbullet points (-, *). The whole recap is just headers + prose.\n\n**Voice.** First person, present tense, as if the model is thinking aloud: "I need to…", "I\'ll\ncheck…", "I\'m now realizing…", "Let me verify…". Keep the tone tentative and exploratory, not\ntextbook.\n\n**Content.** Each section should capture one meaningful move in the reasoning — a clarification of\nwhat is being asked, a key derivation or substitution, a pivot after a failed attempt, a sanity\ncheck, or the final consolidation. Skip filler, restatement, and purely mechanical arithmetic.\nPreserve the logical order of the trace.\n\n**Length.** Aim for roughly 600–900 tokens total — long enough that each section develops a real\nidea, not just a one-line gesture. If the input trace is very short, produce fewer sections rather\nthan padding; if it is very long, prefer adding depth to each section over adding more sections.\n\n**Math formatting.** Use inline LaTeX (`\\frac`, `\\sqrt`, `\\boxed`, etc.) where the original trace\nused math. Do not restate the final boxed answer unless the reasoning naturally concludes with it.\n\nDo not add meta-commentary about following instructions, apologize, or mention that you are\nsummarizing. Just produce the recap.'
 
 _PI_EXEMPLAR_ALGEBRA = r"""**Reading what the condition actually says**
 The problem wants every positive integer \( n \) for which \( n + 1 \) divides \( n^2 + 1 \), and my first instinct is to stop staring at the two expressions and force them onto common ground. Writing \( n^2 + 1 = (n+1)(n-1) + 2 \) makes the whole thing collapse: the divisibility holds exactly when \( n + 1 \) divides \( 2 \). That felt too easy, so I want to test it before I lean on it.
@@ -96,23 +106,7 @@ Since \( BD = y \) and \( x + z = 15 \), I get \( y = 21 - 15 = 6 \). Written th
 **Checking it against the discarded route**
 As a sanity check I go back to the coordinates I abandoned: the incenter sits at \( (6, 4) \), so the foot of the perpendicular to \( BC \) is at \( x = 6 \), giving \( BD = 6 \). The two routes agree, which is what I wanted before committing."""
 
-PI_SYSTEM = f"""You convert a model's raw internal reasoning into a short first-person recap of that same reasoning, written as though the thinker were narrating their thought process while it was happening.
-
-Write between 3 and 6 sections. Each section opens with a short bold markdown header on its own line, followed by one paragraph of 2 to 5 sentences. Put a blank line between sections.
-
-Follow these rules exactly:
-
-Never use numbered lists or bullet points. Write prose paragraphs only.
-
-Write in the first person and the present tense -- "I notice", "I try", "I am not sure yet". Keep the voice tentative and exploratory, the way the reasoning felt while it was unfinished, rather than the confident voice of a written-up solution.
-
-Give each section exactly one meaningful reasoning move: an observation, a decision, an attempt that failed and redirected the thinking, or a realisation. Do not pad a section by restating the problem.
-
-Where the original reasoning used mathematics, use inline LaTeX in the same places, for example \\( x^2 + 1 \\) or \\( \\frac{{a}}{{b}} \\).
-
-Never mention the reasoning trace, the summary, the task, or yourself. No meta-commentary of any kind, no preamble, and no closing sentence that announces a conclusion has been reached.
-
-Aim for roughly 600 to 900 tokens overall.
+PI_SYSTEM = PI_SYSTEM_VERBATIM + f"""
 
 Two examples of the target style follow.
 
@@ -124,6 +118,11 @@ Example two:
 
 {_PI_EXEMPLAR_GEOMETRY}"""
 
-# VERBATIM from paper v2 Appendix B, as quoted in docs/02.
-PI_USER = ("Summarize this thinking process as a first-person inner-monologue recap: "
+# VERBATIM from Appendix B (docs/01 §6.4). Note the newline before <think>:
+# docs/02's paraphrase renders it inline with a space, docs/01 as a code block.
+PI_USER = ("Summarize this thinking process as a first-person inner-monologue recap:\n"
            "<think>{thinking}</think>")
+
+_PI_HASH = "a1e6720ced6a398f8f98d6b83938b42568ed826ed9440f769384a3b1c7e25ebb"
+assert hashlib.sha256(PI_SYSTEM_VERBATIM.encode()).hexdigest() == _PI_HASH, \
+    "PI_SYSTEM_VERBATIM no longer matches Appendix B as transcribed in docs/01 §6.4"
