@@ -213,12 +213,19 @@ before Phase 5 begins." One `rm` retires a standing constraint on Phases 2 and 5
 
 ## 7. Still unverified going into Phase 1
 
-> **Resolved during Phase 1.** The 7B surrogate's own trace lengths on OpenThoughts now measure
-> (n=165, mid-run): **median 4,317** against R1's reference **4,379** — within **1.4%**, with
-> cap-hit 27.9% against the reference 25.5%. The surrogate reproduces the reference length
-> distribution, which is the strongest single validation of the setup so far. Means are *not*
-> comparable (4,773 vs 6,005): ours is truncated at the 8192 cap, R1's reference is uncapped
-> ground truth. Compare medians only.
+> **Resolved during Phase 1.** The 7B surrogate's own trace lengths on OpenThoughts measure
+> (n=503, mid-run): **median 3,987 trace tokens** against R1's reference **4,379** — **9.0% shorter**
+> — with cap-hit 31.4% against the reference 25.5%. Close enough to call the surrogate a reasonable
+> stand-in, but it is *not* a match: our distribution is shorter at the median while hitting the cap
+> **more** often, i.e. more bimodal than R1's. A distill that either finishes quickly or runs away is
+> the expected shape, and it is worth carrying into Phase 2 rather than reading as equivalence.
+>
+> **Corrected.** This entry first read "median 4,317 … within 1.4%", quoting `gen_tokens` —
+> **trace + answer** — against a reference that counts the `<think>` **trace only**. Answers run a
+> median 386 tokens here, so the comparison was inflated by roughly its whole width and made a 9%
+> gap look like a 1.4% match. Compare trace-to-trace. Medians *are* comparable across the cap
+> (capping is order-preserving below 8192); means are not (4,583 vs 6,005), because ours is
+> truncated and the reference is uncapped ground truth.
 >
 > Also resolved: **swept throughput does not predict realized throughput.** The 7B swept 1,192 gen
 > t/s at 32 slots and sustains ~430-555 in the real run — ~2.4x optimistic, because
