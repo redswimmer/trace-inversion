@@ -76,9 +76,11 @@ its two few-shot exemplars were never released. Validate against Table 1's style
 dataset exceed `max_new_tokens 8192`; a capped trace has no `</think>` and poisons the inverter
 (`12` §2). 6,706 rows in, ~5,000 clean out, 31.5 M generated tokens.
 
-Est. **~15-18 h** for both surrogates including compression — revised up from ~4 h. **Sweep
-concurrency at 10,240/slot, not 32,768** (`bench/sweep_concurrency.sh`); for the 7B that is 32 slots
-/ 1,270 t/s, 4.6× Phase 0's rate.
+Est. **~29-31 h** for both surrogates including compression — revised up from ~4 h, then from
+~15-18 h once the 7B run was measured. **Sweep concurrency at 10,240/slot, not 32,768**
+(`bench/sweep_concurrency.sh`); for the 7B that is 32 slots / 1,270 t/s **swept**. Treat that as a
+*ranking* of slot counts, not an operating rate: the 7B realized ~445 t/s in the real run, so budget
+from the first 30 minutes of the run itself (`11` §5).
 
 ## Phase 2 — Train the inverter *(paper Stage 1 cont.)*
 

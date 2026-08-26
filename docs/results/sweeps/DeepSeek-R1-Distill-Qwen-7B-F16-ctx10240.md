@@ -22,8 +22,13 @@ tokens), not compute. There is no more to win without dropping per-slot context 
 ## Why this matters
 
 The Phase 0 sweep of the same model at 32768/slot topped out at **8 slots / 274 gen t/s**
-and the real run realized 241 t/s (88% of swept). Shrinking per-slot context to what Phase 1
-actually needs is a **4.6× throughput gain on identical weights and hardware** — the largest
-single speedup available anywhere in this project, and it costs nothing.
+and the real run realized 241 t/s (88% of swept).
+
+**Corrected.** This section originally claimed a "4.6× throughput gain … the largest single
+speedup available anywhere in this project." That compared swept to swept. Realized to realized,
+Phase 0 got 241 t/s and Phase 1 sustains ~445 t/s — about **1.8×**. Real, and less than half the
+claim. The 88% swept-to-realized ratio quoted above also does not hold at 32 slots: the Phase 1 run
+realized ~37% of its swept figure, because a sweep batches every sequence at identical depth and a
+server does not.
 
 Phase 0 sweep for comparison: `DeepSeek-R1-Distill-Qwen-7B-F16-ctx32768.md`.

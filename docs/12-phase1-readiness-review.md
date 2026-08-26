@@ -128,7 +128,7 @@ sufficient there — and 16,384 is affordable if wanted.
 
 ---
 
-## 4. Phase 1's time budget is ~4× understated — and the fix is a 4.6× speedup
+## 4. Phase 1's time budget is understated — and the sweep fixes less of it than this section claimed
 
 `docs/11` budgets "~3-4 h" for the 7B and `docs/10` "~4 h" for both surrogates. Phase 0's own 7B
 run took **6 h 34 m for 5.7 M tokens — 241 t/s effective**. Phase 1 needs ~31.5 M tokens. At Phase
@@ -146,20 +146,30 @@ swept the 7B at **32,768** per slot because baselines generate up to 32k. Phase 
 | **32** | **327,680** | **1,270.38** |
 | 40 | 409,600 | ❌ OOM (KV cache) |
 
-**4.6× on identical weights and identical hardware, for free** — the largest single speedup
-available anywhere in this project. Throughput was still climbing at 32 slots; the ceiling is the
-KV cache, not compute. Full result: `docs/results/sweeps/DeepSeek-R1-Distill-Qwen-7B-F16-ctx10240.md`.
+4.6× on identical weights and identical hardware, for free. Throughput was still climbing at 32
+slots; the ceiling is the KV cache, not compute.
+
+> **Superseded — that 4.6× is swept-over-swept and is not a speedup you can spend.** This section
+> also called it "the largest single speedup available anywhere in this project," which was written
+> before any realized number existed. Realized-over-realized, Phase 0 got 241 t/s and the Phase 1
+> run sustains ~445 t/s: about **1.8×**. Real, and less than half the claim. See §7 and `11` §5.
+
+Full result: `docs/results/sweeps/DeepSeek-R1-Distill-Qwen-7B-F16-ctx10240-ntg4096.md`.
 
 Revised Phase 1, applying Phase 0's observed 88% swept-to-realized ratio:
 
 | Step | Est. |
 |---|---|
-| 7B generation, 31.5 M tokens @ ~1,120 t/s | ~7.8 h |
-| 1.5B generation | ~4–6 h |
+| 7B generation, 33 M tokens @ ~445 t/s **measured** | **~19 h** |
+| 1.5B generation | ~6–7 h |
 | Compression ×2 arms | ~2–3 h |
-| **Phase 1 total** | **~15–18 h** *(plan says 4 h)* |
+| **Phase 1 total** | **~29–31 h** *(plan says 4 h)* |
 
-Project total moves ~120 h → ~135 h. A budget correction, not a blocker.
+Project total moves ~120 h → ~135-150 h. A budget correction, not a blocker.
+
+> **Superseded.** This table originally read 7.8 h / 15-18 h, projected from the swept 1,270 t/s at
+> 88% realization. The real run sustains ~445 t/s. A sweep ranks slot counts correctly and must not
+> be used to build a time budget — see `11` §5.
 
 ---
 

@@ -101,10 +101,11 @@ we use 5k each. Persist the split indices to disk so Phase 3 cannot accidentally
 ## 3. Proposed order of work
 
 1. **Sweep concurrency at 10,240 per slot** — *not* the 32,768 Phase 0 used. Already done for the
-   7B: **32 slots / 1,270 gen t/s**, OOM at 40
-   (`docs/results/sweeps/DeepSeek-R1-Distill-Qwen-7B-F16-ctx10240.md`). Serve with
-   `-np 32 -c 327680`. Still to do for the 1.5B.
-2. **Generate ~6,700 traces** with the 7B, keep the ~5,000 that did not hit the cap — 31.5 M tokens. Est. **~7.8 h**.
+   7B: **32 slots / 1,270 gen t/s swept**, OOM at 40
+   (`docs/results/sweeps/DeepSeek-R1-Distill-Qwen-7B-F16-ctx10240-ntg4096.md`). Serve with
+   `-np 32 -c 327680`. Swept ranks slot counts; it is **not** an operating rate — the real run
+   sustained ~445 t/s (`11` §5). Still to do for the 1.5B.
+2. **Generate ~6,700 traces** with the 7B, keep the ~5,000 that did not hit the cap — 31.5 M tokens. Est. **~19 h** (was ~7.8 h, projected off the swept rate; see `11` §5).
 3. **Draft the compression prompt `π`** and validate against Table 1 on ~200 traces. Iterate here,
    not at 5k scale.
 4. **Compress all 5k** with `Qwen3.5-4B` on vLLM. Est. ~1-1.5 h.
@@ -114,12 +115,17 @@ we use 5k each. Persist the split indices to disk so Phase 3 cannot accidentally
 
 Steps 1-2 and step 3 are independent — draft `π` while generation runs.
 
-> **Phase 1 is ~15-18 h, not the ~4 h `10` used to budget.** Phase 0's 7B run did 5.7 M tokens in
-> 6 h 34 m (241 t/s effective) and Phase 1 needs ~31.5 M — that is 36 h at Phase 0's rate. The sweep
-> above is what closes the gap, and *why* is the reusable lesson: **sweep at the context the run
-> actually needs.** Phase 0 swept at 32,768/slot because baselines generate to 32k; Phase 1 caps
-> generation at 8,192, so a slot needs ~10 k, and the smaller per-slot KV buys 32 slots instead of 8.
-> **4.6× on identical weights and hardware, for free.**
+> **Phase 1 is ~29-31 h**, not the ~4 h `10` used to budget — and not the ~15-18 h this note
+> claimed before the 7B run was measured. Phase 0's 7B run did 5.7 M tokens in 6 h 34 m
+> (241 t/s effective); Phase 1 sustains ~445 t/s and needs ~33 M.
+>
+> The reusable lesson is **sweep at the context *and* the generation length the run actually
+> needs** — Phase 0 swept at 32,768/slot because baselines generate to 32k, while Phase 1 caps at
+> 8,192, so a slot needs ~10 k and the smaller per-slot KV buys 32 slots instead of 8.
+>
+> But the gain is **~1.8× realized (241 → 445 t/s), not the 4.6× the sweep suggested.** Swept-over-
+> swept is not a speedup you can spend. See `11` §5: a sweep ranks slot counts; budget from the
+> first 30 minutes of the real run.
 
 ### Generation settings — match the paper
 
@@ -304,6 +310,8 @@ error output, which is the point: this is the same failure shape as the five Pha
 | Audit | `bench/audit_results.py <file>.jsonl` | truncation <10% · zero extraction failures on **completed** generations · no benchmark type at exactly 0% · calibration within ~8 pts where a reference exists |
 | Sanity-check the grader | Sample rows marked wrong and read them | Catches false negatives. On the 4B only 1 of 500 was misgraded, and inspection confirmed the grader was right. |
 | Record it | `docs/results/` + commit | Raw `.jsonl` is gitignored (20-45 MB each); commit summaries and audits. |
+| **A retraction is not done until you have grepped for the number** | `grep -rn '<the number>' docs/ bench/` | Fixing the claim where you found it leaves every copy. One retracted throughput figure survived in **three** docs, including the handoff a future session reads first — corrected in one section while the stale copy sat in the section people actually open. Same shape twice in Phase 1: the `~8×` probe-depth claim, and `15-18 h`. |
+| **Results files hold measurements; interpretation goes in a doc that gets revised** | — | A sweep file carried the prose *"a 4.6× throughput gain … the largest single speedup available anywhere in this project"* — written before any realized number existed, inside a file otherwise containing only measurements. Realized-over-realized it was ~1.8×. An opinion in a results file is where a reader least expects one, and it does not get revisited when the measurement that would refute it arrives. |
 
 ### Disk policy for Phases 2 and 5
 
