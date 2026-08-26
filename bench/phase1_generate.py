@@ -20,6 +20,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent / "phase1"))
+from prompts import SURROGATE_SYSTEM  # noqa: E402
+
 
 def split_trace(msg, text):
     """Return (trace, answer). llama-server --jinja may hand back the <think>
@@ -34,8 +37,17 @@ def split_trace(msg, text):
     return ct, ""            # never terminated: no answer to take
 
 
+def messages_for(prompt, use_system=True):
+    """The repo injects a fixed system prompt for surrogate inference and it is part
+    of what makes the surrogate emit long traces (docs/07 §3, docs/09 row 7.8).
+    Measured on 18 rows without it: cap-hit 0%, median 3,612 gen tokens — under the
+    10% STOP floor, which would misread as a broken surrogate."""
+    m = [{"role": "system", "content": SURROGATE_SYSTEM}] if use_system else []
+    return m + [{"role": "user", "content": prompt}]
+
+
 def one(row, url, args):
-    body = {"messages": [{"role": "user", "content": row["prompt"]}],
+    body = {"messages": messages_for(row["prompt"], not args.no_system),
             "max_tokens": args.max_new_tokens, "temperature": args.temperature,
             "top_p": args.top_p, "top_k": args.top_k,
             "repetition_penalty": args.repetition_penalty, "stream": False}
@@ -85,6 +97,8 @@ def main():
     ap.add_argument("--top-k", type=int, default=-1)
     ap.add_argument("--repetition-penalty", type=float, default=1.05)
     ap.add_argument("--timeout", type=int, default=1800)
+    ap.add_argument("--no-system", action="store_true",
+                    help="omit the pinned system prompt (control runs only)")
     args = ap.parse_args()
 
     try:
@@ -93,6 +107,18 @@ def main():
         sys.exit(f"llama-server not reachable at {args.url}: {e}")
 
     rows = [json.loads(l) for l in open(args.prompts)]
+
+    # Print row 0 exactly as the server will render it. The chat-template round trip
+    # is where a dropped system prompt or a doubled <think> tag hides (docs/06 §4.4).
+    try:
+        r = requests.post(f"{args.url}/apply-template",
+                          json={"messages": messages_for(rows[0]["prompt"],
+                                                         not args.no_system)}, timeout=30)
+        print("=== rendered prompt, row 0 " + "=" * 40)
+        print(r.json().get("prompt", r.text))
+        print("=" * 66, flush=True)
+    except Exception as e:
+        print(f"(could not render template: {e})", flush=True)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
 
