@@ -114,7 +114,32 @@ def summaries(rows, tk):
           f"in 3-6 range {pct([3 <= s <= 6 for s in nsec]):.1f}%")
     print()
     print(dist(toks, "summary tokens"))
-    print(f"  in 600-900 (the prompt's stated target) {pct([600 <= t <= 900 for t in toks]):.1f}%")
+    print(f"  IQR {int(np.percentile(toks,25))}-{int(np.percentile(toks,75))}  "
+          f"in 600-900 (the prompt's stated target) {pct([600 <= t <= 900 for t in toks]):.1f}%")
+
+    # Table 1 gives medians only, so we cannot match a spread we were never told.
+    # But pi has to hold up across very different inputs -- a 900-token math trace and
+    # an 8,000-token code trace -- and a wide or input-dependent spread means pi is
+    # unstable before it ever becomes the inverter's training signal. Report, not gate.
+    rr = [r for r in rows if r.get("summary", "").strip()]
+    bydom = {}
+    for r, t in zip(rr, toks):
+        bydom.setdefault(r.get("domain", "?"), []).append(t)
+    print("\nsummary tokens by domain (is pi stable across input types?)")
+    for d, v in sorted(bydom.items(), key=lambda kv: -len(kv[1])):
+        print(f"  {d:12s} " + dist(v, "").lstrip(": "))
+
+    tl = [len(r.get("t", "")) for r in rr]           # trace chars, a free proxy
+    if any(tl):
+        qs = np.percentile([x for x in tl if x], [25, 50, 75])
+        buckets = {"short": [], "mid": [], "long": [], "longest": []}
+        for t, n in zip(toks, tl):
+            k = ("short" if n <= qs[0] else "mid" if n <= qs[1]
+                 else "long" if n <= qs[2] else "longest")
+            buckets[k].append(t)
+        print("\nsummary tokens by trace-length quartile")
+        for k in ("short", "mid", "long", "longest"):
+            print(f"  {k:12s} " + dist(buckets[k], "").lstrip(": "))
     return all(ok for *_, ok in rowsout)
 
 
