@@ -110,6 +110,15 @@ def paired_reference(rows, tk, cap):
     print(f"       Cross-arm overlap (7B vs 1.5B drops) separates 'hard prompt' from")
     print(f"       'this surrogate loops here' — free, both arms run anyway.")
 
+    # A distill running ~10 pts above R1 is the expected shape (measured 36.5 vs
+    # 26.0 on the 7B probe). Much beyond that is not a harder corpus — the prompts
+    # are identical — so it is the surrogate or the harness.
+    gap = 100 * (ours_drop.mean() - r1_drop.mean())
+    print(f"\n  paired cap-hit gap: ours - R1 = {gap:+.1f} pts (tolerance ±10)")
+    return ([f"paired cap-hit gap {gap:+.1f} pts vs R1 on identical prompts "
+             f"(tolerance ±10) — prompt difficulty is controlled, so this is ours"]
+            if abs(gap) > 10.0 else [])
+
 
 def traces(rows, tk, cap):
     n = len(rows)
@@ -142,6 +151,32 @@ def traces(rows, tk, cap):
     print("\nby domain (kept)")
     for d, v in sorted(by.items(), key=lambda kv: -len(kv[1])):
         print(f"  {d:12s} " + dist(v, "").lstrip(": "))
+
+    # Gates. audit_results.py cannot serve this phase: it reads a baseline-eval
+    # schema (bench/correct/truncated/pred/type) that a trace file does not have,
+    # and its TRUNC_LIMIT 0.10 fails every Phase 1 arm by construction, because we
+    # cap 25-45% of rows deliberately and drop them. So the gate lives here, next to
+    # the measurement it gates, rather than as a second auditor with one caller.
+    fails = []
+    if errs:
+        fails.append(f"{len(errs)} request errors — every row must be a real "
+                     f"generation, not a captured exception")
+    # An empty trace on a row we KEPT is the silent-wrongness case: capped==False
+    # says the model terminated, so an empty trace means the split lost it, not
+    # that the model produced nothing.
+    empty = [r for r in kept if not r["trace"].strip()]
+    if empty:
+        fails.append(f"{len(empty)} KEPT rows have an empty trace — the "
+                     f"reasoning_content/</think> split dropped it (idx "
+                     f"{[r['idx'] for r in empty[:5]]})")
+    zero = sorted({r["domain"] for r in rows} - set(by))
+    if zero:
+        fails.append(f"domains with zero kept rows: {zero} — a domain that never "
+                     f"survives the cap is absent from D2 entirely")
+    ch = 100 * len(capped) / max(n, 1)
+    if not 10.0 <= ch <= 45.0:
+        fails.append(f"cap-hit {ch:.1f}% outside the 10-45% band")
+    return fails
 
 
 def summaries(rows, tk):
@@ -229,9 +264,17 @@ def main():
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
     if args.mode == "traces":
         tk = tok(args.trace_tokenizer)
-        traces(rows, tk, args.cap)
+        fails = traces(rows, tk, args.cap)
         if args.paired:
-            paired_reference(rows, tk, args.cap)
+            fails += paired_reference(rows, tk, args.cap)
+        else:
+            print("\n  (paired cap-hit gate NOT run — pass --paired)")
+        print(f"\n=== gates ===")
+        for f in fails:
+            print(f"  FAIL  {f}")
+        print("  ** PASSED **" if not fails
+              else f"  ** {len(fails)} GATE FAILURE(S) — DO NOT ACCEPT AS-IS **")
+        sys.exit(1 if fails else 0)
     else:
         ok = summaries(rows, tok(args.summary_tokenizer))
         sys.exit(0 if ok else 1)

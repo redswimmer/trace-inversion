@@ -16,7 +16,7 @@ WORK
 2. Validate π on ~200 traces against Table 1: median tokens 540-590, bold-header sections >90%, first-person >95%, LaTeX >70%. Report all four, plus the spread by domain. Needs the GPU, so it follows step 1.
 3. Compress the 7B arm with Qwen3.5-4B on vLLM.
 4. Probe the 1.5B, report, run it, compress it.
-5. Run bench/audit_results.py on each arm. Commit docs/results/phase1.md with per-arm trace-length distributions, cap-hit rates, the paired comparison against R1's own traces, the drop decomposition, and the Table 1 numbers.
+5. Gate each arm with bench/phase1_stats.py --mode traces --paired (exits non-zero on failure). NOT audit_results.py — wrong schema for trace files, and its <10% truncation gate contradicts a run that caps 25-45% of rows on purpose. Commit docs/results/phase1.md with per-arm trace-length distributions, cap-hit rates, the paired comparison against R1's own traces, the drop decomposition, and the Table 1 numbers.
 
 REPORTING. You are supervised by the session named phase-1-boss, which audits your work and sends back guidance. After each numbered step, and whenever you stop or are blocked, send it a checkpoint with SendMessage({to: "phase-1-boss", message: "..."}) and print the same line:
   CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
