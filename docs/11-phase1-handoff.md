@@ -254,7 +254,8 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 
 | Check | Command / rule | What it prevents |
 |---|---|---|
-| Sweep concurrency at the run's own context **and its own generation length** | `NTG=<median_gen> bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx>` | Running 4 h at 50% GPU utilization. `-c` is the **total** KV budget split across `-np` slots, and per-slot context must cover the longest expected generation — but no more. **Both halves matter.** Re-sweeping the 7B at 10,240 instead of 32,768 ctx was 4.6× on paper, but that sweep still probed with `-ntg 512` and overstated sustained throughput ~8×: per-token attention cost grows with KV depth, so a short probe measures the latency-bound regime. Set `NTG` near your median generation. |
+| Sweep concurrency at the run's own context **and its own generation length** | `NTG=<median_gen> bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx>` | Running 4 h at 50% GPU utilization. `-c` is the **total** KV budget split across `-np` slots, and per-slot context must cover the longest expected generation — but no more. Re-sweeping the 7B at 10,240 instead of 32,768 ctx was 4.6× on paper. Probe length is a real but small term — `-ntg 512` gives 1,270 t/s and `-ntg 4096` gives 1,192, so KV depth costs **6.1%** at 32 slots, not the ~8× first suspected. Set `NTG` near your median generation anyway. |
+| **A sweep ranks slot counts; it does not give you a time budget** | budget from the first 30 min of the real run | Swept and realized differ by **~2.4×** here, and the gap is not probe depth. `llama-batched-bench` runs every sequence at *identical* depth — a perfectly rectangular batch — while `llama-server` runs them at *ragged* depths under continuous batching. The 7B sustained ~430–555 t/s against 1,192 swept, with all 32 slots busy, CPU under one core of 32, zero disk I/O and no context shifts. On this Vulkan build that is the remaining explanation, and CUDA is the one untested lever (`08` §1). |
 | Never size a run from a partial progress line | wait for the queue to drain | Short generations finish first and capped ones finish last, so in-flight cap-hit reads low and in-flight throughput reads high. A 30-row smoke on 32 slots never refills the queue at all — its wall clock is just the single longest generation. |
 | Verify the model loads | Start `llama-server`, poll `/health`, kill it | A silent OOM at load once left the GPU idle ~9 h. The server exits non-zero and drivers move on without shouting. |
 | Smoke test ~30 items | `--n-per-bench 15` or `--limit 5` | Catches harness bugs for minutes instead of hours. Both the `type`-column bug and the masked exception surfaced this way. |
@@ -268,6 +269,23 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 | **Never edit a running bash script** | Bash reads scripts incrementally; editing shifts its file offset mid-execution. This hung two chained runners for ~50 min. Kill → edit → relaunch. |
 | Don't coordinate runners through files | A skip-marker that one runner deleted to claim a job re-enabled it in another queue, sending the surrogate to the wrong engine. Use one sequential driver. |
 | Check progress is actually visible | Don't `grep -v` the progress bar out of the log, and remember `\r` needs `tr '\r' '\n'` to read. |
+| **A supervising session writes nothing to the tree** | It reads, audits, and hands text to the session that owns the tree. A supervisor with write access to a checkout holding a live GPU job and files under `bench/results/` is a hazard with no upside — reviewing needs no write access. |
+
+#### Working in a shared checkout
+
+More than one agent may be live in this directory. `git worktree list` returns **one** entry:
+there is a single index and a single HEAD, so `git checkout <branch>` silently moves *everyone*,
+and whoever ran it last has decided the branch for both. "Which branch should we each use" is not
+the real variable; there is only one.
+
+| Rule | Why |
+|---|---|
+| **Explicit paths on `git add`. Never `git add -A`** | It sweeps up whatever another agent has on disk at that instant, possibly mid-edit. Two commits here (`045575d`, `72584e9`) each carried ~90–170 lines of a second session's in-progress files under a commit message describing something else entirely, misattributing authorship. Nothing was lost only because later commits caught the rest. |
+| **Never `git checkout <sha> -- <dir>/`** | Path-scoped checkout of a directory is a **silent overwrite, not a merge**. It reverts every file under that path to that commit with no conflict, no error and no output. One such call came within two commits of silently reverting another session's doc work; the next action would have been to commit the reverted state on top. Cherry-pick the commit, or check out the single named file. |
+
+Both hazards fired during Phase 1 — one landed, one missed by two commits. Neither produced any
+error output, which is the point: this is the same failure shape as the five Phase 0 bugs.
+
 
 ### Writing or changing harness code
 
@@ -277,6 +295,7 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 | **Always save raw generated text** | Every later grading or extraction fix then applies retroactively for free via `bench/regrade.py`, instead of costing a regeneration. Three fixes have already been free because of this. |
 | Exception handlers must not raise | A handler that threw on a missing key masked the real request error and produced 20 minutes of useless GPU time with a misleading traceback. |
 | Where the paper specifies a value, use it | Deviating needs a stated reason in `docs/09`. Vendor defaults were once used by accident and caused degenerate looping. |
+| **Probe a chat template by rendering and diffing, never by catching an exception** | `apply_chat_template` forwards *unknown* kwargs into the Jinja context instead of raising, so a `try/except TypeError` probe reports success for every model and silently does nothing. Render with and without the kwarg and compare the strings. Qwen3.5-4B's `enable_thinking` switch is real — its default template ends `<think>\n`, so without disabling it every summary carries a reasoning block. Same silent-success shape as the SIGALRM grader bug, and it recurs every time a new model is templated. |
 
 ### After a run, before believing any number
 
