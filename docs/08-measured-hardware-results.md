@@ -120,11 +120,38 @@ already delivers most of the MATH500 benefit (67.0 at 5k vs 77.6 at 10k).
 
 ---
 
-## 6. Not yet measured
+## 6. Training VRAM — measured 2026-08-26
 
-- Accuracy baselines for the student candidates (Qwen3.5-0.8B / 2B / 4B) — script at
-  `bench/eval_baseline.py`, vLLM 0.27.1 installed in `.venv-vllm`.
+Method and full discussion in `12` §1. bf16 · gradient checkpointing · batch 1 ·
+`Qwen3_5ForCausalLM` (text-only, vision tower absent) · `torch.cuda.max_memory_allocated()`.
+Optimizer states added analytically at 2 B/param (8-bit) and 4 B/param (bf16).
+Usable budget ≈ **23.4 GiB**.
+
+| Model | Role | Mode | @8192 | @16384 |
+|---|---|---|---:|---:|
+| Qwen3.5-2B | student | **FFT + 8-bit Adam** | 12.64 GiB ✅ | **15.79 GiB ✅** |
+| Qwen3.5-2B | student | FFT + bf16 Adam | 16.15 GiB ✅ | 19.30 GiB ✅ |
+| Qwen3.5-4B | inverter | FFT | 27.81 GiB ❌ | OOM ❌ |
+| Qwen3.5-4B | inverter | **LoRA, bf16 base** | **15.11 GiB ✅** | 21.47 GiB ⚠️ |
+
+At the inverter's chosen `max_length` **12288**, bf16 LoRA measures **18.30 GiB** — 5.1 GiB of
+headroom. Every figure in this table was re-run independently and reproduced to ±0.01 GiB.
+
+- **Student full fine-tuning fits at the paper's `cutoff_len` 16384.** No method deviation.
+- **The inverter needs LoRA but not QLoRA** — bf16 base + LoRA fits, so NF4 and `bitsandbytes`
+  can be dropped entirely.
+- **DeltaNet forward + backward works on Ada/SM89** with gradient checkpointing. Largest
+  unverified architectural risk in the plan, cleared.
+- **`chunked_nll` is load-bearing:** naive fp32 logits + gradient at 248,320 vocab is
+  **15.16 GiB at 8k / 30.31 GiB at 16k** — larger than the card, before weights.
+
+These are raw-`transformers` lower bounds. No `trl` / `peft` is installed yet; the `06` §4.10
+smoke test still gates Phase 2.
+
+## 7. Still not measured
+
 - Actual trace lengths produced by the victim at each `reasoning_effort`. The paper's
   fidelity metric is length recovery against a 6,130-token reference, so this needs
   calibrating before generation.
-- Training throughput / VRAM for the TRL QLoRA stages.
+- Compression throughput for `Qwen3.5-4B` on vLLM (Phase 1 step 4).
+- 1.5B surrogate concurrency at 10,240 per slot (Phase 1 step 5).

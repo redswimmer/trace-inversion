@@ -33,11 +33,11 @@ makes the original impossible · `CHOICE` deliberate design decision.
 
 | # | Item | Paper | Ours | Forced? | Expected impact |
 |---|---|---|---|---|---|
-| 3.1 | Method | **full-parameter SFT** | **UNDECIDED** — FFT where it fits, LoRA only where it doesn't | HW (partly) | **Possibly no deviation at all** — see §5.1 |
-| 3.2 | Learning rate | 1e-5 | 1e-5 if FFT (matches paper); 1e-4 – 2e-4 if LoRA | follows 3.1 | Depends entirely on 3.1 |
+| 3.1 | Method | **full-parameter SFT** | student **FFT** ✅ no deviation; inverter **bf16 LoRA** | HW (inverter only) | **Decided on measurement** — see §5.1 |
+| 3.2 | Learning rate | 1e-5 | student **1e-5** (matches paper); inverter 1e-4 – 2e-4 (LoRA) | follows 3.1 | Student matches; inverter cannot |
 | 3.3 | LR schedule | cosine, warmup 0.1 | same | — | — |
 | 3.4 | Epochs | 3 | 2–3 (TBD) | COST | Possible slight undertraining |
-| 3.5 | Sequence length | `cutoff_len` 16384 | 8192 (TBD) | HW | Truncates the longest traces; paper's traces run 5-6k so most survive |
+| 3.5 | Sequence length | `cutoff_len` 16384 | student **16384** ✅ no deviation; inverter **12288** | HW (inverter only) | Measured, not estimated — `12` §1. Inverter needs ≥9,716 (1,524 prompt + 8,192 trace); 12288 gives margin |
 | 3.6 | Effective batch | 24 (inverter) / 96 (student) | matched via grad accumulation | — | Must not collapse both to one value |
 | 3.7 | Packing | `packing: true`, `neat_packing: false` (leaky) | TRL packing (correct masking) | CHOICE | We match TRL's *correct* behavior, not the reference's leaky one |
 
@@ -53,34 +53,45 @@ makes the original impossible · `CHOICE` deliberate design decision.
 
 ## 5. The two deviations that could change conclusions
 
-### 5.1 Fine-tuning method — OPEN DECISION (3.1)
+### 5.1 Fine-tuning method — DECIDED ON MEASUREMENT (3.1)
 
-**Status: not yet decided.** Deferred until baselines lock the student model. This may turn out
-not to be a deviation at all.
+**Status: resolved 2026-08-26.** Measured, not estimated — full method and numbers in `12` §1.
+RTX 4090 · bf16 · gradient checkpointing · batch 1 · `Qwen3_5ForCausalLM` (text-only) ·
+`torch.cuda.max_memory_allocated()`, with optimizer states added at 2 B/param (8-bit) and
+4 B/param (bf16). Usable budget ≈ **23.4 GiB**.
 
-The paper full-fine-tunes. Whether we can depends entirely on which student we pick — at
-~6 bytes/param with 8-bit Adam, bf16, and gradient checkpointing:
+| Model | Role | Mode | @8192 | @12288 | @16384 |
+|---|---|---|---:|---:|---:|
+| Qwen3.5-2B | student | **FFT + 8-bit Adam** | 12.64 GiB ✅ | 14.2 GiB ✅ | **15.79 GiB ✅** |
+| Qwen3.5-2B | student | FFT + bf16 Adam | 16.15 GiB ✅ | — | 19.30 GiB ✅ |
+| Qwen3.5-4B | inverter | FFT | 27.81 GiB ❌ | — | OOM ❌ |
+| Qwen3.5-4B | inverter | **LoRA, bf16 base** | 15.11 GiB ✅ | **18.30 GiB ✅** | 21.47 GiB ⚠️ |
 
-| Student | FFT states | + activations @8k | FFT viable? |
-|---|---:|---:|---|
-| Qwen3.5-0.8B | 4.8 GB | ~7 GB | ✅ comfortable |
-| Qwen3.5-2B | 12 GB | ~15 GB | ✅ fits |
-| Qwen3.5-4B | 24 GB | ~28 GB | ❌ LoRA required |
+**Student: full-parameter SFT at LR 1e-5, `max_length` 16384 — no deviation from the paper at all.**
+The earlier estimate ("~15 GB @8k") was right but conservative; 16384, the paper's own `cutoff_len`,
+also fits, so row 3.5 closes as well.
 
-So **if the baselines point at 0.8B or 2B, we match the paper's method exactly** — full-parameter
-SFT at LR 1e-5 — and this row disappears from the deviations list. Only a 4B student forces LoRA.
+**Inverter: LoRA on a bf16 base, not QLoRA.** 4B full fine-tuning is confirmed impossible. But NF4 is
+not needed either — a bf16 base with LoRA fits at 15.11 GiB @8k and **18.30 GiB measured at the chosen 12288**.
+Dropping NF4 removes the `bitsandbytes` dependency, makes `06` gotcha 9 ("QLoRA on `qwen3_5` is
+UNVERIFIED") moot rather than unresolved, and avoids quantizing the one model that must learn a
+genuinely new behaviour. Keep QLoRA in reserve only if 16384 is wanted for the inverter — 21.47 GiB
+leaves too little margin for a multi-hour run.
 
-**If LoRA does become necessary:** it adapts style well but is weaker at large behavioral shifts,
-and "begin emitting 5,000-token chains of thought" is exactly such a shift. If effect sizes then
-come in below the paper's, LoRA is the first suspect. Mitigations: rank 32–64, target all linear
-projections, LR 1e-4–2e-4.
+**LoRA remains the first suspect** if inverter trace fidelity comes in below the paper's: it adapts
+style well but is weaker at large behavioural shifts, and "emit a 5,000-token chain of thought" is
+exactly such a shift. Mitigations: rank 32–64, all linear projections except `lm_head`, LR 1e-4–2e-4.
 
-**Either way, run the 2B both ways.** It's the largest student that fits FFT, so one paired
-comparison measures what LoRA costs on this task instead of leaving it as an unquantified risk.
+**Still run the 2B student both ways.** It is the largest student that fits FFT, so one paired
+comparison measures what LoRA costs on this task instead of leaving it an unquantified risk.
 
-*Caveat on the table above:* Qwen3.5's 248,320-token vocab makes embed/`lm_head` a large share of
-a small model's parameters, and the fp32 logits tensor is ~8 GB at 8k context before TRL's
-`chunked_nll` reduces it. These numbers assume `chunked_nll` stays enabled.
+Two things the same measurement settled:
+
+- **DeltaNet trains on Ada/SM89.** Forward + backward through the 48 gated-delta-net layers with
+  gradient checkpointing works. This was the largest unverified architectural risk in the plan.
+- **`chunked_nll` is load-bearing, confirmed.** Naive fp32 logits + gradient at 248,320 vocab is
+  **15.16 GiB at 8k and 30.31 GiB at 16k** — larger than the card, before weights. Every number above
+  assumes it stays enabled.
 
 ### 5.2 A student that already reasons (2.5)
 

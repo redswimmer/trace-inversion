@@ -32,10 +32,16 @@ Confirmed identical in `step0_data_preprocess/r1_distill_inference.sh` (surrogat
 `step1_summarization/qwen2_5_summarization_r1.sh` (compression), and the `DEFAULTS` dict in
 `step2_inversion/evaluation/run_inversion_eval.py` (inversion).
 
-> **`max_new_tokens: 8192` is a hard ceiling on trace length.** Table 2's headline lengths are
-> 4,972 / 5,434 / 5,767 / 6,021 tokens against an R1 ground-truth mean of 6,130.6. All sit under
-> 8192, so the cap is rarely binding — but it *is* the reason no synthesized trace can exceed 8192,
-> and the "81–89% length recovery" figure must be read with that ceiling in mind.
+> **`max_new_tokens: 8192` is a hard ceiling on trace length, and it binds far more often than the
+> means suggest.** Table 2's headline lengths (4,972 / 5,434 / 5,767 / 6,021 against an R1
+> ground-truth mean of 6,130.6) all sit under 8192 — but a mean below a cap says nothing about the
+> tail. Measured on 2,000 sampled `llamafactory/OpenThoughts-114k` rows, **25.5% ± 2.5 of R1's own
+> ground-truth traces exceed 8192 tokens** (`12` §2). The cap is the reason no synthesized trace can
+> exceed 8192, and the "81–89% length recovery" figure must be read with that ceiling in mind.
+>
+> *Corrected 2026-08-26. The earlier reading — "all sit under 8192, so the cap is rarely binding" —
+> compared the cap against Table 2's **means**. That is the same error `docs/results/baselines.md`
+> Finding 3 caught when the 16k eval cap "was measuring itself."*
 
 Generation is **sampled, not greedy**, at temperature 0.7, with **one sample per input** and **no
 seed set anywhere**. Combined with the paper reporting no variance, this means every number in the
@@ -158,8 +164,10 @@ zero-shot baseline with a format-matched prompt and see how much of the
 - **No quantized training anywhere** — `bitsandbytes` is an optional extra and every config is
   `finetuning_type: full` + bf16. Our QLoRA path is entirely our own.
 - The dataset used is the **`llamafactory/OpenThoughts-114k` mirror**, whose schema
-  (`system` + `conversations`) differs from canonical `open-thoughts/OpenThoughts-114k` (`messages`).
-  Only the mirror parses with the repo's code.
+  (**`messages`** + `original_solution` + `domain` + `source`) differs from canonical
+  `open-thoughts/OpenThoughts-114k` (`system` + `conversations`). Only the mirror parses with the
+  repo's code. *(Corrected 2026-08-26: this doc previously had the two schemas the wrong way round.
+  Verified live against the Dataset Viewer API — see `12` §5.1.)*
 - Likely bug: `chatgpt_inference.py` uses `start_index=20000` against a 20k-row file → zero rows on
   a fresh run.
 - `preprocess_r1_distill.py` injects a fixed system prompt for surrogate inference ("Your role as an

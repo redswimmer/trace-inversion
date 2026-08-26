@@ -12,6 +12,22 @@ on 2026-08-15. Anything I could not confirm is marked **UNVERIFIED**.
 
 ## 0. Recommendation box
 
+> ### ⚠️ Role assignments here are SUPERSEDED — `10-run-plan.md` is authoritative
+>
+> This box is the pre-Phase-0 *survey*, written before anything was measured. Phase 0 fixed every
+> role on measurement and four of them moved. Read `10-run-plan.md` §"Role assignments" and
+> `docs/results/baselines.md` instead; keep this box only for the reasoning behind the shortlists.
+>
+> | Role | This box says | **Actually chosen** | Decided by |
+> |---|---|---|---|
+> | Victim | Qwen3.8-27B `Q5_K_M` | Qwen3.8-27B **`IQ4_XS`** | `08` §2 — smaller *and* faster |
+> | Surrogate | R1-Distill-**1.5B** | R1-Distill-**7B** primary, 1.5B as arm 2 | baselines — 1.5B sits *below* the student on JEEBench |
+> | Inverter | Qwen3.5-4B **QLoRA** | Qwen3.5-4B **bf16 LoRA** | `08` §6 — NF4 not needed |
+> | Student | **Qwen2.5-7B-Instruct** | **Qwen3.5-2B**, full fine-tuning | baselines — 39 pt headroom, and FFT fits |
+>
+> The student swap also retires this box's "no Qwen3.5 model can be the student" rule: see
+> `09` §5.2 for why a reasoning student is accepted, and what it costs the claim.
+
 The paper has four model roles, not three. The compression model `C` is easy to miss and is required
 to build the summary-setting training data.
 
@@ -388,6 +404,21 @@ backbone.
 
 ## 4. TRL specifics
 
+> ### ⚠️ Corrected 2026-08-26 — read before copying anything in §4.5–4.7
+>
+> The VRAM figures in §4.7 were estimates marked **UNVERIFIED**. They have now been measured
+> (`08` §6, `12` §1) and two recommendations below are superseded:
+>
+> | Was | Now | Why |
+> |---|---|---|
+> | Inverter: **QLoRA** (NF4 + `bitsandbytes`) | **LoRA on a bf16 base** | Measured 15.11 GiB @8k. NF4 is not needed, so gotcha 9 ("QLoRA on `qwen3_5` is UNVERIFIED") becomes moot rather than unresolved — and the model that must learn a new behaviour is not quantized. |
+> | `max_length` **8192** to start | inverter **12288**, student **16384** | Inverter prompt is ~1,524 tokens, so a cap-8192 trace needs ~9,716 (`12` §3). Student FFT at the paper's own 16384 measures 15.79 GiB, and the inverter at 12288 measures 18.30 GiB — no deviation for the student. |
+>
+> Confirmed as written: `chunked_nll` is load-bearing (naive fp32 logits are 30.31 GiB at 16k),
+> `processing_class=AutoTokenizer(...)` is mandatory, and `Qwen3_5ForCausalLM` loads text-only.
+> **DeltaNet forward + backward is verified working on this 4090** — that was the largest
+> unverified risk here.
+
 ### 4.1 Version pins
 
 `transformers` shipped a **v5**, `trl` shipped a **v1** — memory of the old API is actively wrong here.
@@ -567,12 +598,12 @@ from trl import SFTConfig, SFTTrainer
 
 MODEL = "Qwen/Qwen3.5-4B"
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16,
-    bnb_4bit_use_double_quant=True,
-)
+# SUPERSEDED — bf16 LoRA fits (15.11 GiB @8k measured), so NF4 is not needed. Keep this only
+# if you want max_length 16384 on the inverter, where bf16 LoRA is 21.47 GiB and too tight.
+# bnb_config = BitsAndBytesConfig(
+#     load_in_4bit=True, bnb_4bit_quant_type="nf4",
+#     bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True,
+# )
 
 peft_config = LoraConfig(
     r=32,
@@ -599,7 +630,7 @@ args = SFTConfig(
         "dtype": torch.bfloat16,                    # ← required, see gotcha 6
         "attn_implementation": "kernels-community/flash-attn2",
     },
-    max_length=8192,
+    max_length=12288,                               # inverter: ~1,524 prompt + 8,192 trace = 9,716
     packing=False,                                  # see §3.6
     completion_only_loss=True,
     loss_type="chunked_nll",                        # the whole ballgame at 248k vocab
@@ -622,7 +653,7 @@ trainer = SFTTrainer(
     args=args,
     train_dataset=load_dataset("json", data_files="data/inversion_summary.jsonl", split="train"),
     processing_class=tokenizer,                     # ← the single most important line here
-    quantization_config=bnb_config,
+    # quantization_config=bnb_config,             # not needed — bf16 LoRA fits
     peft_config=peft_config,
 )
 trainer.train()
@@ -652,7 +683,7 @@ above `r=64`, re-check VRAM and keep `lm_head` out of the target list regardless
 
 | Knob | Setting | Why |
 |---|---|---|
-| `max_length` | **8192** to start; 16384 to match the paper's `cutoff_len` if VRAM allows | The default 1024 silently truncates every trace. Traces run 2 k–16 k. |
+| `max_length` | inverter **12288**, student **16384** (the paper's `cutoff_len`) | Measured, `12` §1/§3. The default 1024 silently truncates every trace. The inverter's prompt is ~1,524 tokens, so 8192 would cut the tail off ~a quarter of cap-8192 traces — and `keep_start` throws away the *end*, i.e. the conclusion. |
 | `truncation_mode` | `"keep_start"` (default) | `"keep_end"` is deprecated, removed in v2.0.0. |
 | `loss_type` | `"chunked_nll"` (default) | Non-negotiable at 248 k vocab. See §3.4. |
 | `packing` | **`False`** | See below. |

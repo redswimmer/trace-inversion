@@ -21,8 +21,8 @@ full precision.
 | **Surrogate** `V'` (primary) | `DeepSeek-R1-Distill-Qwen-7B` | F16 14.19 GiB | llama.cpp | F16 | no |
 | **Surrogate** `V'` (arm 2) | `DeepSeek-R1-Distill-Qwen-1.5B` | BF16 3.32 GiB | llama.cpp | bf16 | no |
 | **Compressor** `C'` | `Qwen/Qwen3.5-4B` | safetensors | vLLM | bf16 | no (zero-shot) |
-| **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 | **yes** |
-| **Student** `S` | `Qwen/Qwen3.5-2B` | safetensors | TRL → vLLM | bf16 (**full FT**) | **yes** |
+| **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 + **LoRA** (not QLoRA) | **yes** |
+| **Student** `S` | `Qwen/Qwen3.5-2B` | safetensors | TRL → vLLM | bf16 (**full FT**, `max_length` 16384) | **yes** |
 
 **Both surrogates run** — decided on Phase 0 measurements. The 1.5B sits 15 pts *below* the student
 on JEEBench (32.6 vs 47.8), inverting the paper's ordering; the 7B clears it by 12.8 and sits
@@ -72,7 +72,13 @@ Yields `D₂ = {(x', y', b', t')}` — the inverter's training set.
 its two few-shot exemplars were never released. Validate against Table 1's style statistics
 (median ~592 tokens, bold headers ~93%, first-person ~97%, LaTeX ~72%).
 
-Est. ~4 h for both surrogates. **Sweep concurrency first** (`bench/sweep_concurrency.sh`).
+**Over-generate 1.34× and drop capped rows.** 25.5% ± 2.5 of R1's own ground-truth traces on this
+dataset exceed `max_new_tokens 8192`; a capped trace has no `</think>` and poisons the inverter
+(`12` §2). 6,706 rows in, ~5,000 clean out, 31.5 M generated tokens.
+
+Est. **~15-18 h** for both surrogates including compression — revised up from ~4 h. **Sweep
+concurrency at 10,240/slot, not 32,768** (`bench/sweep_concurrency.sh`); for the 7B that is 32 slots
+/ 1,270 t/s, 4.6× Phase 0's rate.
 
 ## Phase 2 — Train the inverter *(paper Stage 1 cont.)*
 
@@ -81,8 +87,10 @@ Est. ~4 h for both surrogates. **Sweep concurrency first** (`bench/sweep_concurr
 | 2.1 | Qwen3.5-4B | TRL `SFTTrainer` | `(x', y', b') → t'` — summary setting |
 | 2.2 | Qwen3.5-4B | TRL `SFTTrainer` | `(x', y') → t'` — no-summary setting |
 
-Two separately trained inverters, per §4. FFT if it fits, else LoRA r=32-64.
-Est. ~14 h for both.
+Two separately trained inverters, per §4. **LoRA r=32-64 on a bf16 base** — 4B FFT is confirmed
+impossible (27.81 GiB @8k) and NF4 is not needed (bf16 LoRA is 15.11 GiB @8k). `max_length` **12288**:
+the inverter prompt is ~1,524 tokens (problem 81 + answer 542 + 900-token summary), so a cap-8192
+trace needs ~9,716. Measured in `12` §1 and §3. Est. ~14 h for both.
 
 ## Phase 3 — Query the victim *(paper Stage 2)*
 
@@ -119,7 +127,7 @@ Five conditions, matching the paper exactly:
 | **Synthesized-Trace (ours)** | `t̂`, `y` |
 | Victim-Trace (oracle) | `t`, `y` — withheld ground truth |
 
-Plus, if the 2B is chosen, the same condition run **FFT and LoRA** to measure what LoRA costs.
+Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to measure what LoRA costs.
 Est. ~20 h.
 
 ## Phase 6 — Evaluate
@@ -134,17 +142,18 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | Phase | Est. |
 |---|---|
 | 0 Baselines | ~30 h *(actual, incl. re-runs)* |
-| 1 Surrogate data (**2 surrogates**) | ~4 h |
+| 1 Surrogate data (**2 surrogates**) | **~15-18 h** *(was ~4 h — see `12` §4)* |
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
-| 3 **Victim queries** | **~23 h** |
+| 3 **Victim queries** | **~10-15 h** |
 | 4 Inversion | ~4 h |
 | 5 Student training | ~20 h |
 | 6 Evaluation | ~8 h |
-| **Total** | **~120 h** (~5 days of GPU time) |
+| **Total** | **~120-135 h** (~5-6 days of GPU time) |
 
-Every individual stage fits an overnight run. Phase 3 dominates; if it needs cutting, the paper's
-own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and 2k would halve it
-again at some cost to the result.
+Every individual stage fits an overnight run. **Phase 2 now dominates** (~28 h), with Phase 5 next;
+Phase 3 dropped to ~10-15 h once the victim's real trace lengths were measured. If generation needs
+cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
+2k would halve it again at some cost to the result.
 
 ## Engine boundary
 

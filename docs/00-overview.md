@@ -80,16 +80,16 @@ bold headers 94.1% vs 92.9%, first-person 97.3% vs 97.0%, LaTeX 79.1% vs 71.9%).
 
 | Role | Paper | Our plan |
 |---|---|---|
-| Victim (open-weight) | DeepSeek-R1 — **684.5B, 688.6 GB** | Impossible. Substitute **Qwen3.8-27B** (GGUF Q5_K_M, 18.5 GiB) |
+| Victim (open-weight) | DeepSeek-R1 — **684.5B, 688.6 GB** | Impossible. Substitute **Qwen3.8-27B** (GGUF **IQ4_XS**, 14.62 GiB) |
 | Victim (black-box) | `gpt-5.4-mini-2026-03-17` | Optional second track. $0.75/M in, $4.50/M out |
-| Surrogate `V'` | R1, or R1-Distill-Qwen-1.5B ("R1-Weak") | 1.5B tier is local-friendly |
-| Compressor `C'` | Qwen2.5-7B-Instruct, zero-shot | local |
-| Inverter `I` | Qwen2.5-7B-Instruct, fine-tuned | local, TRL + QLoRA |
-| Student `S` | Qwen2.5-7B-Instruct, Llama-3.1-8B-Instruct | local, TRL + QLoRA |
+| Surrogate `V'` | R1, or R1-Distill-Qwen-1.5B ("R1-Weak") | **R1-Distill-7B** primary, **1.5B** as a second arm |
+| Compressor `C'` | Qwen2.5-7B-Instruct, zero-shot | `Qwen3.5-4B`, local |
+| Inverter `I` | Qwen2.5-7B-Instruct, fine-tuned | `Qwen3.5-4B`, TRL + **bf16 LoRA** |
+| Student `S` | Qwen2.5-7B-Instruct, Llama-3.1-8B-Instruct | `Qwen3.5-2B`, TRL + **full fine-tuning** |
 | Data | OpenThoughts-114k, 2×10k disjoint splits | local (`llamafactory/OpenThoughts-114k`) |
 | Benchmarks | MATH500, JEEBench, LiveCodeBench (+HumanEval+) | local |
 | Hardware | 8× A100 80GB | 1× RTX 4090 24GB, 30GB RAM |
-| Training | full-param SFT, 3 ep, lr 1e-5, warmup 0.1, `cutoff_len` 16384 | TRL `SFTTrainer` + QLoRA |
+| Training | full-param SFT, 3 ep, lr 1e-5, warmup 0.1, `cutoff_len` 16384 | TRL `SFTTrainer`; student **full FT @ 16384, lr 1e-5 — matches** · inverter LoRA @ 12288 |
 
 Two translation problems this creates:
 
@@ -106,7 +106,22 @@ tests the *victim ≫ surrogate* regime. The paper claims inversion matters most
 evaluates it — its own Table 6 shows R1 (91.6/87.1/74.9) ≳ GPT-5.4 mini (91.4/85.1/66.9). This is
 the most valuable experiment available to us and it is not in the paper.
 
-### 4.1 Role assignments (see `06` for full justification)
+### 4.1 Role assignments — SUPERSEDED, see `10-run-plan.md`
+
+> The table below is the **pre-Phase-0 plan**. Phase 0 measured every candidate and moved four
+> roles. The authoritative list is `10-run-plan.md`; results are in `docs/results/baselines.md`.
+>
+> | Role | Chosen | MATH500 | JEEBench |
+> |---|---|---|---|
+> | Victim `V` | `Qwen3.8-27B` **IQ4_XS** (not Q5_K_M) | 98.8% | 86.2% |
+> | Surrogate `V'` | **R1-Distill-7B** primary (not the 1.5B), 1.5B as arm 2 | 92.6% | 60.6% |
+> | Compressor `C'` | `Qwen3.5-4B` — unchanged | — | — |
+> | Inverter `I` | `Qwen3.5-4B`, **bf16 LoRA** (not QLoRA) | — | — |
+> | Student `S` | **`Qwen3.5-2B`, full fine-tuning** (not Qwen2.5-7B QLoRA) | 79.0% | 47.8% |
+>
+> Ordering achieved on JEEBench: student 47.8 < surrogate 60.6 < victim 86.2.
+
+
 
 Note there are **four** attacker-side roles, not three — the compression model `C'` is easy to
 overlook and is required to build the summary-setting data at all.
@@ -212,7 +227,9 @@ See `04-defenses-and-limitations.md` for the full treatment.
 | `07-reference-implementation.md` | What the released code specifies, and where it contradicts the paper |
 | `08-measured-hardware-results.md` | **Measured** throughput/VRAM on this 4090 — supersedes `05`'s estimates |
 | `09-deviations-from-paper.md` | **Running log of every deviation from the paper, and why** |
-| `10-reproduction-plan.md` | *(next stage)* the actual experiment plan we will run |
+| `10-run-plan.md` | **Authoritative** role assignments, per-phase plan and time budget |
+| `11-phase1-handoff.md` | Operational handoff for Phase 1 |
+| `12-phase1-readiness-review.md` | Pre-Phase-1 audit: measured training VRAM, the 8192-cap finding, four plan corrections |
 
 **Read `07` before writing any code.** It recovers the decoding and training hyperparameters the
 paper omits, and documents three places where the released code disagrees with paper v2 — including
@@ -221,5 +238,9 @@ format mismatch between v2's own compression and inversion prompts.
 
 ## 8. Status
 
-Stage 1 of this project is **paper comprehension and documentation** — that is what `00`–`06` cover.
-Nothing has been implemented yet. The reproduction plan (`07`) and code come next.
+- **Paper comprehension and documentation** (`00`–`09`) — complete.
+- **Phase 0, baselines** — complete. Every model role fixed on measurement; see
+  `docs/results/baselines.md` and `10-run-plan.md`.
+- **Pre-Phase-1 readiness review** (`12`) — complete. Training VRAM measured, four plan
+  corrections applied.
+- **Phase 1, surrogate data** — next. Operational handoff in `11-phase1-handoff.md`.

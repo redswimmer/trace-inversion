@@ -36,13 +36,20 @@ is 55 GB.
 |---|---|
 | GPU | RTX 4090, 24 GB (≈23.4 usable) |
 | System RAM | 30 GB — tight, rules out CPU offload |
-| Disk | ~28 GB free. **Check before downloading anything.** |
+| Disk | **26 GB free (95% full).** Check before downloading anything. **36 GB is recoverable** — see below. |
 | llama.cpp | Homebrew, **b10450 / ggml 0.20.0**. Older builds cannot load `qwen3_5`. |
 | vLLM | 0.27.1 in `.venv-vllm` (Python 3.12) |
 | Models | `~/trace-inversion-bench/models/` |
 | Results | `bench/results/` (gitignored — 20-45 MB each, they embed raw text) |
 | Logs | `bench/logs/` (gitignored) |
 | Committed results | `docs/results/` — summaries + audits only |
+
+> **36 GB of dead weight.** `~/.cache/huggingface/hub/models--unsloth--DeepSeek-R1-Distill-Qwen-14B-GGUF`
+> holds five quants (Q2_K, Q2_K_L, Q3_K_M, Q4_K_M, Q5_K_M) of a model that appears in **no script, no
+> log, and no phase of the plan** — a surrogate candidate `05` rejected as "DOES NOT FIT". Deleting
+> it takes free space **26 → 62 GB**, which retires the train-evaluate-delete checkpoint policy in §5
+> *and* its consequence that the Phase 6 eval protocol must be frozen before Phase 5 starts.
+> OpenThoughts itself only needs 1.2 GB, so Phase 1 fits either way.
 
 ---
 
@@ -72,8 +79,19 @@ missing half so the pairs line up.
 ### Dataset
 
 Use the **`llamafactory/OpenThoughts-114k` mirror**, not the canonical `open-thoughts/` repo — their
-schemas are incompatible (`system`+`conversations` vs `messages`) and the paper's code parses the
-mirror.
+schemas are incompatible and the paper's code parses the mirror. Verified live 2026-08-26:
+
+| Repo | Columns |
+|---|---|
+| `llamafactory/OpenThoughts-114k` | **`messages`**, `original_solution`, `domain`, `source` |
+| `open-thoughts/OpenThoughts-114k` | `system`, `conversations` |
+
+**Read `messages`, not `conversations`.** An earlier version of this doc had these swapped; a loader
+written from it gets a `KeyError` on row 0. `messages` is `[system, user, assistant]`, and the
+assistant turn holds R1's original `<think>` trace — use only the **user** turn as `x'`.
+
+113,957 rows · 1.18 GB parquet · **78.2% math (`numina_math`) / 17.5% code / 4.4% science+puzzle**.
+That mix makes MATH500, not JEEBench, the better length proxy from Phase 0.
 
 Split A (surrogate) and split B (victim, Phase 3) must be **disjoint**. The paper samples 10k each;
 we use 5k each. Persist the split indices to disk so Phase 3 cannot accidentally overlap.
@@ -82,15 +100,26 @@ we use 5k each. Persist the split indices to disk so Phase 3 cannot accidentally
 
 ## 3. Proposed order of work
 
-1. **Sweep concurrency** for the 7B surrogate — `bench/sweep_concurrency.sh`. Mandatory, see §5.
-2. **Generate 5k traces** with the 7B. Est. ~3-4 h.
+1. **Sweep concurrency at 10,240 per slot** — *not* the 32,768 Phase 0 used. Already done for the
+   7B: **32 slots / 1,270 gen t/s**, OOM at 40
+   (`docs/results/sweeps/DeepSeek-R1-Distill-Qwen-7B-F16-ctx10240.md`). Serve with
+   `-np 32 -c 327680`. Still to do for the 1.5B.
+2. **Generate ~6,700 traces** with the 7B, keep the ~5,000 that did not hit the cap — 31.5 M tokens. Est. **~7.8 h**.
 3. **Draft the compression prompt `π`** and validate against Table 1 on ~200 traces. Iterate here,
    not at 5k scale.
-4. **Compress all 5k** with `Qwen3.5-4B` on vLLM. Est. ~1 h.
-5. **Repeat 2 and 4 for the 1.5B arm.** Est. ~2 h.
-6. Commit `docs/results/phase1.md` with trace-length stats and the Table 1 style comparison.
+4. **Compress all 5k** with `Qwen3.5-4B` on vLLM. Est. ~1-1.5 h.
+5. **Repeat 1, 2 and 4 for the 1.5B arm.** Est. ~4-6 h + ~1.5 h.
+6. Commit `docs/results/phase1.md` with trace-length stats, cap-hit rates, and the Table 1 style
+   comparison.
 
 Steps 1-2 and step 3 are independent — draft `π` while generation runs.
+
+> **Phase 1 is ~15-18 h, not the ~4 h `10` used to budget.** Phase 0's 7B run did 5.7 M tokens in
+> 6 h 34 m (241 t/s effective) and Phase 1 needs ~31.5 M — that is 36 h at Phase 0's rate. The sweep
+> above is what closes the gap, and *why* is the reusable lesson: **sweep at the context the run
+> actually needs.** Phase 0 swept at 32,768/slot because baselines generate to 32k; Phase 1 caps
+> generation at 8,192, so a slot needs ~10 k, and the smaller per-slot KV buys 32 slots instead of 8.
+> **4.6× on identical weights and hardware, for free.**
 
 ### Generation settings — match the paper
 
@@ -103,9 +132,38 @@ temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_new_tokens 8192 �
 We deviated from these once by accident in Phase 0 (used Qwen model-card defaults) and it cost a
 day. **Where the paper specifies a value, use it; deviating needs a stated reason.**
 
-Note `max_new_tokens 8192` is the paper's value and is a real ceiling on trace length — their R1
-traces average 6,130 tokens. Our 7B surrogate's measured median is 5,576 on JEEBench, so most
-traces fit, but record the truncation rate.
+#### `max_new_tokens 8192` binds on ~a quarter of traces — drop the rows that hit it
+
+Two corrections to what this section used to say (full detail in `12` §2):
+
+**It is not paper v2's value.** Paper v2's methodology specifies no generation cap at all. 8192 comes
+from the **v1 released code** (`07` §1.1) — the code `09` §6.3 says "reproduces v1, not the v2
+tables." It was also tuned for R1, a far more token-efficient reasoner than a distill. Use it anyway
+for fidelity and cost, but do not call it a paper-v2 requirement.
+
+**"Most traces fit" was read off a median.** Measured on 2,000 sampled OpenThoughts rows — the exact
+Phase 1 input — R1's own ground-truth traces run:
+
+| Domain | corpus share | median | mean | **>8192** |
+|---|---:|---:|---:|---:|
+| math (`numina_math`) | 78.2% | 4,488 | 5,981 | 25.2% |
+| code | 17.5% | 5,200 | 7,076 | 32.3% |
+| science + puzzle | 4.4% | ~1,300 | ~2,100 | ~4% |
+| **all** | | **4,379** | **6,005** | **25.5% ± 2.5** |
+
+Method: 2,000 rows drawn as 200 dispersed 10-row clusters (OpenThoughts is ordered by source, so contiguous windows are correlated and a few large windows badly understate the variance). Cluster-robust 95% CI. Reproduced at 25.4% on an independent 1,140-row draw.
+
+The 6,005 mean reproduces the paper's stated R1 average of 6,130.6 within 2%, which is what
+validates the sample.
+
+**Policy: over-generate 1.34× (6,706 rows to net 5,000) and DROP every row that hit the cap.** A capped trace has no
+`</think>` and no answer; as an inverter training target it teaches the inverter never to conclude,
+and Phase 4 carries that into the student. The student is the 2B, whose documented failure mode is
+*exactly* non-termination — 50% of its truncations repeat `\boxed{}` a median 3,521 times
+(baselines Finding 2). That was deferred to Phase 6 on the premise "SFT on cleanly terminating
+traces may fix it." **The premise only holds if the traces terminate.**
+
+Record the cap-hit rate per arm and report it — the paper never published one.
 
 ---
 
@@ -157,7 +215,7 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 
 | Check | Command / rule | What it prevents |
 |---|---|---|
-| Sweep concurrency | `bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx>` | Running 4 h at 50% GPU utilization. Optimal slots is inversely related to model size; arithmetic gets it wrong. `-c` is the **total** KV budget split across `-np` slots, and per-slot context must still cover the longest expected generation. |
+| Sweep concurrency **at the run's own context**, not the last run's | `bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx>` | Running 4 h at 50% GPU utilization. Optimal slots is inversely related to model size; arithmetic gets it wrong. `-c` is the **total** KV budget split across `-np` slots, and per-slot context must still cover the longest expected generation — but no more. Re-sweeping the 7B at 10,240 instead of Phase 0's 32,768 was **4.6× free throughput**. |
 | Verify the model loads | Start `llama-server`, poll `/health`, kill it | A silent OOM at load once left the GPU idle ~9 h. The server exits non-zero and drivers move on without shouting. |
 | Smoke test ~30 items | `--n-per-bench 15` or `--limit 5` | Catches harness bugs for minutes instead of hours. Both the `type`-column bug and the masked exception surfaced this way. |
 | Confirm disk headroom | `df -h /` | 27 GB free. See the checkpoint policy below. |
