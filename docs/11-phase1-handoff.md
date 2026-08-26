@@ -9,22 +9,19 @@ we differ). This document is the operational summary.
 
 ---
 
-## 0. State of play — what is already built
+## 0. What is already built — use these, do not rebuild them
 
-| Artifact | Path | Status |
-|---|---|---|
-| Splits A/B | `bench/phase1/splits.json` | done — A=16,000, B=9,000, disjoint, seed 20260826 |
-| Prompts A written out | `bench/results/phase1/promptsA.jsonl` | done — 16,000 rows |
-| Surrogate system prompt | `bench/phase1/prompts.py` → `SURROGATE_SYSTEM` | done — verbatim, sha256-asserted |
-| Compression prompt `π` | `bench/phase1/prompts.py` → `PI_SYSTEM` | done — verbatim from `01` §6.4 + 2 exemplars |
-| Generator | `bench/phase1_generate.py` | done — **resumes** from existing output |
-| Compressor | `bench/phase1_compress.py` | done |
-| Stats / Table 1 harness | `bench/phase1_stats.py` | done — `--paired` supported |
-| 7B traces | `bench/results/phase1/traces-7b.jsonl` | **in progress** — resume, do not restart |
-| 1.5B traces | — | not started |
-| `docs/results/phase1.md` | — | not written |
+| Artifact | Path |
+|---|---|
+| Splits A/B, disjoint, seed 20260826 | `bench/phase1/splits.json` — A=16,000, B=9,000 |
+| Split A prompts, written out | `bench/results/phase1/promptsA.jsonl` — 16,000 rows |
+| Surrogate system prompt (verbatim, sha256-asserted) | `bench/phase1/prompts.py` → `SURROGATE_SYSTEM` |
+| Compression prompt `π` (verbatim + 2 exemplars) | `bench/phase1/prompts.py` → `PI_SYSTEM` |
+| Generator | `bench/phase1_generate.py` |
+| Compressor | `bench/phase1_compress.py` |
+| Stats / Table 1 harness | `bench/phase1_stats.py` (`--paired`) |
 
-Branch `phase1-build`. Import the prompts from `prompts.py`; never retype them.
+Import the prompts from `prompts.py`; never retype them. No traces have been generated yet.
 
 ---
 
