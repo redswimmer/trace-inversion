@@ -65,5 +65,34 @@ for k in (10, 45):
     assert not any("outside" in x for x in f), f"cap-hit {k}% should be inside the band: {f}"
 
 print("all phase1 trace gates fire correctly")
-print("NOT covered here: the paired cap-hit gate — it loads OpenThoughts, so it is "
-      "exercised by the real --paired run rather than stubbed.")
+
+
+
+
+# --- the paired cap-hit gate -------------------------------------------------
+# Injects reference lengths rather than loading OpenThoughts, so the gate that
+# prompt difficulty cannot confound is not the one gate left untested.
+
+def paired(n_ours_capped, n_r1_over, n=100, cap=8192):
+    """n rows; n_ours_capped of ours hit the cap, n_r1_over of R1's exceed it."""
+    rows = [row(i, capped=i < n_ours_capped,
+                fin="length" if i < n_ours_capped else "stop") for i in range(n)]
+    r1 = [cap + 1000 if i < n_r1_over else 2000 for i in range(n)]
+    return st.paired_reference(rows, FakeTok(), cap, r1_tokens=r1)
+
+
+import io, contextlib
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf):          # the gate prints a full report
+    over = paired(30, 19)      # +11 pts
+    under = paired(30, 21)     # + 9 pts
+    negative = paired(19, 30)  # -11 pts — abs(), so direction must not matter
+    exact = paired(30, 20)     # +10 pts exactly — tolerance is inclusive
+
+assert any("paired cap-hit gap" in x for x in over), f"+11 pt gap must fire: {over}"
+assert under == [], f"+9 pt gap must pass: {under}"
+assert any("paired cap-hit gap" in x for x in negative), f"-11 pt gap must fire: {negative}"
+assert exact == [], f"exactly 10 pts is inside the tolerance: {exact}"
+assert "ours - R1 = +11.0 pts" in buf.getvalue(), "the gap must be printed, not only gated"
+
+print("paired cap-hit gate fires at ±11 pts, passes at 9 and at exactly 10")

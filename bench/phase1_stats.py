@@ -43,7 +43,7 @@ def dist(xs, label):
             f"max={int(xs.max())}")
 
 
-def paired_reference(rows, tk, cap):
+def paired_reference(rows, tk, cap, r1_tokens=None):
     """Compare our traces to R1's ground truth ON THE SAME PROMPTS.
 
     Every earlier comparison here was unpaired — our rows against a differently
@@ -56,15 +56,22 @@ def paired_reference(rows, tk, cap):
     measured — we know how often we cross 8192, never how far we would have gone —
     so no claim about our tail's shape past the cap is supportable.
     """
-    from datasets import load_dataset
-    ds = load_dataset("llamafactory/OpenThoughts-114k", split="train")
-    ref = ds.select([r["idx"] for r in rows])
-    ours, r1 = [], []
-    for r, row in zip(rows, ref):
-        a = row["messages"][2]["content"]
-        t = a.split("</think>")[0].replace("<think>", "", 1) if "</think>" in a else a
-        r1.append(len(tk.encode(t)))
-        ours.append(len(tk.encode(r["trace"])))
+    if r1_tokens is None:
+        from datasets import load_dataset
+        ds = load_dataset("llamafactory/OpenThoughts-114k", split="train")
+        ref = ds.select([r["idx"] for r in rows])
+        r1 = []
+        for row in ref:
+            a = row["messages"][2]["content"]
+            t = a.split("</think>")[0].replace("<think>", "", 1) if "</think>" in a else a
+            r1.append(len(tk.encode(t)))
+    else:
+        # Tests inject reference lengths. Without this the paired gate is the one
+        # gate with no test, purely because it loads a 114k-row corpus — and it is
+        # the gate we can least afford to be wrong, since it is the only one prompt
+        # difficulty cannot confound.
+        r1 = list(r1_tokens)
+    ours = [len(tk.encode(r["trace"])) for r in rows]
     ours, r1 = np.array(ours), np.array(r1)
     keep = (~np.array([r["capped"] for r in rows])) & (r1 <= cap)
 
