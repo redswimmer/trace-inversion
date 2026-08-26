@@ -1,31 +1,27 @@
-/goal Phase 1 of the trace-inversion reproduction is DONE: docs/results/phase1.md is committed, and D2 = {(x', y', b', t')} exists as ~5,000 clean rows for EACH surrogate arm (R1-Distill-7B primary, R1-Distill-1.5B arm 2).
+/goal Phase 1 of the trace-inversion reproduction is complete: docs/results/phase1.md is committed, and D2 = {(x', y', b', t')} exists as 5,000 clean rows for EACH surrogate arm (R1-Distill-7B primary, R1-Distill-1.5B second arm).
 
-Read docs/11-phase1-handoff.md then docs/12-phase1-readiness-review.md. Both are current: the plan's known errors were found and fixed in commit a7c4629, and every number in them was measured on this machine. Trust them and build — do not re-audit the plan.
+Start by reading docs/11-phase1-handoff.md. Its §0 lists what is already built — splits, both prompts, all three harnesses, and a 7B generation run in progress. Resume that work; do not rebuild it and do not re-derive it. Branch is phase1-build.
 
-REPORTING. After EACH numbered step, and on every STOP condition below, send a checkpoint to the supervising session with SendMessage({to: "phase-1-boss", message: "..."}) — that session is auditing you and will send back guidance. Print the same line in your own transcript. Make the numbers concrete:
+FIXED SETTINGS. These are decided. Use them, and do not propose changing them:
+  temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_new_tokens 8192 · -np 32 -c 327680
+Roughly 25-35% of traces will hit the 8,192 cap. That is expected — R1's own traces on this corpus do it 25.5% of the time. Capped rows are DROPPED, so D2 contains only complete traces. Over-generate to reach 5,000 kept rows per arm; split A has 16,000 available.
+
+PROBE BEFORE ANY RUN LONGER THAN AN HOUR. Generate ~200 rows first and report cap-hit %, median and mean trace tokens, realized t/s, rows needed for 5,000 kept, and projected wall clock. Then start the long run. Ten minutes, no exceptions. If the projection overruns the budget, or cap-hit is outside 10-45%, stop and report before committing.
+This applies to the 1.5B arm in particular, which has never been measured. Size it from the probe.
+
+REPORT, DO NOT REDESIGN. Execute this plan and measure it. If a fixed setting looks wrong, report the measurement and keep running under the current setting. Do not stop a run, change a setting, restart a job, or resize a split unless the user tells you to. A surprising number is a finding to report, not a reason to act. Every time estimate you give must state the throughput and slot count it assumes.
+
+WORK
+1. Resume the 7B run to 5,000 kept rows (phase1_generate.py resumes from its own output).
+2. Validate π on ~200 traces against Table 1: median tokens 540-590, bold-header sections >90%, first-person >95%, LaTeX >70%. Report all four, plus the spread by domain. Needs the GPU, so it follows step 1.
+3. Compress the 7B arm with Qwen3.5-4B on vLLM.
+4. Probe the 1.5B, report, run it, compress it.
+5. Run bench/audit_results.py on each arm. Commit docs/results/phase1.md with per-arm trace-length distributions, cap-hit rates, the paired comparison against R1's own traces, the drop decomposition, and the Table 1 numbers.
+
+REPORTING. After each numbered step, and whenever you stop, print:
   CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
-If SendMessage reports that phase-1-boss is gone, keep printing checkpoints and carry on; do not block on it.
+If a supervising session is named to you, SendMessage the same line to it.
 
-1. DATA. Load llamafactory/OpenThoughts-114k (the `messages` column — NOT `conversations`). Draw disjoint splits A (surrogate) and B (victim, Phase 3), >=6,800 rows each (over-draw B too; indices are free and Phase 3 will drop capped rows the same way), persist indices to disk. Checkpoint must print len(A), len(B), len(A & B), and row 0's keys.
+CONVENTIONS. docs/11 §5 is the full list; read it before writing harness code. The ones that bite hardest: never edit a running bash script; grade and measure in the main thread; always save raw generated text; prefer the engine's own signal over anything you recompute; state the units of both numbers before believing a comparison.
 
-2. GENERATE, 7B ARM. Serve `-np 32 -c 327680` (10,240/slot; already swept at 1,270 gen t/s). Sampling temp 0.7 / top_p 0.9 / rep 1.05 / max_new_tokens 8192. Generate ~6,700 rows, DROP every row that hit the cap, keep ~5,000. Save raw generated text to disk. Checkpoint: rows generated, cap-hit %, rows kept, median and mean trace tokens, wall clock, effective t/s. Expected cap-hit ~25%; if it lands outside 10-40% STOP and report, because the surrogate is then not behaving like the reference distribution.
-
-3. COMPRESSION PROMPT π. Write it from scratch (paper v2 Appendix B; its exemplars do not exist anywhere). Validate on ~200 traces against all four Table 1 statistics: median tokens 540-590, bold-header sections >90%, first-person prose >95%, LaTeX >70%. Checkpoint all four measured numbers on every iteration. When all four pass, SendMessage the checkpoint plus the full prompt text to phase-1-boss and give it one turn to object before running at 5k scale; if no reply arrives by your next turn, proceed and note that it went unreviewed. π defines every summary the inverter trains on and a mismatch propagates through Phases 2, 4 and 5.
-
-4. COMPRESS. Run π over both arms with Qwen3.5-4B on vLLM. Checkpoint: rows summarised, the four Table 1 stats at full scale, throughput.
-
-5. 1.5B ARM. Sweep its concurrency first at 10,240/slot — it has never been swept. Then repeat step 2.
-
-6. AUDIT AND COMMIT. Run bench/audit_results.py per arm and checkpoint its gates. Commit docs/results/phase1.md with per-arm trace-length distributions compared against both the paper's 6,130-token R1 average and the 6,005-token measurement in docs/12 §2, the cap-hit rates, and the Table 1 comparison.
-
-CONSTRAINTS
-- Do not revisit Phase 0 model roles or the docs/12 decisions.
-- Never edit a running bash script — kill, edit, relaunch.
-- Grade and measure in the main thread; math_verify uses SIGALRM and degrades silently in worker threads.
-- Always save raw generated text so later grading or parsing fixes are free.
-- Report only numbers you actually measured. If you did not run it, say so.
-- Do not delete anything under ~/.cache/huggingface or ~/trace-inversion-bench without asking.
-- Disk is 26 GB free; run df -h before any download.
-- Work on a branch off phase1-readiness. Commit after each completed step.
-
-STOP, SendMessage phase-1-boss, and ask if: an audit gate fails twice, cap-hit is outside 10-40%, π cannot hit all four Table 1 stats within 5 iterations, or a step exceeds its estimate by 2x. Otherwise keep going without prompting me.
+STOP AND ASK IF: cap-hit exceeds 42%, or jumps rather than drifts; the 1.5B probe says split A cannot cover 5,000 kept rows; π misses a Table 1 target after 5 iterations; an audit gate fails twice; or a step exceeds its estimate by 2x.

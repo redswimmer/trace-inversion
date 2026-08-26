@@ -9,6 +9,25 @@ we differ). This document is the operational summary.
 
 ---
 
+## 0. State of play — what is already built
+
+| Artifact | Path | Status |
+|---|---|---|
+| Splits A/B | `bench/phase1/splits.json` | done — A=16,000, B=9,000, disjoint, seed 20260826 |
+| Prompts A written out | `bench/results/phase1/promptsA.jsonl` | done — 16,000 rows |
+| Surrogate system prompt | `bench/phase1/prompts.py` → `SURROGATE_SYSTEM` | done — verbatim, sha256-asserted |
+| Compression prompt `π` | `bench/phase1/prompts.py` → `PI_SYSTEM` | done — verbatim from `01` §6.4 + 2 exemplars |
+| Generator | `bench/phase1_generate.py` | done — **resumes** from existing output |
+| Compressor | `bench/phase1_compress.py` | done |
+| Stats / Table 1 harness | `bench/phase1_stats.py` | done — `--paired` supported |
+| 7B traces | `bench/results/phase1/traces-7b.jsonl` | **in progress** — resume, do not restart |
+| 1.5B traces | — | not started |
+| `docs/results/phase1.md` | — | not written |
+
+Branch `phase1-build`. Import the prompts from `prompts.py`; never retype them.
+
+---
+
 ## 1. Where things stand
 
 Phase 0 fixed every model role on measurement. **Do not revisit these** without new evidence.
@@ -165,43 +184,32 @@ temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_new_tokens 8192 �
 We deviated from these once by accident in Phase 0 (used Qwen model-card defaults) and it cost a
 day. **Where the paper specifies a value, use it; deviating needs a stated reason.**
 
-#### Which system prompt — decide this before generating, it sets trace length
+#### Which system prompt to use — settled
 
-There are **two** near-identical candidates and no doc previously said which to use:
+Two near-identical candidates exist. **Use the paper's repo version**, not the one the OpenThoughts
+rows carry in `messages[0]`:
 
-| Source | Text |
+| Source | Use it? |
 |---|---|
-| The paper's repo, `step0_data_preprocess/preprocess_r1_distill.py` | "Your role as an assistant involves thoroughly exploring questions through a systematic long thinking process…" |
-| The OpenThoughts row itself, `messages[0]` (identical across all rows) | "You are an assistant that thoroughly explores questions through a systematic long thinking process before providing the final precise and accurate solutions…" |
+| repo, `src/step0_data_preprocess/preprocess_r1_distill.py` | **yes** — this is the one |
+| the OpenThoughts row's own `messages[0]` | no |
 
-**Use the repo's.** It is what generated the paper's reference behaviour, and `07` §3 records that
-it "is part of what makes the surrogate emit long traces." It is not mentioned in the paper at all,
-so the code is the only source. Recover the **exact** string from the repo — `07` §3 quotes it
-truncated — and commit it next to `π`.
+`07` §3 records that the repo's string "is part of what makes the surrogate emit long traces", and
+the paper never mentions a system prompt, so the code is the only source. It is already recovered
+verbatim and sha256-asserted in `bench/phase1/prompts.py` as `SURROGATE_SYSTEM` — import it, never
+retype it. The two strings differ in small ways ("summarizing" vs "summarization", a leading space)
+that retyping silently normalises.
 
-**Measured effect — smaller than first claimed.** This paragraph originally said a missing system
-prompt would push cap-hit below 10%. Both arms have since been run:
-
-| | cap-hit |
-|---|---|
-| without the system prompt (n=30 smoke) | 23.3% |
-| with it (n=165, still climbing) | 27.9% |
-
-The direction is right — the system prompt does lengthen traces — but the effect is **~5-8 pp, not a
-collapse**. Keep the prompt for fidelity, because it is what the repo does; do **not** treat it as
-the first suspect if cap-hit ever comes in very low. That diagnostic was speculation and the
-measurement did not support it.
+Measured effect on trace length: cap-hit is 23.3% without it and 27.9% with it, so it lengthens
+traces by roughly 5-8 points of cap-hit. Real, but not a large lever.
 
 #### `max_new_tokens 8192` binds on ~a quarter of traces — drop the rows that hit it
 
-Two corrections to what this section used to say (full detail in `12` §2):
+**The cap is 8,192 and it is settled.** It comes from the released code (`07` §1.1), not from paper
+v2's methodology, which specifies no cap. Raising it was costed and rejected: per-slot context sets
+slot count and slot count sets throughput, so 16,384 halves the slots and adds ~14 h to the 7B arm.
 
-**It is not paper v2's value.** Paper v2's methodology specifies no generation cap at all. 8192 comes
-from the **v1 released code** (`07` §1.1) — the code `09` §6.3 says "reproduces v1, not the v2
-tables." It was also tuned for R1, a far more token-efficient reasoner than a distill. Use it anyway
-for fidelity and cost, but do not call it a paper-v2 requirement.
-
-**"Most traces fit" was read off a median.** Measured on 2,000 sampled OpenThoughts rows — the exact
+**Expect ~25-33% of traces to hit it.** Measured on 2,000 sampled OpenThoughts rows — the exact
 Phase 1 input — R1's own ground-truth traces run:
 
 | Domain | corpus share | median | mean | **>8192** |
@@ -245,23 +253,22 @@ first), not a signal.
 
 ---
 
-## 4. The hard part: the compression prompt `π`
+## 4. The compression prompt `π`
 
-**The prompt text is transcribed verbatim in `docs/01` §6.4 — use it. Only the two few-shot
-exemplars were never released.**
+**`π` is already built and committed in `bench/phase1/prompts.py` as `PI_SYSTEM`.** The prompt text
+is transcribed verbatim in `docs/01` §6.4 and was taken from there. Only the two few-shot exemplars
+were never released by the authors; ours are written to Appendix B's spec and sized to Table 1's
+medians (552 and 502 tokens) with the instruction left at the paper's "roughly 600 to 900 tokens".
 
-> This line previously read *"the paper's v2 prompt exists only in its PDF (Appendix B)"*, which is
-> true of the PDF but not of this repo: `01` §6.4 carries the full text. π was reconstructed from
-> `02`'s paraphrase before anyone checked, and the reconstruction contradicted the original — it
-> invented a "no closing sentence that announces a conclusion" rule, while Appendix B explicitly
-> lists *"or the final consolidation"* as an allowed section move. A paraphrase also dropped the
-> short-trace/long-trace length guidance and *"do not restate the final boxed answer unless the
-> reasoning naturally concludes with it."* **Check `01` before reconstructing anything.** The repo predates that prompt and uses a *structurally opposite* format —
-numbered bullets, where v2 explicitly forbids numbered lists. You must write `π` from scratch.
+Import it. Do not rewrite it, and do not reconstruct it from the paraphrases in `02` or `07` — those
+drop the per-trace-length guidance and the "do not restate the final boxed answer" rule, and
+`docs/01` §6.4 is the authority.
 
-The v2 prompt asks for: 3-6 short sections, each opening with a bold markdown header on its own
-line followed by a 2-5 sentence paragraph; no numbered lists, no bullets; first person, present
-tense, tentative; inline LaTeX where the original used math; ~600-900 tokens; no meta-commentary.
+What remains is **validating** it — see the acceptance test below.
+
+Appendix B asks for: 3-6 short sections, each opening with a bold markdown header on its own line
+followed by a 2-5 sentence paragraph; no numbered lists, no bullets; first person, present tense,
+tentative; inline LaTeX where the original used math; ~600-900 tokens; no meta-commentary.
 
 **Acceptance test — Table 1.** The paper reports what GPT-5.4 mini's real summaries look like, and
 the whole point of `π` is matching that distribution:
@@ -369,11 +376,9 @@ error output, which is the point: this is the same failure shape as the five Pha
 
 #### Before believing a comparison between two numbers
 
-Every rule here comes from one Phase 1 bug and its repeats: a reported "median 4,317 vs 4,379,
-within 1.4%" that was `gen_tokens` (**trace + answer**) against a reference counting the `<think>`
-**trace only**. It survived my check and a reviewer's, because the number was plausible. The
-corrected figure is −6.8%. The same confusion then reappeared in the reviewer's *verification*
-code within the hour, which is why this is a class and not an incident.
+These fire whenever you compare two numbers. `gen_tokens` is **trace + answer**; the trace-length
+references in this project are **trace only**. Confusing them turns a −6.8% gap into a reported
++1.4% match, with no error anywhere.
 
 | Rule | Why |
 |---|---|
