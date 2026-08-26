@@ -42,6 +42,8 @@ reference, and a full run costs ~9 h instead of ~2 h.
 - [ ] `docs/results/phase1.md` must state that the paired comparison is **stochastic on our side only** —
       OpenThoughts ships one fixed R1 trace per row, so ~4 pts of any reported gap is our own resampling
       before a surrogate difference is visible.
+- [ ] Recheck the ours-only flip rate at end of run — the subset is ~10x larger there (n≈29 now).
+      Expect the point estimate to move and the separation from both-cap (p=0.0003) to hold.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
