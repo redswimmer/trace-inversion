@@ -42,6 +42,9 @@ reference, and a full run costs ~9 h instead of ~2 h.
 - [ ] `docs/results/phase1.md` must state that the paired comparison is **stochastic on our side only** —
       OpenThoughts ships one fixed R1 trace per row, so ~4 pts of any reported gap is our own resampling
       before a surrogate difference is visible.
+- [ ] `docs/results/phase1.md`: state that the final cap-hit is the FIRST unbiased one, because the file is
+      written in completion order and in-flight rows are disproportionately long/capped. Running figures are
+      lower bounds (at n=1,011: 35.0% observed, at most 37.0% -> tight to +2.0 pts with 32 slots).
 - [ ] Recheck the ours-only flip rate at end of run — the subset is ~10x larger there (n≈29 now).
       Expect the point estimate to move and the separation from both-cap (p=0.0003) to hold.
 - [ ] Write the headroom table into `docs/08`
