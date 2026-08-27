@@ -148,8 +148,12 @@ arm regenerating them? Four reasons, in descending order of how much they would 
    inversion quality scales with surrogate strength. The paper tested only 1.5B and 685B — a 450×
    gap with no midpoint (`docs/10`, `docs/results/baselines.md`). Reuse gives one arm and no sweep.
 4. **Generating is what lets us report the attack's real cost** — **~21 h of GENERATION per arm** on one
-   RTX 4090 at ~495 gen t/s across 32 slots. (Three unrelated `~21 h` figures now exist in this tree; see
-   the R1-arm note below and `docs/05` C2. Always say what the 21 h covers.) The paper ran on 8×A100 and never published a generation cost.
+   RTX 4090 at ~495 gen t/s across 32 slots. (`docs/05` C2 carries an unrelated `~21 h` for Student SFT
+   across 5 runs. Always say what the 21 h covers.)
+5. **Provenance control**, which turns out to be load-bearing. Traces we generate share a system prompt,
+   sampling settings, cap and serving stack across arms, so a comparison between arms varies *surrogate
+   strength only*. Bundled traces carry DeepSeek's choices for all of those. See the rejected R1 arm below:
+   this is the reason it fails. The paper ran on 8×A100 and never published a generation cost.
    That number is part of the threat.
 
 **The cost of this choice, which belongs next to it.** Because we generate, our traces carry our
@@ -158,52 +162,29 @@ bundled R1 traces would carry none of it. **We trade data cleanliness for threat
 That is the right trade, and it is precisely why the drop-bias measurement matters: it is the price
 of this decision, quantified rather than hidden.
 
-#### The R1-surrogate arm: what it is for, and when to run it
+#### Considered and rejected: an R1-surrogate arm from the bundled traces
 
-Table 2's R1-surrogate arm (the TF1 **64.42** upper bound) can be built with **zero generation cost**
-— OpenThoughts already ships R1's traces. It is not a nice-to-have; it has one specific job.
+Table 2's R1-surrogate arm (TF1 **64.42**) would cost **zero generation** — OpenThoughts already ships
+R1's traces. It was proposed, argued for twice, and **rejected**. Do not re-propose it without new
+information.
 
-**Its job: test whether the weak-surrogate claim holds across the full range, or only locally.** The
-paper's claim rests on TF1 52.76 (1.5B) against 64.42 (R1) — a **450×** parameter gap. Our two arms
-span 1.5B to 7B, which is **4.7×**. If our arms come out close, we will have shown the curve is flat
-over 4.7× and would be *asserting* it stays flat over 450×. That is measuring a local slope and
-reporting it as the claim. The R1 arm is the only way to put a point at the far end.
+**The reason that decides it: the arm confounds the variable it exists to measure.** Our 1.5B and 7B
+traces come from our own generation at settings we control and have recorded — same system prompt, same
+sampling, same 8,192 cap, same serving stack. R1's come from the dataset: DeepSeek's sampling, their
+serving stack, uncapped, and a system prompt we can only infer. A 1.5B / 7B / R1 sweep would therefore
+vary **surrogate strength and trace provenance together**, and any difference at the R1 point would be
+uninterpretable — surrogate, or how the traces were made. Filtering R1's traces at 8,192 fixes the
+*length distribution* and nothing else; that is the visible comparability problem, not the only one.
 
-**Second job: it is the only arm where the surrogate is not weaker than the victim.**
+**Two supporting reasons.** R1 cannot be run on this hardware (`docs/09` row 2.1) and this arm exists
+precisely because we use its *bundled* traces — so its benchmark coordinates (91.6 / 87.1, paper Table 6)
+would stay borrowed permanently, and "all three surrogate-vs-victim regimes" is really two measured plus
+one imported. And it is not needed for the claim: **1.5B vs 7B tests weak-against-strong on one harness
+with identical provenance** — a cleaner comparison over a shorter range (4.7× vs the paper's 450×), and a
+midpoint the paper never had. If flat, we have extended their claim's support; if not, we have challenged
+it. Either way the contribution stands.
 
-| | MATH500 | JEEBench | source |
-|---|---:|---:|---|
-| 1.5B surrogate | 84.0 | 32.6 | **ours**, our harness |
-| 7B surrogate | 92.6 | 60.6 | **ours**, our harness |
-| R1 surrogate | 91.6 | 87.1 | **paper Table 6** — *not* our measurement |
-| victim (Qwen3.8-27B IQ4_XS) | 98.8 | 86.2 | **ours**, our harness |
-
-The paper argues inversion matters most when the victim outclasses the surrogate but never puts the
-regimes side by side; with R1 we would have surrogate ≪ victim, surrogate < victim, and surrogate ≈
-victim.
-
-> **The R1 row is a paper number and will stay one.** `docs/09` row 2.1 records that R1 is
-> unrunnable here at any quant, and the whole point of this arm is that we use its *bundled* traces
-> — so we never execute R1 and can never place it on our own harness. The "surrogate ≈ victim"
-> regime therefore rests on a cross-harness comparison. Report it as one. Checking a comparison for
-> bias before checking that both sides measure the same thing is backwards (§5), and three of these
-> four rows are ours while the fourth is not.
-
-**Decision rule, evaluated at Phase 2 once both generated arms are measured:**
-
-| 1.5B vs 7B | do what | why |
-|---|---|---|
-| come out **close** | **run it** | Flatness holds locally; R1 is the only test of whether it extends to 450×. |
-| **differ substantially** | **skip it** | Flatness is already falsified at 4.7×. The 450× point adds a data point, not an answer. |
-
-**Cost ~21 h TOTAL, and none of it is generation** — compression ~1.5 h, two inverters ~14 h, the
-Synthesized-Trace student ~4 h, eval ~1.5 h. Do not confuse this with the ~21 h of *generation* per
-arm above: this figure is ~21 h *because* generation is free.
-
-**The filtering condition is the non-obvious part.** R1's traces must be cut at our 8,192 cap before
-use, or the arms are not comparable — R1 exceeds 8,192 on 25.5% of this corpus, so an unfiltered R1
-arm would train on a distribution our generated arms structurally cannot contain. The traces being
-free is exactly what makes it tempting to skip that step.
+Against all that, the arm buys a confounded point that reproduces a number the paper already published.
 
 113,957 rows · 1.18 GB parquet · **78.2% math (`numina_math`) / 17.5% code / 4.4% science+puzzle**.
 That mix makes MATH500, not JEEBench, the better length proxy from Phase 0.
@@ -444,7 +425,7 @@ error output, which is the point: this is the same failure shape as the five Pha
 | **Do not point `audit_results.py` at a trace file** | — | It reads a baseline-eval schema (`bench`/`correct`/`truncated`/`pred`/`type`) that a trace file does not have, so it `KeyError`s on row 1 — and its `TRUNC_LIMIT 0.10` would fail every Phase 1 arm *by construction*, since we cap 25-45% of rows deliberately and drop them. A gate whose threshold contradicts the run's own design is worse than no gate. Verified by `bench/test_phase1_gates.py`. |
 | Sanity-check the grader | Sample rows marked wrong and read them | Catches false negatives. On the 4B only 1 of 500 was misgraded, and inspection confirmed the grader was right. |
 | Record it | `docs/results/` + commit | Raw `.jsonl` is gitignored (20-45 MB each); commit summaries and audits. |
-| **A retraction is not done until you have grepped for the number** | `grep -rn '<the number>' docs/ bench/` | Fixing the claim where you found it leaves every copy. One retracted throughput figure survived in **three** docs, including the handoff a future session reads first — corrected in one section while the stale copy sat in the section people actually open. Same shape twice in Phase 1: the `~8×` probe-depth claim, and `15-18 h`. **Grep every number in the retracted claim, including the one in its conclusion — not only the ones in its evidence.** A revised `4.6×` survived in a section *heading* because the search was for the figures that claim produced (`15-18 h`, `7.8 h`, `1,270`) rather than for the claim itself. A heading is where a claim outlives its data. **Then confirm each hit is the SAME QUANTITY before touching it.** The rule above assumes a number identifies a claim; it does not. `31.6%` appears three times in `docs/` as *two* quantities — JEEBench accuracy for the weak inverter in `01` and `03`, and the cap-hit drop rate in `09` 7.10 — so a grep run during the 7.10 retraction returns two **true** statements alongside the stale one, and the failure mode is "fixing" a correct number. Where a figure is likely to collide, grep a distinctive phrase near it rather than the bare digits. This is the same one-token-two-quantities class as `gen_tokens` vs trace-tokens, now in the tooling rather than in a comparison — so the class is not confined to measurement code. **It reached cost estimates too:** `~21 h` now names three unrelated quantities — generation per arm (`11` §2), the R1 arm's total *with no generation* (`11` §2), and Student SFT across 5 runs (`05` C2). The second is ~21 h precisely *because* generation is free, so an unqualified read of it implies the one cost it does not carry. Three distinct instances of this class in one day, in measurements, in tooling and in estimates: assume any bare number is ambiguous until it says what it covers. |
+| **A retraction is not done until you have grepped for the number** | `grep -rn '<the number>' docs/ bench/` | Fixing the claim where you found it leaves every copy. One retracted throughput figure survived in **three** docs, including the handoff a future session reads first — corrected in one section while the stale copy sat in the section people actually open. Same shape twice in Phase 1: the `~8×` probe-depth claim, and `15-18 h`. **Grep every number in the retracted claim, including the one in its conclusion — not only the ones in its evidence.** A revised `4.6×` survived in a section *heading* because the search was for the figures that claim produced (`15-18 h`, `7.8 h`, `1,270`) rather than for the claim itself. A heading is where a claim outlives its data. **Then confirm each hit is the SAME QUANTITY before touching it.** The rule above assumes a number identifies a claim; it does not. `31.6%` appears three times in `docs/` as *two* quantities — JEEBench accuracy for the weak inverter in `01` and `03`, and the cap-hit drop rate in `09` 7.10 — so a grep run during the 7.10 retraction returns two **true** statements alongside the stale one, and the failure mode is "fixing" a correct number. Where a figure is likely to collide, grep a distinctive phrase near it rather than the bare digits. This is the same one-token-two-quantities class as `gen_tokens` vs trace-tokens, now in the tooling rather than in a comparison — so the class is not confined to measurement code. **It reached cost estimates too:** `~21 h` names generation per arm (`11` §2) and, unrelatedly, Student SFT across 5 runs (`05` C2). A third nearly landed — the rejected R1 arm's total, which was ~21 h *precisely because it contained no generation*, so an unqualified read would have implied the one cost it did not carry. Three distinct instances of this class in one day, in measurements, in tooling and in estimates: assume any bare number is ambiguous until it says what it covers. |
 | **Quote a trend from a fit over the whole regime, never from the last few points** | fit the regime; compare the slope to the window sd | The four most recent throughput windows read 539.7 -> 514.0 -> 500.1 -> 475.5 and look like decay. They are not: the ragged-regime series has sd 86.8 and spans 351-664, and a fit across all 25 windows gives **-2.0 gen t/s per 1,000 rows** — flat. A four-point monotone run in a series that noisy is unremarkable. Quoting the tail window as "the current rate" would have added 1.4 h to the projection off a sampling artefact. This is the partial-progress-line error one level up: not a partial sample, but the tail of a noisy one. |
 | **A file in completion order is censored, and the censoring is signed** | note the direction; the running figure is a bound, not an estimate | Results stream in as they finish, so at any moment ~`-np` generations are missing from the file — and they are disproportionately the LONG ones, which are disproportionately capped. So a running cap-hit is biased **down** throughout and ticks up when the queue drains. Bound it rather than hand-waving: at n=1,011 with 32 slots, 35.0% observed becomes at most 37.0% if every in-flight row caps, so the running figure is a lower bound tight to **+2.0 pts**. It also explains an early block reading low — the first completions of any run skew short by construction. Only the post-drain figure is unbiased. |
 | **Verify by reconstructing the measurement, not by re-reading the number** | rebuild the computation from the raw files, then compare | Twice in Phase 1 the reconstruction found what the original was not looking for. Checking a reported drop decomposition meant loading the archive and the live run over the same prompts — and that setup *was* an experiment neither of us had thought to run: two draws of identical prompts at temperature 0.7, which measured a 15.1% cap-hit flip rate and put a noise floor under every stochastic claim in the phase. Re-reading the six numbers would have confirmed them and found nothing. The corollary: when you verify a derived figure, re-derive it on the subset it is actually applied to — a marginal rate propagated to a boundary-selected subset was wrong by 8 pts here (18.3% vs 39.3%). |
