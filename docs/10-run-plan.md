@@ -169,10 +169,13 @@ below 32k to buy more slots. **Sweep first at 16k/slot.**
 |---|---|---|---|
 | 4.1 | Inverter (merged) | vLLM | synthetic traces `t̂` from `(x, y, b*)` |
 
-Est. ~4 h. Then score `t̂` against withheld `t` → **Table 2 reproduction**.
+Est. ~4 h. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
+looks sane against the victim's, then run the rest. **No new tooling.** If you want the length as a
+number, point `bench/phase1_stats.py`'s existing length reporting at the output file — a flag on code
+we already have.
 
-> **DECIDED: no fidelity scorer. Do not build TF1, BLEU or ROUGE.** The metrics do not measure what
-> their names imply, so the missing code was never the problem.
+> **Considered and rejected: a Table 2 fidelity suite (TF1 / BLEU / ROUGE).** Not a missing tool — the
+> metrics do not measure what their names imply.
 >
 > **They are largely length in disguise.** Across the paper's own six Table 2 rows, Len correlates with
 > ROUGE-1 at **r = +0.945**, TF1 at **+0.916**, ROUGE-L **+0.890**, BLEU **+0.889**, ROUGE-2 **+0.838**
@@ -189,13 +192,11 @@ Est. ~4 h. Then score `t̂` against withheld `t` → **Table 2 reproduction**.
 > synthesized traces sometimes *beat* the oracle, so lower similarity with better outcomes is the
 > interesting case, not a failure. **Table 3 — downstream student accuracy — carries the entire result.**
 >
-> **Keep instead, and it is much smaller: a trace-length sanity check before Phase 5.** If the inverter
-> emits ~1,000-token stubs against victim traces running ~4,000, the attack is broken and Phase 5 would
-> burn ~20 h discovering it — exactly what the paper's zero-shot row shows (Len 978 against a 6,130
-> reference, ~16% of target). Needs a tokenizer we already have and no scoring library: compare the
-> synthesized-trace length distribution against the victim's, the way `bench/phase1_stats.py` already
-> compares ours against R1's. Optionally also grade whether synthesized traces reach the correct answer
-> — the graders exist.
+> **Also rejected: a formal length gate.** Either the inverter learns or it does not, and student
+> training reveals that either way. A 1,000-token trace where 4,000 was expected is not a hidden
+> property needing instrumentation — it is the most visible thing about the output file. A gate would
+> earn its place only if Phase 4 fed Phase 5 unattended, and it does not: there is a checkpoint between
+> them. Smoke test, spot-check, proceed.
 
 ## Phase 5 — Train students *(paper Stage 3)*
 
