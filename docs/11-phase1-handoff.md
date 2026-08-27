@@ -130,6 +130,39 @@ schemas are incompatible and the paper's code parses the mirror. Verified live 2
 written from it gets a `KeyError` on row 0. `messages` is `[system, user, assistant]`, and the
 assistant turn holds R1's original `<think>` trace — use only the **user** turn as `x'`.
 
+#### Why we generate surrogate traces instead of reusing the ones OpenThoughts ships
+
+The obvious question, since every row already carries R1's own `<think>` trace: why spend ~21 h per
+arm regenerating them? Four reasons, in descending order of how much they would cost us.
+
+1. **Threat model.** The attack assumes an attacker with a model they control and can query — not
+   one who already owns a corpus of strong-reasoner traces. Reusing the bundled traces assumes away
+   the most expensive step, and weakens the claim from *"an attacker can manufacture this training
+   data"* to *"given such data, an inverter can be built."* The paper's own code generates:
+   `step0_data_preprocess/r1_distill_inference.sh` (`docs/07` §1), not a dataset read.
+2. **The bundled traces are R1 at 685 B.** The paper's most consequential claim is that a *weak*
+   surrogate works nearly as well as a strong one — TF1 **52.76** from the 1.5B against **64.42**
+   from R1 (`docs/00` §39, `docs/02` Table 2). Reusing the bundled traces tests only the strong
+   case, which is the least realistic and least interesting one.
+3. **It would eliminate the surrogate-strength sweep.** The two-arm design exists to measure how
+   inversion quality scales with surrogate strength. The paper tested only 1.5B and 685B — a 450×
+   gap with no midpoint (`docs/10`, `docs/results/baselines.md`). Reuse gives one arm and no sweep.
+4. **Generating is what lets us report the attack's real cost** — ~21 h per arm on one RTX 4090 at
+   ~495 gen t/s across 32 slots. The paper ran on 8×A100 and never published a generation cost.
+   That number is part of the threat.
+
+**The cost of this choice, which belongs next to it.** Because we generate, our traces carry our
+surrogate's own behaviour — the ~35% cap-hit and the drop bias in `docs/09` rows 7.10 and 7.11. The
+bundled R1 traces would carry none of it. **We trade data cleanliness for threat-model fidelity.**
+That is the right trade, and it is precisely why the drop-bias measurement matters: it is the price
+of this decision, quantified rather than hidden.
+
+**An option, not a plan.** Table 2's R1-surrogate arm (the 64.42 upper bound) could be reproduced at
+zero *generation* cost, since those traces are already on disk. It would still need a compression
+pass and inverter training, and it would require filtering R1's traces by our 8,192 cap so the arms
+compare on equal terms. A Phase 2 decision — the generated arms are the headline. Recorded so nobody
+has to rediscover that the option exists.
+
 113,957 rows · 1.18 GB parquet · **78.2% math (`numina_math`) / 17.5% code / 4.4% science+puzzle**.
 That mix makes MATH500, not JEEBench, the better length proxy from Phase 0.
 
