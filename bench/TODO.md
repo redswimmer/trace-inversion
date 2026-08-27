@@ -53,10 +53,12 @@ reference, and a full run costs ~9 h instead of ~2 h.
       result is silently meaningless while looking like a spectacular success. No downstream gate
       catches a leaked oracle. Cannot be deferred — by Phase 4 the file layout is fixed. (`docs/10`
       Phase 3)
-- [ ] **Phase 4** — write the fidelity scorer. It does not exist: no TF1/ROUGE/BLEU anywhere in
-      `bench/`, no scoring library in `pyproject.toml`. Spec is in `docs/02` §73-74 (TF1 = unigram
-      bag-of-tokens F1, not n-gram, not sequence-aligned; ROUGE-1/2/L). Report ROUGE as **both** F
-      and recall — the paper never says which it used. The whole three-arm comparison depends on it.
+- [ ] **Phase 4** — trace-length sanity check on synthesized traces, before Phase 5 burns ~20 h.
+      Compare the synthesized-trace length distribution against the victim's, as `phase1_stats.py`
+      already does against R1's; ~1,000-token stubs against ~4,000-token victim traces mean the
+      attack is broken. Tokenizer only, no scoring library. **No fidelity metrics — TF1/BLEU/ROUGE
+      are decided against**; see `docs/10` Phase 4 (they track Len at r = 0.84-0.95 and cannot
+      separate correct reasoning from incorrect).
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
