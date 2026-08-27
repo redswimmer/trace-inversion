@@ -53,6 +53,15 @@ reference, and a full run costs ~9 h instead of ~2 h.
       it into the attack and the result is silently meaningless while looking like a spectacular
       success. No downstream gate catches a leaked oracle. Cannot be deferred — by Phase 4 the file
       layout is fixed. (`docs/10` Phase 3)
+- [ ] `docs/results/phase1.md`: report **LaTeX by domain**, not just the 79.5% headline —
+      math n=156 89.1% · code n=29 55.2% · physics n=4 75.0% · chemistry n=3 33.3% ·
+      biology n=5 0.0% · puzzle n=3 0.0%. The headline is ~78% a math measurement. Modelling
+      split A's real mix (78.2/17.3/4.5), the >70% gate is threatened only when code reaches
+      **48.1%** of the corpus — 2.8x its actual share, so the gate is robust.
+- [ ] `docs/results/phase1.md`: state that the 600-900 over-ask is calibrated to the PAPER'S C'
+      (Qwen2.5-7B, ~28% undershoot -> 537). Ours is Qwen3.5-4B and undershoots ~17%. The
+      calibration is a property of the compressor, not the prompt; swapping C' lands elsewhere
+      on the same instruction.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)

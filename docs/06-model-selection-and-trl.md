@@ -315,6 +315,22 @@ Concretely: one `uv` venv for training (§4.1), the `llama.cpp` binary outside P
 only if you want it — a second venv for vLLM. The victim and the trainers never run at the same time
 anyway (you generate traces, *then* you train), so the 24 GB is not contended.
 
+> **Launch vLLM with the venv's `bin/` on `PATH`, not just its `python`.** vLLM JIT-compiles sampling
+> kernels at engine start and shells out by bare name — `subprocess.run(['ninja', ...])` — so running
+> `.venv-vllm/bin/python script.py` directly fails with `FileNotFoundError: 'ninja'` even though
+> `ninja` is installed at `.venv-vllm/bin/ninja`. Invoking a venv's interpreter puts the *interpreter*
+> in scope but not the venv's console scripts; only activation (or an explicit `PATH`) does that.
+>
+> ```bash
+> PATH="$PWD/.venv-vllm/bin:$PATH" .venv-vllm/bin/python bench/phase1_compress.py ...
+> ```
+>
+> It presents as an engine-init crash — `RuntimeError: Engine core initialization failed` with the
+> real cause 40 lines up the traceback — and reads like an OOM or a config problem, though the model
+> has already loaded successfully by then. **llama.cpp never hits this**, because it compiles nothing
+> at runtime, so the trap is invisible on every generation step and fires on every vLLM step:
+> compression here, and Phases 2, 4 and 5.
+
 ---
 
 ## 2. Qwen3.5 inventory (verified)
