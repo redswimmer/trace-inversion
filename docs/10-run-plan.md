@@ -105,6 +105,20 @@ The victim's real traces `t` are **withheld from the attack** and used only for 
 `Victim-Trace` oracle baseline and (b) Table 2 fidelity scoring. This is what a local victim buys
 that no API victim can.
 
+> **Make the withholding STRUCTURAL here, in 3.1 — not a convention.** The sentence above states the
+> rule, which is exactly what makes it feel handled when nothing enforces it. `t` is simultaneously
+> the oracle condition and the fidelity reference, so it must never reach the attack path — and
+> today that rests on remembering, across three phases and however many sessions.
+>
+> **Write `t` to a different file from the `(y, b*)` the attack consumes**, so leaking it requires
+> opening a file the attack path has no reason to touch. One wrong join otherwise puts the oracle
+> into the attack, and the result is silently meaningless while *looking like a spectacular success*
+> — the worst available failure shape, and one no gate downstream can catch, because a leaked oracle
+> fails no sanity check.
+>
+> **This is a Phase 3 decision and cannot be deferred to Phase 4**: by then the file layout is
+> fixed. Raise it before 3.1 runs.
+
 Est. **~10-15 h** — revised down from 23 h. The victim's measured median is only 3,484 tokens
 (JEEBench) / 593 (MATH500), not the ~5k assumed. Its p95 is 17,795, so per-slot context can drop
 below 32k to buy more slots. **Sweep first at 16k/slot.**
@@ -116,6 +130,15 @@ below 32k to buy more slots. **Sweep first at 16k/slot.**
 | 4.1 | Inverter (merged) | vLLM | synthetic traces `t̂` from `(x, y, b*)` |
 
 Est. ~4 h. Then score `t̂` against withheld `t` → **Table 2 reproduction**.
+
+> **The scorer does not exist.** `grep -rlniE "TF1|token_overlap|rouge|bleu|fidelity" bench/` returns
+> nothing, and `pyproject.toml` declares no scoring library. The one sentence above is the entire
+> implementation. The metrics *are* specified — `docs/02` §73-74: **TF1** is unigram bag-of-tokens
+> F1, the harmonic mean of token-level precision and recall, explicitly **not** n-gram and **not**
+> sequence-aligned; ROUGE-1/2/L standard. So the spec exists and the code does not, which is the
+> shape most likely to be mistaken for done. The three-arm comparison in `docs/11` §2 depends
+> entirely on this scorer. Note the paper never says whether its ROUGE figures are F or recall —
+> **compute and report both** rather than picking one and hoping.
 
 ## Phase 5 — Train students *(paper Stage 3)*
 

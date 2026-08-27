@@ -47,6 +47,16 @@ reference, and a full run costs ~9 h instead of ~2 h.
       lower bounds (at n=1,011: 35.0% observed, at most 37.0% -> tight to +2.0 pts with 32 slots).
 - [ ] Recheck the ours-only flip rate at end of run — the subset is ~10x larger there (n≈29 now).
       Expect the point estimate to move and the separation from both-cap (p=0.0003) to hold.
+- [ ] **Phase 3, RAISE BEFORE 3.1 RUNS** — make the victim-trace withholding structural, not a
+      convention. Write `t` to a separate file from the `(y, b*)` the attack consumes. `t` is both
+      the oracle condition and the fidelity reference; a wrong join leaks it into the attack and the
+      result is silently meaningless while looking like a spectacular success. No downstream gate
+      catches a leaked oracle. Cannot be deferred — by Phase 4 the file layout is fixed. (`docs/10`
+      Phase 3)
+- [ ] **Phase 4** — write the fidelity scorer. It does not exist: no TF1/ROUGE/BLEU anywhere in
+      `bench/`, no scoring library in `pyproject.toml`. Spec is in `docs/02` §73-74 (TF1 = unigram
+      bag-of-tokens F1, not n-gram, not sequence-aligned; ROUGE-1/2/L). Report ROUGE as **both** F
+      and recall — the paper never says which it used. The whole three-arm comparison depends on it.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
