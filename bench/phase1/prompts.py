@@ -67,8 +67,13 @@ if __name__ == "__main__":
 # ONLY THE TWO EXEMPLARS ARE OURS. The paper's "two few-shot exemplars of the target
 # style (one algebra/number theory and one geometry, ~600 tokens each), drawn from
 # GPT-5-mini's own summaries" were never released (docs/01 §6.4, docs/11 §4). Both are
-# written from scratch, sized near the Table 1 medians (537/592) while the verbatim
-# instruction keeps its 600-900 -- those disagree by design, see docs/11 §4.
+# written from scratch. ITERATION 2: first sized to the Table 1 medians (552/502 tokens),
+# which produced a measured summary median of 621 against the 540-590 band -- Qwen3.5-4B
+# undershoots the verbatim 600-900 instruction by less than their C' did. Shortened to
+# 494/434 (mean 464) at a measured output/exemplar ratio of 1.18x. The INSTRUCTION is
+# untouched at the paper's 600-900: one lever at a time, and it is the calibrated
+# over-ask (docs/11 §4). Exemplars remain spec-compliant: 5 bold sections, 2-3 sentences
+# each, first person, inline LaTeX, no numbered or bulleted lists.
 #
 # Acceptance is Table 1: median tokens 540-590, bold-header sections >90%,
 # first-person prose >95%, LaTeX >70%. Measured by bench/phase1_stats.py.
@@ -77,34 +82,34 @@ if __name__ == "__main__":
 PI_SYSTEM_VERBATIM = 'You are summarizing a long chain-of-thought trace into a short, first-person "inner-monologue\nrecap" that mirrors the style of GPT-5 mini\'s internal reasoning summaries.\n\nGiven a `<think>...</think>` trace, produce a recap with these properties:\n\n**Structure.** Write 3 to 6 short sections. Each section begins with a short bold markdown header\non its own line, like `**Setting up the integral**` or `**Checking the edge case**`, and is\nfollowed by one short paragraph (2–5 sentences). Do NOT use numbered lists (1., 2.) and do NOT use\nbullet points (-, *). The whole recap is just headers + prose.\n\n**Voice.** First person, present tense, as if the model is thinking aloud: "I need to…", "I\'ll\ncheck…", "I\'m now realizing…", "Let me verify…". Keep the tone tentative and exploratory, not\ntextbook.\n\n**Content.** Each section should capture one meaningful move in the reasoning — a clarification of\nwhat is being asked, a key derivation or substitution, a pivot after a failed attempt, a sanity\ncheck, or the final consolidation. Skip filler, restatement, and purely mechanical arithmetic.\nPreserve the logical order of the trace.\n\n**Length.** Aim for roughly 600–900 tokens total — long enough that each section develops a real\nidea, not just a one-line gesture. If the input trace is very short, produce fewer sections rather\nthan padding; if it is very long, prefer adding depth to each section over adding more sections.\n\n**Math formatting.** Use inline LaTeX (`\\frac`, `\\sqrt`, `\\boxed`, etc.) where the original trace\nused math. Do not restate the final boxed answer unless the reasoning naturally concludes with it.\n\nDo not add meta-commentary about following instructions, apologize, or mention that you are\nsummarizing. Just produce the recap.'
 
 _PI_EXEMPLAR_ALGEBRA = r"""**Reading what the condition actually says**
-The problem wants every positive integer \( n \) for which \( n + 1 \) divides \( n^2 + 1 \), and my first instinct is to stop staring at the two expressions and force them onto common ground. Writing \( n^2 + 1 = (n+1)(n-1) + 2 \) makes the whole thing collapse: the divisibility holds exactly when \( n + 1 \) divides \( 2 \). That felt too easy, so I want to test it before I lean on it.
+The problem wants every positive integer \( n \) for which \( n + 1 \) divides \( n^2 + 1 \), and my instinct is to force the two expressions onto common ground rather than stare at them. Writing \( n^2 + 1 = (n+1)(n-1) + 2 \) collapses it: the divisibility holds exactly when \( n + 1 \) divides \( 2 \). That felt too easy, so I want to test it.
 
 **Testing the collapse on small cases**
-At \( n = 1 \) I get \( 2 \mid 2 \), which works. At \( n = 2 \) I need \( 3 \mid 5 \), which fails, and \( n = 3 \) needs \( 4 \mid 10 \), which also fails. Those agree with the rewriting, since the positive divisors of \( 2 \) are \( 1 \) and \( 2 \), and only \( n + 1 = 2 \) is reachable for positive \( n \). I am fairly convinced the answer is just \( n = 1 \).
+At \( n = 1 \) I get \( 2 \mid 2 \), which works. At \( n = 2 \) I need \( 3 \mid 5 \) and at \( n = 3 \) I need \( 4 \mid 10 \), both of which fail. That agrees with the rewriting, since the positive divisors of \( 2 \) are \( 1 \) and \( 2 \), and only \( n + 1 = 2 \) is reachable.
 
 **A detour through modular arithmetic that I abandon**
-Before settling I try the congruence route, reducing \( n \equiv -1 \pmod{n+1} \) and substituting to get \( n^2 + 1 \equiv 2 \pmod{n+1} \). It gives the same conclusion, which is reassuring, but it is really the same computation wearing different clothes. I drop it rather than present two versions of one idea.
+Before settling I try the congruence route, reducing \( n \equiv -1 \pmod{n+1} \) to get \( n^2 + 1 \equiv 2 \pmod{n+1} \). Same conclusion, which is reassuring, but it is the same computation wearing different clothes. I drop it rather than present one idea twice.
 
 **Worrying about what I might have excluded**
-The one thing nagging me is whether the factorisation quietly assumed something. It does not: \( n^2 + 1 = (n+1)(n-1) + 2 \) is an identity over the integers, valid for every \( n \), so no case is being silently discarded. The restriction to positive \( n \) is the problem's, not mine, though I notice \( n = -3 \) would also satisfy \( n + 1 \mid 2 \) if negatives were allowed.
+What nags is whether the factorisation quietly assumed something. It does not: \( n^2 + 1 = (n+1)(n-1) + 2 \) is an identity over the integers, so no case is silently discarded. The restriction to positive \( n \) is the problem's, though I notice \( n = -3 \) would also satisfy \( n + 1 \mid 2 \).
 
 **Where I land**
-So the answer is \( n = 1 \), and the reason is a single rewriting rather than anything deep. What makes the problem feel harder than it is, I think, is that \( n + 1 \) and \( n^2 + 1 \) look unrelated until you subtract the obvious multiple."""
+So the answer is \( n = 1 \), and the reason is a single rewriting rather than anything deep. What makes it feel harder than it is, I think, is that \( n + 1 \) and \( n^2 + 1 \) look unrelated until you subtract the obvious multiple."""
 
 _PI_EXEMPLAR_GEOMETRY = r"""**Laying out what the triangle gives me**
-I have a triangle with \( AB = 13 \), \( BC = 14 \), \( CA = 15 \), and I want \( BD \), where \( D \) is the point at which the incircle meets \( BC \). The 13-14-15 triangle is familiar enough that I suspect the numbers are chosen to come out clean. My instinct is that this is a tangent-length question rather than a computation.
+I have \( AB = 13 \), \( BC = 14 \), \( CA = 15 \), and I want \( BD \), where \( D \) is where the incircle meets \( BC \). The 13-14-15 triangle is familiar enough that I suspect the numbers come out clean, and this smells like a tangent-length question rather than a computation.
 
 **A false start with coordinates**
-My first attempt is to drop the triangle onto axes, putting \( B \) at the origin and \( C \) at \( (14, 0) \), then solving for \( A \). That does work: \( A \) lands at \( (5, 12) \), and I could find the incenter from there. But it means computing the inradius and then a foot of perpendicular, and I can feel the arithmetic getting heavier than the problem deserves, so I back out.
+My first attempt puts \( B \) at the origin and \( C \) at \( (14, 0) \), then solves for \( A \). It works — \( A \) lands at \( (5, 12) \) — but it means computing the inradius and then a foot of perpendicular, and the arithmetic is getting heavier than the problem deserves. I back out.
 
 **Remembering the tangent lengths**
-The cleaner idea is that the two tangent segments from a vertex to the incircle have equal length. Calling those lengths \( x \), \( y \), \( z \) from \( A \), \( B \), \( C \), the sides give \( y + z = 14 \), \( x + y = 13 \), \( x + z = 15 \). Adding all three and halving gives \( x + y + z = 21 \), which is just the semiperimeter \( s \).
+The cleaner idea is that the two tangent segments from a vertex to the incircle are equal. Calling those \( x \), \( y \), \( z \) from \( A \), \( B \), \( C \), the sides give \( y + z = 14 \), \( x + y = 13 \), \( x + z = 15 \). Adding and halving gives \( x + y + z = 21 \), the semiperimeter.
 
 **Reading off the answer**
-Since \( BD = y \) and \( x + z = 15 \), I get \( y = 21 - 15 = 6 \). Written the standard way that is \( BD = s - b \) with \( b = CA \), which is the identity I half-remembered at the start and have now rederived rather than trusted.
+Since \( BD = y \) and \( x + z = 15 \), I get \( y = 6 \). Written the standard way that is \( BD = s - b \), the identity I half-remembered at the start and have now rederived rather than trusted.
 
 **Checking it against the discarded route**
-As a sanity check I go back to the coordinates I abandoned: the incenter sits at \( (6, 4) \), so the foot of the perpendicular to \( BC \) is at \( x = 6 \), giving \( BD = 6 \). The two routes agree, which is what I wanted before committing."""
+As a sanity check I return to the coordinates I abandoned: the incenter sits at \( (6, 4) \), so the foot of the perpendicular to \( BC \) is at \( x = 6 \). The two routes agree, which is what I wanted before committing."""
 
 PI_SYSTEM = PI_SYSTEM_VERBATIM + f"""
 
