@@ -369,6 +369,10 @@ mismatch may have artificially depressed the paper's zero-shot row (TF1 35.36).
 > visible. When in doubt, prefer the check that would have caught a wrong number over the one that
 > saves time.
 
+### Before proposing an experiment at all
+
+See **`docs/10` § Before proposing an experiment** — four questions, in order, and *cost is never a reason to run one*. It lives in `10` because it spans every phase; the worked example is this phase's rejected R1-surrogate arm.
+
 ### Before launching any generation or eval run
 
 | Check | Command / rule | What it prevents |

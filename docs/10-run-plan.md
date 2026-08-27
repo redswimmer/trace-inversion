@@ -13,6 +13,44 @@ full precision.
 
 ---
 
+## Before proposing an experiment
+
+Answer these four **in order**. If any fails, do not propose it.
+
+| # | Question | What does not count as an answer |
+|---|---|---|
+| 1 | **What specific question does it answer?** | "It would be interesting." "For comparison." "As a reference point." The answer must have a possible *outcome that changes what we do*. |
+| 2 | **What is compared to what?** | Name both sides concretely: which artifact, scored by which metric, against which reference. |
+| 3 | **Does anything ELSE vary alongside the variable of interest?** | Provenance, harness, sampling settings, serving stack, system prompt. If so the result is uninterpretable *no matter how cleanly it runs*. |
+| 4 | **Does the machinery exist?** | If not, building it is part of the cost and the proposal carries it. "Cheap to run" is not "cheap." |
+
+> **Cost is never a reason to run an experiment. It is only ever a reason not to.**
+
+**Worked example — the R1-surrogate arm** (`docs/11` §2, considered and rejected). The sequence is the
+instructive part, because every round narrowed a vague proposal toward a concrete one and the concrete
+version was invalid:
+
+| | |
+|---|---|
+| proposed | because generation was free — the traces are already on disk. That is **question 4 answered first, and 1-3 not asked at all**, and it was labelled an "optional reference point", which *defers* justification rather than supplying it. |
+| round 1 | *what is it for?* → an abstract answer about testing flatness across 450× rather than 4.7× |
+| round 2 | *what would you compare the traces to?* → TF1 against the victim's withheld real traces |
+| round 3 | *does the project do that anywhere?* → **no.** No TF1/BLEU/ROUGE code exists. Question 4 was actually *unanswered*: what had been checked was that generation was free, not that scoring existed. |
+| round 4 | *sounds like we're not doing it* → **question 3, finally.** The bundled traces differ from ours in provenance as well as surrogate strength, so the sweep confounds the variable it measures. Fatal — and present from the very beginning. |
+
+The four questions asked up front would have killed it in a minute instead of an hour, and **question 3
+would have killed it outright**.
+
+**The word is the tell.** *"Optional", "reference", "nice to have", "while we're at it", "since it's
+free"* — these are the labels a proposal wears when it has not answered question 1. Treat them as a
+prompt to ask the four questions, not as a category of work.
+
+**The corollary:** a proposal that survives only because nobody asked what it would measure is
+indistinguishable from a good one until someone asks. Here, the user asked. Neither of the two sessions
+running the work did.
+
+---
+
 ## Role assignments
 
 | Role | Model | Format | Engine | Precision | Trained? |
