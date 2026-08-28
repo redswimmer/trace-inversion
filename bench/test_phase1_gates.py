@@ -138,3 +138,32 @@ assert any("target 5000" in x for x in f), f"short-count gate did not fire: {f}"
 assert d2(CLEAN[:4999], target=4999) == [], "an explicit lower target must pass"
 
 print("D2 integrity gates fire on empty x/y/b/t, severed summaries, duplicates, short counts")
+
+
+# --- the cap-hit band is per-surrogate, not a constant -----------------------
+# A single threshold either passes a broken 7B or fails a healthy 1.5B: the two
+# arms settle at 34.6% and 46.5% on identical prompts.
+
+def at(pct, n=200, band=(10.0, 45.0)):
+    k = round(n * pct / 100)
+    rows = ([row(i, capped=True, fin="length") for i in range(k)]
+            + [row(1000 + i) for i in range(n - k)])
+    return st.traces(rows, FakeTok(), 8192, band)
+
+
+with contextlib.redirect_stdout(io.StringIO()):
+    seven_default = at(46.5)                       # 1.5B's rate under the 7B's band
+    fifteen_widened = at(46.5, band=(10.0, 58.0))  # same data, its own band
+    seven_ok = at(34.6)
+    over = at(59.0, band=(10.0, 58.0))
+    under = at(9.0, band=(10.0, 58.0))
+
+assert any("outside" in x for x in seven_default), "46.5% must fail the 7B's 10-45 band"
+assert not any("outside" in x for x in fifteen_widened), "46.5% must pass the 1.5B's 10-58 band"
+assert not any("outside" in x for x in seven_ok), "34.6% must pass the 7B's band"
+assert any("outside" in x for x in over), "59% must fail the 1.5B's band"
+assert any("outside" in x for x in under), "9% must still fail — a collapse, not verbosity"
+# the hard ceiling is arithmetic, not judgement: 5,000 kept from 15,999 usable
+assert abs((1 - 5000 / 15999) * 100 - 68.75) < 0.02, "split A exhausts at 68.75% cap-hit"
+
+print("cap-hit band is per-surrogate: 46.5% fails 10-45 and passes 10-58; floor still fires")

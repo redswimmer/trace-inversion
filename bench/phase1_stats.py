@@ -127,7 +127,7 @@ def paired_reference(rows, tk, cap, r1_tokens=None):
             if abs(gap) > 10.0 else [])
 
 
-def traces(rows, tk, cap):
+def traces(rows, tk, cap, band=(10.0, 45.0)):
     n = len(rows)
     capped = [r for r in rows if r["capped"]]
     kept = [r for r in rows if not r["capped"]]
@@ -180,9 +180,15 @@ def traces(rows, tk, cap):
     if zero:
         fails.append(f"domains with zero kept rows: {zero} — a domain that never "
                      f"survives the cap is absent from D2 entirely")
+    # The band is PER-SURROGATE, not a global constant — that is the finding, not a
+    # convenience. The 7B settles at 34.6% and the 1.5B at 46.5% on identical prompts,
+    # so a single threshold either passes a broken 7B or fails a healthy 1.5B. The
+    # ceiling that is NOT a matter of judgement: 5,000 kept from 15,999 usable rows
+    # needs a keep rate of 31.25%, so split A is exhausted at 68.75% cap-hit.
     ch = 100 * len(capped) / max(n, 1)
-    if not 10.0 <= ch <= 45.0:
-        fails.append(f"cap-hit {ch:.1f}% outside the 10-45% band")
+    if not band[0] <= ch <= band[1]:
+        fails.append(f"cap-hit {ch:.1f}% outside the {band[0]:g}-{band[1]:g}% band "
+                     f"(split A exhausts at 68.8%)")
     return fails
 
 
@@ -293,6 +299,11 @@ def main():
                     help="same family/vocab as the 7B; docs/12 §2 measured 6,005 with it")
     ap.add_argument("--summary-tokenizer", default="Qwen/Qwen3.5-4B",
                     help="the compressor's own tokenizer")
+    ap.add_argument("--cap-hit-band", type=float, nargs=2, default=[10.0, 45.0],
+                    metavar=("LO", "HI"),
+                    help="traces mode: acceptable cap-hit %%. PER-SURROGATE: 10 45 for the "
+                         "7B (settles 34.6%%), 10 58 for the 1.5B (settles 46.5%%). Split A "
+                         "exhausts at 68.8%%, which is the only hard ceiling.")
     ap.add_argument("--validation", action="store_true",
                     help="summaries mode: this is a ~200-row pi validation sample, so "
                          "gate Table 1 only and skip the D2 integrity gates")
@@ -307,7 +318,7 @@ def main():
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
     if args.mode == "traces":
         tk = tok(args.trace_tokenizer)
-        fails = traces(rows, tk, args.cap)
+        fails = traces(rows, tk, args.cap, tuple(args.cap_hit_band))
         if args.paired:
             fails += paired_reference(rows, tk, args.cap)
         else:
