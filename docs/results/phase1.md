@@ -278,7 +278,10 @@ silently.
   because it is a mid-run configuration change, not because it is expected to matter.
 - **16 GB of idle VRAM was not 16 GB of idle throughput.** The 1.5B at 32 slots used 8,071 MiB of 24,564 at
   34–38% utilization, which looked like obvious headroom. A sweep predicted **5,097 gen t/s** at 128 slots;
-  realized was **760–861**, a gain of 13–25% over the 32-slot baseline of 687.6. The card sits at 17–21%
+  realized was **+12.3% rows/min** (8.25 vs 7.35) measured between two steady states 31.4 min apart, which
+  cancels the pipeline-depth offset that made a naive from-restart comparison read **−7%**. Three independent
+  instruments agree: +12.3% rows/min, +12.1% kept/min, +13% engine-native tokens. **The sweep overstated by
+  ~6×**, and 16.5 GB of idle VRAM bought about 45 minutes on a 6-hour remainder. The card sits at 17–21%
   utilization and ~61 W at 2,010 MHz even at 128 slots — it is memory-latency bound, waiting on weights
   rather than computing, so extra concurrent sequences help only until the memory system saturates and 32
   slots was already most of the way there. **The headroom was real and unspendable.**
