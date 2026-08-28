@@ -23,6 +23,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--model", default="Qwen/Qwen3.5-4B")
     ap.add_argument("--limit", type=int, default=0, help="0 = all kept rows")
+    ap.add_argument("--fix", action="store_true",
+                    help="reuse --out's good rows and regenerate only the bad ones "
+                         "(empty summary, or finish_reason=='length'). Use a different "
+                         "--seed or the sampler may reproduce the same failure.")
     ap.add_argument("--max-tokens", type=int, default=2048,
                     help="pi targets 600-900; 2048 leaves room without letting the "
                          "cap shape the length distribution we are measuring")
@@ -45,6 +49,23 @@ def main():
         kept = kept[: args.limit]
     print(f"{len(rows)} traces, {len(kept)} kept (cap-hit "
           f"{100*(1-len(kept)/max(len(rows),1)):.1f}%)", flush=True)
+
+    # --fix: a severed or empty summary is the same defect class as a capped trace —
+    # the inverter's conditioning input is malformed, and an empty b is NOT the
+    # no-summary condition, it is a summary-condition row teaching the inverter to
+    # expect nothing. Dropping them costs rows we need; regenerating costs seconds.
+    all_kept = list(kept)
+    good = {}
+    if args.fix and Path(args.out).exists():
+        for line in open(args.out):
+            r = json.loads(line)
+            if r["b"].strip() and r["finish_reason"] != "length":
+                good[r["idx"]] = r
+        kept = [r for r in kept if r["idx"] not in good]
+        print(f"--fix: {len(good)} good rows reused, regenerating {len(kept)} "
+              f"(seed {args.seed})", flush=True)
+        if not kept:
+            print("nothing to fix"); return
 
     tok = AutoTokenizer.from_pretrained(args.model)
     # Qwen3.5 is a reasoning model; if its template has a thinking switch, turn it
@@ -91,7 +112,8 @@ def main():
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     n_trunc = n_think = 0
-    with open(args.out, "w") as f:
+    fresh = {}
+    with open(args.out + ".new", "w") as f:
         for r, o in zip(kept, outs):
             c = o.outputs[0]
             text = c.text
@@ -99,7 +121,7 @@ def main():
                 n_think += 1
                 text = RE_THINK.sub("", text, count=1)
             n_trunc += c.finish_reason == "length"
-            f.write(json.dumps({
+            fresh[r["idx"]] = {
                 "idx": r["idx"], "domain": r["domain"], "source": r["source"],
                 "x": r["prompt"],        # x' — the OpenThoughts user turn
                 "y": r["answer"],        # y' — surrogate's final answer
@@ -108,9 +130,18 @@ def main():
                 "summary": text.strip(),          # alias, for phase1_stats.py
                 "summary_tokens": len(c.token_ids),
                 "finish_reason": c.finish_reason,
-            }) + "\n")
+            }
+        # rebuild in the original kept order so --fix does not reshuffle D2
+        order = [r["idx"] for r in all_kept] if args.fix else [r["idx"] for r in kept]
+        for i in order:
+            f.write(json.dumps(fresh.get(i) or good[i]) + "\n")
+    Path(args.out + ".new").replace(args.out)
+    still_bad = sum(1 for i in order
+                    for r in [fresh.get(i) or good[i]]
+                    if not r["b"].strip() or r["finish_reason"] == "length")
     print(f"\nsummarised {len(kept)}  truncated_at_cap {n_trunc}  "
-          f"stripped_think_block {n_think}  -> {args.out}", flush=True)
+          f"stripped_think_block {n_think}  rows_written {len(order)}  "
+          f"still_bad {still_bad}  -> {args.out}", flush=True)
 
 
 if __name__ == "__main__":

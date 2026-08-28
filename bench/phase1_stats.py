@@ -186,6 +186,37 @@ def traces(rows, tk, cap):
     return fails
 
 
+def d2_gates(rows, target=5000):
+    """Integrity of D2 itself, separate from pi's Table 1 quality.
+
+    A severed or empty summary is the same defect class as a capped trace: the
+    inverter's conditioning input is malformed. An empty b' is NOT the no-summary
+    condition — it is a summary-condition row that teaches the inverter to expect
+    nothing. Both were found on the 7B arm (1 empty, 18 length-capped of 5,012) and
+    neither is visible to the --mode traces gates, which check traces, not summaries.
+    """
+    fails = []
+    n = len(rows)
+    for k in ("x", "y", "b", "t"):
+        bad = [r["idx"] for r in rows if not str(r.get(k, "")).strip()]
+        if bad:
+            fails.append(f"{len(bad)} rows with empty {k!r} (idx {bad[:5]})")
+    cut = [r["idx"] for r in rows if r.get("finish_reason") == "length"]
+    if cut:
+        fails.append(f"{len(cut)} summaries hit the generation cap — severed "
+                     f"conditioning input (idx {cut[:5]})")
+    dup = n - len({r["idx"] for r in rows})
+    if dup:
+        fails.append(f"{dup} duplicate idx — D2 must be one row per prompt")
+    if n < target:
+        fails.append(f"{n} rows, target {target}")
+    print(f"\n=== D2 integrity ===")
+    print(f"  rows {n} (target {target}) · duplicate idx {dup} · "
+          f"empty x/y/b/t {[sum(1 for r in rows if not str(r.get(k,'')).strip()) for k in 'xybt']} · "
+          f"summaries at cap {len(cut)}")
+    return fails
+
+
 def summaries(rows, tk):
     txt = [r["summary"] for r in rows if r.get("summary", "").strip()]
     n = len(txt)
@@ -250,7 +281,7 @@ def summaries(rows, tk):
         print("\nsummary tokens by trace-length quartile")
         for k in ("short", "mid", "long", "longest"):
             print(f"  {k:12s} " + dist(buckets[k], "").lstrip(": "))
-    return all(ok for *_, ok in rowsout)
+    return [f"Table 1: {name} = {got}, target {want}" for name, got, want, ok in rowsout if not ok]
 
 
 def main():
@@ -262,6 +293,11 @@ def main():
                     help="same family/vocab as the 7B; docs/12 §2 measured 6,005 with it")
     ap.add_argument("--summary-tokenizer", default="Qwen/Qwen3.5-4B",
                     help="the compressor's own tokenizer")
+    ap.add_argument("--validation", action="store_true",
+                    help="summaries mode: this is a ~200-row pi validation sample, so "
+                         "gate Table 1 only and skip the D2 integrity gates")
+    ap.add_argument("--target", type=int, default=5000,
+                    help="summaries mode: required D2 row count")
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
@@ -283,8 +319,17 @@ def main():
               else f"  ** {len(fails)} GATE FAILURE(S) — DO NOT ACCEPT AS-IS **")
         sys.exit(1 if fails else 0)
     else:
-        ok = summaries(rows, tok(args.summary_tokenizer))
-        sys.exit(0 if ok else 1)
+        fails = summaries(rows, tok(args.summary_tokenizer))
+        # Integrity gates run on a full D2 file, not on a ~200-row pi validation
+        # sample where a short count is expected.
+        if not args.validation:
+            fails += d2_gates(rows, args.target)
+        print(f"\n=== gates ===")
+        for f in fails:
+            print(f"  FAIL  {f}")
+        print("  ** PASSED **" if not fails
+              else f"  ** {len(fails)} GATE FAILURE(S) — DO NOT ACCEPT AS-IS **")
+        sys.exit(1 if fails else 0)
 
 
 if __name__ == "__main__":

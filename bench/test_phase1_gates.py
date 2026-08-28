@@ -96,3 +96,45 @@ assert exact == [], f"exactly 10 pts is inside the tolerance: {exact}"
 assert "ours - R1 = +11.0 pts" in buf.getvalue(), "the gap must be printed, not only gated"
 
 print("paired cap-hit gate fires at ±11 pts, passes at 9 and at exactly 10")
+
+
+# --- D2 integrity gates ------------------------------------------------------
+# These catch what the trace gates structurally cannot: the trace gates check
+# traces, and these defects live in the summaries. Both were real on the 7B arm.
+
+def d2row(idx, b="a summary", fin="stop", x="p", y="ans", t="trace"):
+    return {"idx": idx, "domain": "math", "source": "numina_math",
+            "x": x, "y": y, "b": b, "t": t, "summary": b,
+            "summary_tokens": 100, "finish_reason": fin}
+
+
+import io, contextlib
+
+def d2(rows, target=5000):
+    with contextlib.redirect_stdout(io.StringIO()):
+        return st.d2_gates(rows, target)
+
+
+CLEAN = [d2row(i) for i in range(5000)]
+assert d2(CLEAN) == [], "a clean D2 must pass"
+
+f = d2(CLEAN[:-1] + [d2row(9999, b="   ")])
+assert any("empty 'b'" in x for x in f), f"empty summary gate did not fire: {f}"
+# an empty b is NOT the no-summary condition; it must fail rather than pass quietly
+assert not any("finish_reason" in x for x in f), "empty b must not be reported as a cap hit"
+
+f = d2(CLEAN[:-1] + [d2row(9999, fin="length")])
+assert any("hit the generation cap" in x for x in f), f"severed summary gate did not fire: {f}"
+
+for field in ("x", "y", "t"):
+    f = d2(CLEAN[:-1] + [d2row(9999, **{field: ""})])
+    assert any(f"empty {field!r}" in x for x in f), f"empty {field} gate did not fire: {f}"
+
+f = d2(CLEAN[:-1] + [d2row(0)])          # idx 0 already present
+assert any("duplicate idx" in x for x in f), f"duplicate-idx gate did not fire: {f}"
+
+f = d2(CLEAN[:4999])
+assert any("target 5000" in x for x in f), f"short-count gate did not fire: {f}"
+assert d2(CLEAN[:4999], target=4999) == [], "an explicit lower target must pass"
+
+print("D2 integrity gates fire on empty x/y/b/t, severed summaries, duplicates, short counts")
