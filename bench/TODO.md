@@ -77,6 +77,18 @@ reference, and a full run costs ~9 h instead of ~2 h.
       — it would rescue some of the 6, but 2,048 was fixed before Table 1 was validated against it,
       so moving it changes the artifact we measured. Rescuing 6 rows by invalidating the validation
       of 5,012 is a bad trade.
+- [ ] `docs/results/phase1.md`, LEAD WITH THIS PAIR — they must be stated together or the first
+      over-generalises and the second has no context:
+      (a) **200 rows is sufficient for a CENTRAL statistic.** The n=200 pi validation predicted the
+          n=5,006 median within 5 tokens (578 vs 583). This is the only evidence in the project that
+          `docs/11` §4's prescribed ~200-row sample is adequate; until now it was inherited and
+          untested. It is what justifies validating the 1.5B arm the same way rather than at scale.
+      (b) **200 rows is structurally blind to a RARE-EVENT statistic.** Bullet-list incidence read
+          0.0% at n=200 and 0.1% at n=5,006. That is not noise: a 0.1% behaviour has an expected
+          count of 0.2 in 200 rows, so the validation could not have seen it whatever pi did.
+      Consequence: if any Appendix B compliance figure is ever promoted from report to GATE, its
+      threshold cannot be set from a 200-row run. Bullets, numbered lists and the 3-6 section bound
+      are all in that category.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
