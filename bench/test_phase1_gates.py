@@ -40,8 +40,10 @@ BASE = ([row(i) for i in range(70)]
 f = gates(BASE)
 assert f == [], f"healthy arm should pass, got {f}"
 
+# One error in 111 rows is 0.9%, under the 1% rate gate — it must NOT fire. The
+# zero-count gate this replaces could not scale across arms of different length.
 f = gates(BASE + [row(900, fin="ERROR: ConnectionError: boom")])
-assert any("request error" in x for x in f), f"error gate did not fire: {f}"
+assert not any("error rate" in x for x in f), f"0.9% must not fire the rate gate: {f}"
 
 f = gates(BASE + [row(901, trace="   ")])
 assert any("empty trace" in x for x in f), f"empty-trace gate did not fire: {f}"
@@ -167,3 +169,38 @@ assert any("outside" in x for x in under), "9% must still fail — a collapse, n
 assert abs((1 - 5000 / 15999) * 100 - 68.75) < 0.02, "split A exhausts at 68.75% cap-hit"
 
 print("cap-hit band is per-surrogate: 46.5% fails 10-45 and passes 10-58; floor still fires")
+
+
+# --- errors are a RATE, and the paired gap tolerance is per arm ---------------
+# A zero-count error gate cannot scale: the 7B ran 7,669 rows with zero, the 1.5B
+# had 12 in 9,314 = 0.13%, dispersed and flat across two serving configurations.
+
+def with_errors(k, n=1000):
+    return ([row(i, fin="ERROR: HTTPError: 500 Server Error") for i in range(k)]
+            + [row(500 + i, capped=True, fin="length") for i in range(300)]
+            + [row(2000 + i) for i in range(n - k - 300)])
+
+
+with contextlib.redirect_stdout(io.StringIO()):
+    tolerated = st.traces(with_errors(9), FakeTok(), 8192, (10.0, 58.0), 1.0)   # 0.9%
+    over = st.traces(with_errors(20), FakeTok(), 8192, (10.0, 58.0), 1.0)       # 2.0%
+    zero_ok = st.traces(with_errors(0), FakeTok(), 8192, (10.0, 58.0), 1.0)
+
+assert not any("error rate" in x for x in tolerated), f"0.9% must pass a 1% gate: {tolerated}"
+assert any("error rate" in x for x in over), f"2.0% must fail a 1% gate: {over}"
+assert not any("error rate" in x for x in zero_ok), f"zero errors must pass: {zero_ok}"
+
+# the paired gap tolerance must be settable per arm: +18.6 fails the 7B's 16 and passes the 1.5B's 27
+with contextlib.redirect_stdout(io.StringIO()):
+    tight = paired(46, 27, n=100)          # +19 pts
+    tight_f = st.paired_reference(
+        [row(i, capped=i < 46, fin="length" if i < 46 else "stop") for i in range(100)],
+        FakeTok(), 8192, r1_tokens=[9192 if i < 27 else 2000 for i in range(100)], gap_tol=16.0)
+    loose_f = st.paired_reference(
+        [row(i, capped=i < 46, fin="length" if i < 46 else "stop") for i in range(100)],
+        FakeTok(), 8192, r1_tokens=[9192 if i < 27 else 2000 for i in range(100)], gap_tol=27.0)
+
+assert any("paired cap-hit gap" in x for x in tight_f), "+19 must fail the 7B's ±16"
+assert loose_f == [], "+19 must pass the 1.5B's ±27"
+
+print("error gate is a rate (0.9% passes, 2.0% fails); paired tolerance is per arm (+19 fails 16, passes 27)")
