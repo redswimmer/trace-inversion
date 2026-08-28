@@ -271,6 +271,17 @@ silently.
 - **Quote a trend from a fit over the regime, never from the last few points.** Four consecutive
   throughput windows read 539.7 → 514.0 → 500.1 → 475.5 and look like decay; the ragged-regime series
   has sd 86.8 and a fit across all 25 windows gives −2.0 gen t/s per 1,000 rows. Flat.
+- **The 1.5B arm changed slot count mid-run, at the user's direction.** Rows 1–5,832 were generated at
+  `-np 32 -c 327680`; the remainder at `-np 128 -c 1310720`. Per-slot context is 10,240 in both, so the
+  8,192 cap and the prompt budget are unchanged, and **slot count affects throughput only** — each request
+  decodes independently and sampling is per-request, so cap-hit and trace length are unaffected. Recorded
+  because it is a mid-run configuration change, not because it is expected to matter.
+- **16 GB of idle VRAM was not 16 GB of idle throughput.** The 1.5B at 32 slots used 8,071 MiB of 24,564 at
+  34–38% utilization, which looked like obvious headroom. A sweep predicted **5,097 gen t/s** at 128 slots;
+  realized was **760–861**, a gain of 13–25% over the 32-slot baseline of 687.6. The card sits at 17–21%
+  utilization and ~61 W at 2,010 MHz even at 128 slots — it is memory-latency bound, waiting on weights
+  rather than computing, so extra concurrent sequences help only until the memory system saturates and 32
+  slots was already most of the way there. **The headroom was real and unspendable.**
 - **Launch vLLM with the venv's `bin/` on `PATH`, not just its `python`.** vLLM JIT-compiles sampling
   kernels via `subprocess.run(['ninja', ...])`; running `.venv-vllm/bin/python` directly puts the
   interpreter in scope but not the venv's console scripts. Presents as `RuntimeError: Engine core
