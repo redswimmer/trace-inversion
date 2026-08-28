@@ -7,6 +7,10 @@ paper's own preprocess_r1_distill.py drops them the same way), runs pi over each
 trace, and writes {x', y', b', t'}.
 
 Offline vLLM batch, not a server: the batch is fixed and known up front.
+
+Output schema is x' / y' / b' / t' plus a `summary` field that DUPLICATES `b` — the
+alias exists only so bench/phase1_stats.py --mode summaries can read this file and a
+pi-validation file with the same code. Five text fields, four quantities.
 """
 import argparse, json, re, sys
 from pathlib import Path
@@ -23,6 +27,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--model", default="Qwen/Qwen3.5-4B")
     ap.add_argument("--limit", type=int, default=0, help="0 = all kept rows")
+    ap.add_argument("--drop-bad", action="store_true",
+                    help="drop malformed rows from an existing --out and exit. No model "
+                         "load. Use after --fix stops making progress: a row that fails "
+                         "repeatedly is failing for a reason in its input, not by chance.")
     ap.add_argument("--fix", action="store_true",
                     help="reuse --out's good rows and regenerate only the bad ones "
                          "(empty summary, or finish_reason=='length'). Use a different "
@@ -39,6 +47,25 @@ def main():
     ap.add_argument("--repetition-penalty", type=float, default=1.05)
     ap.add_argument("--seed", type=int, default=1234)
     args = ap.parse_args()
+
+    # --drop-bad touches no model: it is a filter over an existing output file.
+    if args.drop_bad:
+        rows = [json.loads(l) for l in open(args.out)]
+        bad = [r for r in rows if not r["b"].strip() or r["finish_reason"] == "length"]
+        good = [r for r in rows if r["b"].strip() and r["finish_reason"] != "length"]
+        side = args.out.replace(".jsonl", "-dropped.jsonl")
+        with open(side, "w") as f:
+            for r in bad:
+                f.write(json.dumps(r) + "\n")
+        with open(args.out, "w") as f:
+            for r in good:
+                f.write(json.dumps(r) + "\n")
+        print(f"dropped {len(bad)} malformed rows -> {side}\n"
+              f"  empty summary   {sum(1 for r in bad if not r['b'].strip())}\n"
+              f"  severed at cap  {sum(1 for r in bad if r['finish_reason'] == 'length')}\n"
+              f"  idx {[r['idx'] for r in bad]}\n"
+              f"{len(good)} rows remain -> {args.out}", flush=True)
+        return
 
     from vllm import LLM, SamplingParams
     from transformers import AutoTokenizer

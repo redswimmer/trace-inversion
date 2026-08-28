@@ -62,6 +62,21 @@ reference, and a full run costs ~9 h instead of ~2 h.
       (Qwen2.5-7B, ~28% undershoot -> 537). Ours is Qwen3.5-4B and undershoots ~17%. The
       calibration is a property of the compressor, not the prompt; swapping C' lands elsewhere
       on the same instruction.
+- [ ] `docs/results/phase1.md`: record C''s SHORT-TRACE PADDING failure. On very short traces it
+      stops summarising and starts solving — original derivation, not recap — running to the 2,048
+      cap. 6 of 5,012 on the 7B arm, trace lengths bimodal at percentiles 7/10/10 and 84/87/87
+      against a 2,804 corpus median. Appendix B anticipates it ("if the input trace is very short,
+      produce fewer sections rather than padding") and Qwen3.5-4B pads anyway. Third instance of one
+      story: iteration 1's 621, the ~17% vs ~28% undershoot, and this — the paper's guidance is
+      calibrated to Qwen2.5-7B and our substituted C' sits differently on the same instruction.
+- [ ] `docs/results/phase1.md`: `stripped_think_block 1` of 5,012. `enable_thinking=False` works and
+      still leaks ~1 in 5,000, so the defensive `</think>` strip in phase1_compress.py is
+      LOAD-BEARING, not belt-and-braces. Removing it as redundant loses one row in five thousand
+      silently.
+- [ ] `docs/results/phase1.md`: record raising `--max-tokens` above 2,048 as CONSIDERED AND REJECTED
+      — it would rescue some of the 6, but 2,048 was fixed before Table 1 was validated against it,
+      so moving it changes the artifact we measured. Rescuing 6 rows by invalidating the validation
+      of 5,012 is a bad trade.
 - [ ] Write the headroom table into `docs/08`
 - [ ] **DECIDE:** student model (0.8B / 2B / 4B)
 - [ ] **DECIDE:** FFT vs LoRA (follows from student size — 0.8B/2B fit FFT, 4B does not)
