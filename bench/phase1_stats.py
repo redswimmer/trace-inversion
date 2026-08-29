@@ -307,7 +307,7 @@ def summaries(rows, tk):
     return [f"Table 1: {name} = {got}, target {want}" for name, got, want, ok in rowsout if not ok]
 
 
-def inverted(rows, tk, cap, holdout=None, n_expected=None, tag=""):
+def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None):
     """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
     (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
     counts the same traces with R1-Distill's, so say which before comparing across docs.
@@ -348,22 +348,28 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag=""):
     sys.path.insert(0, str(_P(__file__).resolve().parent))
     from eval_baseline import extract_boxed, grade
     buckets = {"match": [], "mismatch": [], "no box in t_hat": [], "no box in y": []}
+    per_row = {}
     for r in rows:
         gold, pred = extract_boxed(r["y"] or ""), extract_boxed(r["t_hat"])
         if gold is None:
-            buckets["no box in y"].append(r["idx"])
+            b = "no box in y"
         elif pred is None:
-            buckets["no box in t_hat"].append(r["idx"])
+            b = "no box in t_hat"
         else:
-            buckets["match" if grade(pred, gold, "MATH") else "mismatch"].append(r["idx"])
+            b = "match" if grade(pred, gold, "MATH") else "mismatch"
+        buckets[b].append(r["idx"])
+        per_row[r["idx"]] = {"gold": gold, "pred": pred, "bucket": b, "finish_reason": r["finish_reason"]}
     n_graded = len(buckets["match"]) + len(buckets["mismatch"])
+    nobox_cap = sum(per_row[i]["finish_reason"] == "length" for i in buckets["no box in t_hat"])
     print(f"\nanswer consistency (last boxed in t_hat vs y; report only):  "
           + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
           + (f"   match rate among graded {100*len(buckets['match'])/n_graded:.1f}% (n={n_graded})" if n_graded else ""))
+    print(f"  no box in t_hat = {nobox_cap} severed at the cap + {len(buckets['no box in t_hat']) - nobox_cap} ending in prose")
     if buckets["mismatch"]:
-        print(f"  mismatch idx: {buckets['mismatch']}")
-    if buckets["no box in t_hat"]:
-        print(f"  no-box idx: {buckets['no box in t_hat'][:40]}")
+        print(f"  mismatch idx: {buckets['mismatch']}  (read them: genuine vs grader miss — docs/11 §5)")
+    if out_json:
+        json.dump(per_row, open(out_json, "w"), indent=1)      # re-gradable without regenerating
+        print(f"  per-row (gold, pred, bucket) -> {out_json}")
 
     # three rows for a human to read: shortest, median and longest t_true
     order = np.argsort(tt)
@@ -429,7 +435,8 @@ def main():
     if args.mode == "inverted":
         hold = set(json.load(open(args.holdout))["idx"]) if args.holdout else None
         fails = inverted(rows, tok(args.summary_tokenizer), args.cap, hold,
-                         len(hold) if hold else None, args.tag)
+                         len(hold) if hold else None, args.tag,
+                         out_json=args.file.replace(".jsonl", "") + "-consistency.json")
         print(f"\n=== gates ===")
         for f in fails:
             print(f"  FAIL  {f}")

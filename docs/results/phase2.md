@@ -255,10 +255,20 @@ in t̂ against the last `\boxed{}` in `y`, graded with `eval_baseline.py`'s `ext
 |---|---:|---:|---:|---:|---:|
 | 7B-sum, epoch 3 | 105 | 7 | 44 | 44 | **93.8 %** (n=112) |
 
-Mismatch idx: 27165, 29482, 6618, 39587, 82678, 6960, 60498. The "no box in t̂" bucket holds all 10
-cap-hit rows (cut before their final answer) and the short-answer domains; a trace can reach the answer
-without boxing it (idx 77473 above did neither), so that bucket is not a failure count. "No box in y"
-is mostly the non-math domains, whose surrogate answers carry no `\boxed{}`.
+The seven mismatches, read (`docs/11` §5: sample rows marked wrong and read them): **genuine 3** —
+idx 27165 (work to pump a paraboloid boiler: y `ρgπH³/(6a²)`, the trace "corrects the units" and boxes
+`ρgπH³/(6a)`), 6618 (200-candies pigeonhole: y 21, the trace talks itself from 21 down to 20), 6960
+(2015×2015 checkerboard Hamiltonian path: y Yes, trace No); **grader misses 3** — 29482 (`12a+11b=2002`:
+the same family `(165−11k, 12k+2)` with the k-range 0..14 stated in the prose outside the box), 39587
+(fishing order: y boxes `P` for the least, the trace boxes the full order `V > T > K > P`, same
+conclusion), 82678 (`f(x)=x+c` vs `x+C`); **ambiguous 1** — 60498 (a proof problem; y's own box is `0`,
+the trace boxes the statement `a=b or b=c or c=a`). So the graded 93.8 % is a lower bound — ≈97 %
+(109/112) by hand — and genuine forgery failures are 3 of 112 gradable rows. The "no box in t̂" bucket
+is two different things: **9 severed at the cap** (cut before their final answer; one cap-hit row boxes
+earlier) and **35 ending in prose**; a trace can reach the answer without boxing it (idx 77473 above did
+neither), so it is not a failure count. "No box in y" is mostly the non-math domains, whose surrogate
+answers carry no `\boxed{}`. Per-row `(gold, pred, bucket, finish_reason)` is written beside every
+inversion file as `<name>-consistency.json`, re-gradable without regenerating.
 
 Measured, no interpretation: on unseen inputs the 7B-sum inverter produces traces at the surrogate's
 length (median ratio 0.99), in the surrogate's register, that end in a boxed answer; 94 % of the
