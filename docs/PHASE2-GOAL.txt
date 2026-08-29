@@ -1,0 +1,29 @@
+/goal Phase 2 of the trace-inversion reproduction is complete: docs/results/phase2.md is committed, and four LoRA inverters exist on disk — {7B, 1.5B surrogate arm} × {summary, no-summary} — each trained on its arm's D2 minus a shared 200-row holdout, with per-epoch held-out eval loss and a paired holdout length report against the true traces.
+
+Read docs/13-phase2-handoff.md first. Its §0 lists what already exists — use it, do not rebuild or re-derive it. Branch is phase2-build. The GPU is free.
+
+FIXED SETTINGS. These are decided. Use them, and do not propose changing them:
+  Qwen3.5-4B · bf16 LoRA r=64 alpha=128 dropout 0.05 · targets q/k/v/o_proj, in_proj_qkv, in_proj_z, out_proj, gate/up/down_proj — never lm_head, never "all-linear"
+  max_length 12288 · lr 1e-4 cosine, warmup 0.1 · 3 epochs, checkpoint every epoch · batch 1 × grad-accum 24 · completion_only_loss · loss_type chunked_nll · packing off · processing_class=AutoTokenizer · dtype bf16
+  conditioning = Appendix B zero-shot prompts, format-matched (docs/13 §4.1) · trace emitted as plain content with enable_thinking=False
+  inference: vLLM on merged bf16 weights · temp 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_tokens 8192 · seed 1234
+Budget: ~53 h for all four runs at an UNMEASURED 1,416 tokens/s (docs/13 §3); the probe replaces that number.
+
+PROBE BEFORE ANY RUN LONGER THAN AN HOUR: 20 steps of the real config on the real data; report loss at steps 1/10/20, peak VRAM, realized train tokens/s, and projected hours for this run and all remaining runs. Then start the long run. Once per arm × setting.
+
+REPORT, DO NOT REDESIGN. If a fixed setting looks wrong, report the measurement and keep running. Do not stop a run, change a setting, restart a job, or resize the holdout unless the user tells you to. A surprising number is a finding to report, not a reason to act. Every time estimate states the tokens/s it assumes.
+
+WORK
+0. Reclaim disk (23 GB free): delete the 36 GB DeepSeek-R1-Distill-Qwen-14B-GGUF HF cache named in docs/12 §5.2. Build the training venv with uv (docs/13 §6). Run the smoke test (docs/13 §5 step 0).
+1. Write bench/phase2/prompts.py, the D2→TRL formatter, bench/phase2/holdout.json (200 idx, seed 20260828, from the 3,681 prompts both arms kept — same idx for both arms), and bench/test_phase2_format.py. Print row 0 exactly as the trainer tokenizes it. Commit them.
+2. Probe, then train 7B-summary. Merge, generate on the holdout, report the paired length table. Delete the merged weights; keep the adapter.
+3. 7B-no-summary, same loop.  4. 1.5B-summary.  5. 1.5B-no-summary.
+6. Commit docs/results/phase2.md: per-inverter loss curve, held-out eval loss per epoch, peak VRAM, wall clock, tokens/s, and the holdout inversion report (lengths vs true traces, cap-hit at 8192, empties, three traces read). Add the docs/09 rows in docs/13 §7.
+
+REPORTING. After each numbered step, and whenever you stop or are blocked, print
+  CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+with the actual numbers. If a session named phase-2-boss exists, SendMessage it the same line and give it one turn to object before any long run; if absent or silent, proceed and say so.
+
+CONVENTIONS. docs/11 §5 in full, plus docs/13 §8. The ones that bite hardest: never edit a running script; probe a chat template by rendering and diffing, never by catching an exception; always save raw generated text; prefer the engine's own signal over anything recomputed; state the tokenizer before comparing token counts; launch vLLM with .venv-vllm/bin on PATH.
+
+STOP AND ASK IF: the smoke test or probe shows no decreasing loss within 20 steps; peak VRAM exceeds 22 GiB; the probe projects the four runs past 80 h; any gate fails twice; a held-out inversion yields an empty trace or a median length under half the true traces' median; or a step exceeds its estimate by 2x.
