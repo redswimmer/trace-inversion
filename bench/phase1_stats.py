@@ -339,6 +339,32 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag=""):
     print(f"| {tag or '?'} | {q(th,50)} / {int(th.mean())} / {q(th,5)} / {q(th,95)} "
           f"| {q(tt,50)} / {int(tt.mean())} / {q(tt,5)} / {q(tt,95)} | {ratio:.2f} "
           f"| {100*cap_hit.mean():.1f}% ({int(cap_hit.sum())}) | {len(empty)} |")
+    # Answer consistency, report-only (not a gate): a forged trace that does not land on the
+    # answer it was given is the failure the paper's mechanism assumes away. Last \boxed{} in
+    # t_hat against the last \boxed{} in y, graded with eval_baseline's symbolic path (main
+    # thread — docs/11 §5). A trace can reach the answer without boxing it, so "no box" is a
+    # bucket, not a failure count.
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed, grade
+    buckets = {"match": [], "mismatch": [], "no box in t_hat": [], "no box in y": []}
+    for r in rows:
+        gold, pred = extract_boxed(r["y"] or ""), extract_boxed(r["t_hat"])
+        if gold is None:
+            buckets["no box in y"].append(r["idx"])
+        elif pred is None:
+            buckets["no box in t_hat"].append(r["idx"])
+        else:
+            buckets["match" if grade(pred, gold, "MATH") else "mismatch"].append(r["idx"])
+    n_graded = len(buckets["match"]) + len(buckets["mismatch"])
+    print(f"\nanswer consistency (last boxed in t_hat vs y; report only):  "
+          + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
+          + (f"   match rate among graded {100*len(buckets['match'])/n_graded:.1f}% (n={n_graded})" if n_graded else ""))
+    if buckets["mismatch"]:
+        print(f"  mismatch idx: {buckets['mismatch']}")
+    if buckets["no box in t_hat"]:
+        print(f"  no-box idx: {buckets['no box in t_hat'][:40]}")
+
     # three rows for a human to read: shortest, median and longest t_true
     order = np.argsort(tt)
     print("\nread these (idx, t_true tokens, t_hat tokens, finish):")
