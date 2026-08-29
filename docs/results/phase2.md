@@ -177,6 +177,18 @@ answer.
 | rows at `max_length` / tokens per epoch (TRL) | 0 / 20,231,546 (= the formatter's count); row 0: 878 tokens, loss mask 133 |
 | wall clock | 938 s for 20 steps (1,990,129 tokens) |
 
+### 1.5B-sum probe — `bench/logs/phase2-probe-1.5b-sum.log`, 2026-08-29 14:05
+
+| | |
+|---|---|
+| loss @ step 1 / 10 / 20 | **0.5579 / 0.4368 / 0.4369**; half-means 0.4881 → 0.4404, first five 0.5208 → last five 0.4264; `grad_norm` 1.36 → 0.124; token accuracy 0.816 → 0.843. Starts higher than the 7B arm's 0.47: the 1.5B surrogate's traces are less predictable to the base model |
+| peak VRAM | **15.39 GiB** allocated / 16.80 reserved |
+| realized train tokens/s | **2,102** steady-state (2,101 overall) |
+| projection @ 2,102 tok/s | 1.5B-sum **9.3 h** · 1.5B-nosum 8.0 h · remaining two 17.3 h |
+| paths | DeltaNet `fla` · conv torch fallback · attention `sdpa` |
+| rows at `max_length` / tokens per epoch (TRL) | 0 / 22,604,920 (= the formatter's count), max row 10,425; row 0: 1,501 tokens, loss mask 245 |
+| wall clock | 1,046 s for 20 steps |
+
 ---
 
 ## 4. Per-inverter records
