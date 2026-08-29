@@ -189,6 +189,7 @@ window" is the mean train loss over the last 50 steps of the epoch.
 | inverter | rows trained / dropped | steps | train wall | tok/s (regime fit) | peak VRAM alloc / reserved | eval_loss e1 / e2 / e3 | train window at e1 / e2 / e3 end | train − eval gap | adapter |
 |---|---:|---:|---:|---:|---|---|---|---|---:|
 | 7B-sum | 4,806 / 0 | 603 | 9.12 h (32,848 s) | 2,141 | 15.44 / 18.39 GiB | **0.3866 / 0.3810 / 0.3847** | 0.374 / 0.349 / 0.313 | +0.012 / +0.032 / +0.072 | 488 MB |
+| 7B-nosum | 4,806 / 0 | 603 | 8.12 h (29,214 s) | 2,085 | 15.27 / 17.54 GiB | **0.3896 / 0.3840 / 0.3876** | 0.375 / 0.349 / 0.314 | +0.015 / +0.035 / +0.074 | 488 MB |
 
 ### 7B-sum — `bench/results/phase2/inverter-7b-sum/`, 2026-08-28 20:14 → 08-29 05:21
 
@@ -214,6 +215,20 @@ Disk after the run: 50 GB free. 59 → 54 GB at launch = training venv 5.1 GB + 
 1.0 GB + formatted files 0.55 GB; 54 → 50 = three 1.4 GB checkpoints (adapter + optimizer state — the
 handoff assumed ~250 MB) + 0.5 GB final adapter + 0.5 GB probe adapter.
 
+### 7B-nosum — `bench/results/phase2/inverter-7b-nosum/`, 2026-08-29 05:44 → 13:52
+
+```
+epoch 1:  0.4190  0.3827  0.3779  0.3750      eval 0.3896  (tok-acc 0.863, entropy 0.391)
+epoch 2:  0.3480  0.3545  0.3427  0.3493      eval 0.3840  (tok-acc 0.865, entropy 0.362)
+epoch 3:  0.3215  0.3259  0.3165  0.3137      eval 0.3876  (tok-acc 0.865, entropy 0.336)
+```
+
+The same shape as 7B-sum to within 0.003 at every point — front-loaded drop, a train-side step at
+each epoch boundary, eval best at epoch 2 by 0.006 and 0.004 back at epoch 3, gap 0.015 → 0.035 →
+0.074. Without the summary the inverter's teacher-forced loss on the traces is only 0.003 higher than
+with it. Merge check on the epoch-3 adapter: `in_proj_qkv` 2.7e-3 / 88.5 %, `q_proj` 3.3e-3 / 84.8 %
+(`merge-check.json`). Disk after the run: 43 GB free.
+
 ---
 
 ## 5. Held-out inversion — paired lengths on the same 200 rows
@@ -228,6 +243,25 @@ inverted`. Gates: 0 empty · 200 rows · every idx in the holdout · median t̂ 
 | inverter | t̂ median / mean / p05 / p95 | t_true median / mean / p05 / p95 | t̂ / t_true at the median | cap-hit @ 8192 | empty |
 |---|---|---|---:|---|---:|
 | 7B-sum, epoch 3 | **2,149** / 2,627 / 181 / 8,000 | 2,172 / 2,574 / 190 / 6,390 | **0.99** | 5.0 % (10) | 0 |
+| 7B-nosum, epoch 3 | **1,966** / 2,530 / 196 / 7,563 | 2,172 / 2,574 / 190 / 6,390 | **0.91** | 5.0 % (10) | 0 |
+| 7B-sum, epoch 2 (`checkpoint-402`) | **2,241** / 2,507 / 157 / 6,777 | 2,172 / 2,574 / 190 / 6,390 | **1.03** | 3.0 % (6) | 0 |
+
+Direction, stated as measured and not explained: the no-summary inverter's traces are **shorter** than
+the summary inverter's at the median here (1,966 vs 2,149; 0.91 vs 0.99 of the true length). The paper's
+Table 2 reports the opposite direction for its R1-Weak surrogate (no-summary 5,434 vs summary 4,972
+tokens) — different ground truth (R1 vs a 7B distill) and a different backbone.
+
+**Answer consistency, three labels** (`docs/11` §5: every mismatch read). *Equivalent-form* = the grader
+rejects an equivalent answer; *alternative-valid* = a different answer that is also correct but is not
+the one the trace was conditioned on; *genuine* = the trace argues away from the given answer. Two
+derived counts: **inconsistent with the conditioned answer** = genuine + alternative-valid (what makes a
+student target `[t̂; y]` contradictory), and **wrong** = genuine.
+
+| inverter | graded match | equivalent-form | alternative-valid | genuine | not gradable | by hand | inconsistent with y | wrong |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 7B-sum, epoch 3 | 105 / 112 | 3 | 0 | 3 | 1 (60498, proof with no canonical box) | 109 / 112 | **3 / 112** | 3 / 112 |
+| 7B-nosum, epoch 3 | 105 / 114 | 4 | 1 | 3 | 1 (42804, cap-severed) | 110 / 113 | **4 / 113** | 3 / 113 |
+| 7B-sum, epoch 2 | 113 / 118 | 3 | 1 | 1 | 0 | 116 / 118 | **2 / 118** | 1 / 118 |
 
 ### 7B-sum, epoch 3 — `bench/results/phase2/holdout-7b-sum.jsonl`
 
@@ -263,7 +297,12 @@ the same family `(165−11k, 12k+2)` with the k-range 0..14 stated in the prose 
 (fishing order: y boxes `P` for the least, the trace boxes the full order `V > T > K > P`, same
 conclusion), 82678 (`f(x)=x+c` vs `x+C`); **ambiguous 1** — 60498 (a proof problem; y's own box is `0`,
 the trace boxes the statement `a=b or b=c or c=a`). So the graded 93.8 % is a lower bound — ≈97 %
-(109/112) by hand — and genuine forgery failures are 3 of 112 gradable rows. The "no box in t̂" bucket
+(109/112) by hand — and genuine forgery failures are 3 of 112 gradable rows. All three genuine failures
+have the same shape: the trace **argues itself away from the answer it was conditioned on** — a units
+"correction", 21 talked down to 20, Yes to No — the answer-conditioning overridden by the model's own
+reasoning, not a format or truncation failure. That is the class Phase 4/5 will have to decide about:
+a student target `[t̂; y]` whose t̂ concludes otherwise is contradictory supervision, and the paper does
+no filtering. The "no box in t̂" bucket
 is two different things: **9 severed at the cap** (cut before their final answer; one cap-hit row boxes
 earlier) and **35 ending in prose**; a trace can reach the answer without boxing it (idx 77473 above did
 neither), so it is not a failure count. "No box in y" is mostly the non-math domains, whose surrogate
@@ -274,3 +313,58 @@ Measured, no interpretation: on unseen inputs the 7B-sum inverter produces trace
 length (median ratio 0.99), in the surrogate's register, that end in a boxed answer; 94 % of the
 gradable ones box the answer they were given. The paper measures fidelity only downstream (student
 accuracy, Phase 5).
+
+### 7B-nosum, epoch 3 — `bench/results/phase2/holdout-7b-nosum.jsonl`
+
+Per-row ratio median 0.97; t̂ shorter on 53.5 % of rows; the median is 9 % under the surrogate's where
+the summary-conditioned inverter's was 1 % under. By domain, t̂ / t_true median: math 2,215 / 2,429
+(n=151) · code 1,824 / 2,355 (28) · physics 998 / 1,001 (9) · biology 1,046 / 893 (5) · puzzle
+579 / 388 (5) · chemistry 717 / 800 (2). Cap-hit 10/200 again, but a different ten: the overlap with
+7B-sum's cap-hit set is **2** rows (idx 32747, 61555; computed from the two files' `finish_reason`),
+so which row runs past 8,192 is mostly a property of the sample, not of the prompt.
+
+| row | t_true → t̂ tokens | reaches the given answer? |
+|---|---|---|
+| short, idx 77473 (paint the wall; y = 100) | 68 → 151 | **Yes**, unboxed: 9×12 = 108, window 2×4 = 8, 108 − 8 = 100 — the arithmetic the summary-conditioned inverter got wrong, with no summary to read. |
+| median, idx 84388 (x+y+xy=2006) | 2,191 → 2,299 | **Yes.** Same factorisation, same four boxed pairs. |
+| long, idx 14587 (angle bisector vs DE; y = 2:5) | 7,755 → 4,431 | **No.** Coordinates, bisector y = x, intersection (39/7, 39/7), then "DG : GE = 5 : 2" and boxes `\dfrac{5}{2}` — the orientation of y's 2:5 inverted. |
+
+| inverter | match | mismatch | no box in t̂ (cap-severed + prose) | no box in y | match rate among graded |
+|---|---:|---:|---|---:|---:|
+| 7B-nosum, epoch 3 | 105 | 9 | 42 (6 + 36) | 44 | **92.1 %** (n=114) |
+
+The nine mismatches, read: **genuine 3** — 18067 (202-city airlines: argues itself from 101 down to
+100), 59441 (ellipse chord: √93/3 against √7), 14587 (above, 5:2 for 2:5); **grader misses /
+alternative valid answers 5** — 29482 (k-range in the prose), 69793 ("Rhombus" vs "The parallelogram
+is a rhombus."), 69125 (a construction described in other words), 39587 (four names boxed separately,
+the last is Petr = y's `P`), 16770 (`3+9k` where y has `7+8k`: 3 to the first power rules out two
+squares and 3 mod 9 rules out two cubes, so it is a valid progression — *alternative-valid*, not the
+surrogate's answer); **not gradable 1** — 42804 (cap-severed with an empty `\boxed{}`). ≈97 % (110/113)
+by hand; genuine failures 3 of 113, the same count and the same shape as 7B-sum — the trace arguing
+away from the answer it was given; inconsistent with the conditioned answer 4 of 113.
+
+The idx 77473 pair is a single-row observation, n = 1, no rate: the summary-conditioned epoch-3 inverter
+invented a 4×3 window and got 96; the no-summary one and the summary epoch-2 one both reached 100 in prose.
+
+### 7B-sum, epoch 2 — `bench/results/phase2/holdout-7b-sum-ep2.jsonl` (`bench/run_phase2_invert.sh`)
+
+Run at the GPU gap after 7B-nosum because eval loss is lowest at epoch 2 and the checkpoint choice cannot
+be made on eval loss alone. Same 200 rows, same sampling. Per-row ratio median 1.03; t̂ shorter on
+49.0 %; cap-hit 6/200 against epoch 3's 10 (overlap with epoch 3's ten: see the consistency file); p95
+6,777 against 8,000. Merge check: `in_proj_qkv` 3.2e-3 / 88.0 %, `q_proj` 3.3e-3 / 84.5 %.
+
+| row | t_true → t̂ tokens | reaches the given answer? |
+|---|---|---|
+| short, idx 77473 | 68 → 146 | **Yes**, in prose: 108 − 8 = 100. |
+| median, idx 84388 | 2,191 → 2,346 | **Yes.** Same four boxed pairs. |
+| long, idx 14587 | 7,755 → 4,485 | **Yes.** Concludes "DF is shorter than FE … 2:5" and boxes `\dfrac{2}{5}`, orientation right. |
+
+Consistency: match 113, mismatch 5, no box in t̂ 38 (3 cap-severed + 35 prose), no box in y 44 —
+95.8 % graded (n=118). The five, read: **genuine 1** — 6618 (21 talked down to 20, as at epoch 3);
+**alternative-valid 1** — 16770 (`3+9k`); **equivalent-form 3** — 25352 (a proof: boxes `p − 1` for
+y's `k | p − 1`), 29482 (k-range in the prose), 54798 (`4·sign(sin 2x)` ≡ `4·sign(sin x)·sign(cos x)`).
+By hand 116/118; inconsistent with the conditioned answer 2/118; wrong 1/118. Epoch 2 against epoch 3
+on identical rows and sampling: cap-hit 6 vs 10, p95 6,777 vs 8,000, graded match 95.8 % vs 93.8 %,
+median ratio 1.03 vs 0.99 — one draw each at temperature 0.7, so the differences carry the resampling
+noise Phase 1 measured (cap-hit flips on ~15 % of rows between two draws of the same model). Which
+adapter Phase 4 serves is the user's decision.
