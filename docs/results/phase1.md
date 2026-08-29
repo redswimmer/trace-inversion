@@ -15,7 +15,7 @@ midpoint).
 |---|---|---|
 | Surrogate `V'` | `DeepSeek-R1-Distill-Qwen-7B`, GGUF F16 | `DeepSeek-R1-Distill-Qwen-1.5B`, GGUF BF16 |
 | Compressor `C'` | `Qwen/Qwen3.5-4B` bf16, vLLM | same |
-| Status | **complete — 5,006 rows** | *(generation in flight)* |
+| Status | **complete — 5,006 rows** | **complete — 5,028 rows** |
 
 Settings, identical on both arms and taken from the paper's repo: `temperature 0.7 · top_p 0.9 ·
 repetition_penalty 1.05 · max_new_tokens 8192`, served at `-np 32 -c 327680` (10,240 tokens/slot).
@@ -256,7 +256,78 @@ silently.
 
 ---
 
-## 4. Method notes that cost time
+## 4. The 1.5B arm
+
+**Lead with this: a weaker surrogate does not produce longer training data — it produces slightly
+*shorter* training data plus a far larger discard pile.**
+
+| trace-tokens only | 1.5B | 7B |
+|---|---:|---:|
+| kept median | **2,480** | 2,804 |
+| kept mean | 2,981 | 3,114 |
+| all-rows median (censored) | **6,502** | 4,915 |
+| cap-hit | **45.9%** | 34.6% |
+
+The kept medians are close and the 1.5B's is *lower*; the all-rows medians differ by 32%. All of the
+extra verbosity lives in the tail the cap removes, so it surfaces as cap-hit rather than as longer
+surviving traces.
+
+### Generation
+
+| | |
+|---|---:|
+| rows generated | 9,314 (of 15,999 usable — 58%, never close to binding) |
+| rows kept | **5,043** |
+| cap-hit | **45.9%** (4,271) |
+| request errors | 12 = **0.13%** |
+| wall clock | ~20 h across two serving configurations |
+
+### Paired against R1, identical prompts (n=9,314)
+
+| | ours | R1 | Δ |
+|---|---:|---:|---:|
+| cap-hit | **45.9%** | 27.2% | **+18.6 pts** (7B: +7.8) |
+| kept p50 (both under cap, n=4,639) | 2,312 | 2,504 | −7.7% |
+| dispersion p75/p25 | 3.69 | 2.66 | |
+| ours shorter on | 55.8% of prompts | | (7B: 62.6%) |
+
+**Drop decomposition:** we drop 4,271 · R1 would drop 2,534 · both 2,130 · **ours only 2,141 = 50% of
+our drops, 23.0% of all prompts** · R1 only 404. Against the 7B's 38% / 13.2%. So the train/serve
+shift is **1.7× larger** for the weaker surrogate, on 9,314 paired prompts.
+
+### Cross-arm drop overlap — read against the noise floor
+
+7,669 prompts were attempted by both arms:
+
+| | |
+|---|---:|
+| both drop (hard prompts) | 2,189 |
+| **1.5B only** (weaker surrogate runs away) | **1,319** |
+| 7B only | 468 |
+| neither | 3,693 |
+| **disagreement** | **23.3%** |
+
+**Against the ~15.4% same-model flip floor** measured from the archive re-draw, only about **7.9
+points** of that disagreement is attributable to surrogate identity — the rest is what the *same*
+model produces against itself at temperature 0.7. Without the floor, 23.3% would read as a large
+surrogate difference; two thirds of it is noise. This is what the archive is for.
+
+### `D₂` for the 1.5B arm
+
+| | |
+|---|---:|
+| rows | **5,028** |
+| gate | exit 0 |
+| Table 1 | median **582** · headers **100.0%** · first-person **99.8%** · LaTeX **80.0%** |
+| dropped | 15 severed at the 2,048 cap (44 → 15 after one `--fix` reseed) |
+
+`π` behaves near-identically on both arms — summary medians 583 and 582, LaTeX 80.5% and 80.0% —
+despite the arms' traces differing substantially. **The compressor is not sensitive to which
+surrogate produced its input**, which is what makes the two `D₂` sets comparable as training data.
+
+---
+
+## 5. Method notes that cost time
 
 - **The cap-hit acceptance band is per-surrogate, not a constant.** The 7B settles at 34.6% and the
   1.5B at 46.5% on identical prompts, so a single threshold either passes a broken 7B or fails a
