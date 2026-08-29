@@ -165,6 +165,18 @@ five rows). Together with the step-1 loss this says the base model needs little 
 what three epochs add, if anything, is what the per-epoch eval loss and the 200-row holdout lengths
 answer.
 
+### 7B-nosum probe — `bench/logs/phase2-probe-7b-nosum.log`, 2026-08-29 05:28
+
+| | |
+|---|---|
+| loss @ step 1 / 10 / 20 | **0.4656 / 0.3524 / 0.4576**; half-means 0.4326 → 0.4092, first five 0.4457 → last five 0.4161; `grad_norm` 1.06 → 0.146; token accuracy 0.839 → 0.853 |
+| peak VRAM | **15.27 GiB** allocated |
+| realized train tokens/s | **2,127** steady-state (2,121 overall) |
+| projection @ 2,127 tok/s | 7B-nosum **8.2 h** · 1.5B-sum 9.2 h · 1.5B-nosum 7.9 h · remaining three 25.3 h |
+| paths | DeltaNet `fla` · conv torch fallback · attention `sdpa` |
+| rows at `max_length` / tokens per epoch (TRL) | 0 / 20,231,546 (= the formatter's count); row 0: 878 tokens, loss mask 133 |
+| wall clock | 938 s for 20 steps (1,990,129 tokens) |
+
 ---
 
 ## 4. Per-inverter records
@@ -235,7 +247,20 @@ Three rows read (shortest, median, longest t_true):
 | median, idx 84388 (math: all positive-integer pairs with x+y+xy=2006) | 2,191 → 2,382 | **Yes.** Rewrites as (x+1)(y+1)=2007, factors 3²·223, checks the divisors, ends with the same four boxed pairs as y. Style indistinguishable from the surrogate's ("Okay, so I have this equation…"). |
 | long, idx 14587 (math: angle bisector of C vs side DE of the square on the hypotenuse; y = 2:5) | 7,755 → 6,393 | **Yes, in a different form.** Coordinates, bisector, intersection, concludes 2:5 but boxes `\dfrac{2}{5}` after debating which form the grader wants — t_true has the mirror-image debate and boxes 2:5. |
 
+**Answer consistency** (report, not a gate — `phase1_stats.py --mode inverted`): the last `\boxed{}`
+in t̂ against the last `\boxed{}` in `y`, graded with `eval_baseline.py`'s `extract_boxed` + `grade`
+(math_verify symbolic equivalence, normalized-string fallback), main thread.
+
+| inverter | match | mismatch | no box in t̂ | no box in y | match rate among graded |
+|---|---:|---:|---:|---:|---:|
+| 7B-sum, epoch 3 | 105 | 7 | 44 | 44 | **93.8 %** (n=112) |
+
+Mismatch idx: 27165, 29482, 6618, 39587, 82678, 6960, 60498. The "no box in t̂" bucket holds all 10
+cap-hit rows (cut before their final answer) and the short-answer domains; a trace can reach the answer
+without boxing it (idx 77473 above did neither), so that bucket is not a failure count. "No box in y"
+is mostly the non-math domains, whose surrogate answers carry no `\boxed{}`.
+
 Measured, no interpretation: on unseen inputs the 7B-sum inverter produces traces at the surrogate's
-length (median ratio 0.99), in the surrogate's register, that end in a boxed answer; whether that
-answer is the given one was 2 of 3 in the rows read. The paper measures fidelity only downstream
-(student accuracy, Phase 5); nothing here is promoted to a rate.
+length (median ratio 0.99), in the surrogate's register, that end in a boxed answer; 94 % of the
+gradable ones box the answer they were given. The paper measures fidelity only downstream (student
+accuracy, Phase 5).
