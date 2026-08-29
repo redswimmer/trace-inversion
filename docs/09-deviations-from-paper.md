@@ -33,11 +33,11 @@ makes the original impossible · `CHOICE` deliberate design decision.
 
 | # | Item | Paper | Ours | Forced? | Expected impact |
 |---|---|---|---|---|---|
-| 3.1 | Method | **full-parameter SFT** | **UNDECIDED** — FFT where it fits, LoRA only where it doesn't | HW (partly) | **Possibly no deviation at all** — see §5.1 |
-| 3.2 | Learning rate | 1e-5 | 1e-5 if FFT (matches paper); 1e-4 – 2e-4 if LoRA | follows 3.1 | Depends entirely on 3.1 |
+| 3.1 | Method | **full-parameter SFT** | student **FFT** ✅ no deviation; inverter **bf16 LoRA** | HW (inverter only) | **Decided on measurement** — see §5.1 |
+| 3.2 | Learning rate | 1e-5 | student **1e-5** (matches paper); inverter 1e-4 – 2e-4 (LoRA) | follows 3.1 | Student matches; inverter cannot |
 | 3.3 | LR schedule | cosine, warmup 0.1 | same | — | — |
 | 3.4 | Epochs | 3 | 2–3 (TBD) | COST | Possible slight undertraining |
-| 3.5 | Sequence length | `cutoff_len` 16384 | 8192 (TBD) | HW | Truncates the longest traces; paper's traces run 5-6k so most survive |
+| 3.5 | Sequence length | `cutoff_len` 16384 | student **16384** ✅ no deviation; inverter **12288** | HW (inverter only) | Measured, not estimated — `12` §1. Inverter needs ≥9,716 (1,524 prompt + 8,192 trace); 12288 gives margin |
 | 3.6 | Effective batch | 24 (inverter) / 96 (student) | matched via grad accumulation | — | Must not collapse both to one value |
 | 3.7 | Packing | `packing: true`, `neat_packing: false` (leaky) | TRL packing (correct masking) | CHOICE | We match TRL's *correct* behavior, not the reference's leaky one |
 
@@ -53,34 +53,45 @@ makes the original impossible · `CHOICE` deliberate design decision.
 
 ## 5. The two deviations that could change conclusions
 
-### 5.1 Fine-tuning method — OPEN DECISION (3.1)
+### 5.1 Fine-tuning method — DECIDED ON MEASUREMENT (3.1)
 
-**Status: not yet decided.** Deferred until baselines lock the student model. This may turn out
-not to be a deviation at all.
+**Status: resolved 2026-08-26.** Measured, not estimated — full method and numbers in `12` §1.
+RTX 4090 · bf16 · gradient checkpointing · batch 1 · `Qwen3_5ForCausalLM` (text-only) ·
+`torch.cuda.max_memory_allocated()`, with optimizer states added at 2 B/param (8-bit) and
+4 B/param (bf16). Usable budget ≈ **23.4 GiB**.
 
-The paper full-fine-tunes. Whether we can depends entirely on which student we pick — at
-~6 bytes/param with 8-bit Adam, bf16, and gradient checkpointing:
+| Model | Role | Mode | @8192 | @12288 | @16384 |
+|---|---|---|---:|---:|---:|
+| Qwen3.5-2B | student | **FFT + 8-bit Adam** | 12.64 GiB ✅ | 14.2 GiB ✅ | **15.79 GiB ✅** |
+| Qwen3.5-2B | student | FFT + bf16 Adam | 16.15 GiB ✅ | — | 19.30 GiB ✅ |
+| Qwen3.5-4B | inverter | FFT | 27.81 GiB ❌ | — | OOM ❌ |
+| Qwen3.5-4B | inverter | **LoRA, bf16 base** | 15.11 GiB ✅ | **18.30 GiB ✅** | 21.47 GiB ⚠️ |
 
-| Student | FFT states | + activations @8k | FFT viable? |
-|---|---:|---:|---|
-| Qwen3.5-0.8B | 4.8 GB | ~7 GB | ✅ comfortable |
-| Qwen3.5-2B | 12 GB | ~15 GB | ✅ fits |
-| Qwen3.5-4B | 24 GB | ~28 GB | ❌ LoRA required |
+**Student: full-parameter SFT at LR 1e-5, `max_length` 16384 — no deviation from the paper at all.**
+The earlier estimate ("~15 GB @8k") was right but conservative; 16384, the paper's own `cutoff_len`,
+also fits, so row 3.5 closes as well.
 
-So **if the baselines point at 0.8B or 2B, we match the paper's method exactly** — full-parameter
-SFT at LR 1e-5 — and this row disappears from the deviations list. Only a 4B student forces LoRA.
+**Inverter: LoRA on a bf16 base, not QLoRA.** 4B full fine-tuning is confirmed impossible. But NF4 is
+not needed either — a bf16 base with LoRA fits at 15.11 GiB @8k and **18.30 GiB measured at the chosen 12288**.
+Dropping NF4 removes the `bitsandbytes` dependency, makes `06` gotcha 9 ("QLoRA on `qwen3_5` is
+UNVERIFIED") moot rather than unresolved, and avoids quantizing the one model that must learn a
+genuinely new behaviour. Keep QLoRA in reserve only if 16384 is wanted for the inverter — 21.47 GiB
+leaves too little margin for a multi-hour run.
 
-**If LoRA does become necessary:** it adapts style well but is weaker at large behavioral shifts,
-and "begin emitting 5,000-token chains of thought" is exactly such a shift. If effect sizes then
-come in below the paper's, LoRA is the first suspect. Mitigations: rank 32–64, target all linear
-projections, LR 1e-4–2e-4.
+**LoRA remains the first suspect** if inverter trace fidelity comes in below the paper's: it adapts
+style well but is weaker at large behavioural shifts, and "emit a 5,000-token chain of thought" is
+exactly such a shift. Mitigations: rank 32–64, all linear projections except `lm_head`, LR 1e-4–2e-4.
 
-**Either way, run the 2B both ways.** It's the largest student that fits FFT, so one paired
-comparison measures what LoRA costs on this task instead of leaving it as an unquantified risk.
+**Still run the 2B student both ways.** It is the largest student that fits FFT, so one paired
+comparison measures what LoRA costs on this task instead of leaving it an unquantified risk.
 
-*Caveat on the table above:* Qwen3.5's 248,320-token vocab makes embed/`lm_head` a large share of
-a small model's parameters, and the fp32 logits tensor is ~8 GB at 8k context before TRL's
-`chunked_nll` reduces it. These numbers assume `chunked_nll` stays enabled.
+Two things the same measurement settled:
+
+- **DeltaNet trains on Ada/SM89.** Forward + backward through the 48 gated-delta-net layers with
+  gradient checkpointing works. This was the largest unverified architectural risk in the plan.
+- **`chunked_nll` is load-bearing, confirmed.** Naive fp32 logits + gradient at 248,320 vocab is
+  **15.16 GiB at 8k and 30.31 GiB at 16k** — larger than the card, before weights. Every number above
+  assumes it stays enabled.
 
 ### 5.2 A student that already reasons (2.5)
 
@@ -118,7 +129,10 @@ cross-family student as a check.
 | 7.2 | `max_new_tokens` | 8192 | 16384 for baselines | Smoke test truncated 4/5 JEEBench items at 2048 — capping would measure the cap |
 | 7.3 | Victim concurrency | n/a (8 GPUs) | 32 (hard ceiling — recurrent-state cache OOMs at 40) | Measured, see `08` |
 | 7.4 | Dataset mirror | `llamafactory/OpenThoughts-114k` | same | Canonical `open-thoughts/` repo has an incompatible schema |
-| 7.5 | Split inference engine | vLLM only | victim on llama.cpp, everything else on vLLM | see below |
+| 7.9 | Dropping capped traces | `preprocess_r1_distill.py`: `if '</think>' not in prediction: continue` | **same — no deviation** ✅ | The reference already discards non-terminating traces. Our over-generate-and-drop policy matches it; only the over-generation ratio is ours |
+| 7.8 | Surrogate system prompt | repo injects the R1-Distill prompt; **paper never mentions it** | **same as the repo** — not the near-identical one the OpenThoughts rows carry | `07` §3: it is part of what makes the surrogate emit long traces, so it must not be left to chance. See `11` §3 |
+| 7.10 | `D₂`'s prompt distribution is surrogate-filtered | same drop policy, **never measured** | **same policy, measured** ✅ | **PROVISIONAL, n=1,142 — being re-measured on the full ~7,875-row 7B run.** Source: `~/trace-inversion-bench/archive/traces-7b-partial-1130rows.jsonl` (the name says 1130; it holds 1,142 — the count was taken before the last flush). Same cap, system prompt and sampling as the live run; reproduced independently 2026-08-26. Dropping capped traces removes **34.2%** of prompts, and paired against R1's ground truth on the *same* prompts, **33% of our drops (11.2% of all prompts) are ones R1 completes fine** (we drop 390, R1 would drop 314, both 262, ours-only 128, R1-only 52). An earlier figure of 31.6% / 33% / 10.3% circulated with no recorded sample and is not recoverable — do not cite it. **Treat all three numbers as ±4 pts.** Two independent samples of the *same* 259 prompts at temperature 0.7 give cap-hit 31.7% and 35.1%, disagreeing on capped-vs-kept for 15.1% of rows: whether a given prompt hits the cap is substantially a resampling outcome, not a fixed property of the prompt. The 7B probe's 36.5% / 40% / 14.5% (n=200) sits inside that noise, so it is not evidence of a shift. **The 33% idiosyncratic share is an upper bound; the stable component is ~20%, not ~27%.** The flip rate is *not* uniform across drop types, so the marginal 18.3% must not be applied to the ours-only subset: ours-only drops flip back to kept on a re-draw **39.3%** of the time (11/28, CI [23.6, 57.6]) while both-cap drops flip only **7.4%** (4/54, CI [2.9, 17.6]) — Fisher exact OR 8.1, p=0.0008. That is mechanical rather than statistical: a both-cap prompt is genuinely long, since R1 exceeds 8,192 on it too, so it caps reliably; an ours-only prompt is by construction one R1 finishes, i.e. sitting at our boundary, which is exactly where a re-draw changes the outcome. Propagating 39.3% to the 128 ours-only rows leaves ~78 stable = **19.9% of our drops, 6.8% of prompts** (CI range 13.9-25.3% of drops). Applying the marginal rate instead gives ~27% / 9.2% and overstates how much of the drop is a real surrogate property. **State the mechanism, not just the number: the number moves with n, the mechanism does not.** Selecting on *R1 completes this* is selecting for marginality — the criterion that defines the ours-only set guarantees the prompt does not force a cap, which places it at our model's boundary — so the marginal rate is biased low for that subset in a predictable direction, structurally rather than by chance. **The 1.5B arm has the same structure and will hit the same error**, so re-derive its flip rate on its own ours-only subset rather than reusing either arm's marginal figure — they are where *our* 7B ran away, not hard prompts. So the inverter trains on a surrogate-filtered distribution and Phase 4 serves it on split B, which is essentially unfiltered (victim truncation was 0.0-0.4%). **A train/serve shift created by our own drop policy.** The paper's code drops identically and carries the same bias unmeasured. Not a Phase 1 problem and not fixed here — reported in `docs/results/phase1.md`, and the two-arm design measures it for free: overlap between the 7B's and 1.5B's drops separates "genuinely hard prompt" from "this surrogate loops here". |
+| 7.11 | The two arms cover **different amounts of prompt space** | not measured | **measured per arm** ✅ | Follows from 7.10. Cap-hit is surrogate-specific, so each arm's `D₂` is built from a different subset of split A. The 7B drops ~33%; the 1.5B is more verbose on every Phase 0 measurement (median 4,849 vs 3,875 at a 32k cap; 35.0% vs 19.2% would exceed 8192) and is projected far higher. **So the arms differ not only in surrogate strength — the intended variable — but in how much of the prompt space each training set covers.** That is a confound when reading the surrogate-strength comparison, and it must be reported alongside it. It is also a genuine finding: a weak surrogate may work partly *because* it trains on the subset it handles cleanly, which the paper never measured. Split A was extended to 16,000 indices so the weaker arm is not silently starved.  **MEASURED ON BOTH ARMS, 2026-08-27.** 7B cap-hit **34.6%** (n=7,669), 1.5B **46.5%** (n=200 probe) on identical prompts. The shape is the finding: the 1.5B's **kept** median is 2,861 against the 7B's 2,804 — nearly identical — while its **all-rows** median is 6,651 against 4,915. **The extra verbosity lives almost entirely in the tail the cap removes, so a weaker surrogate does not produce longer training traces; it produces the same traces plus a much larger discard pile.** Ours-only drop share 51% vs 38%, so **23.5% of the whole prompt space leaves the 1.5B's D₂ for surrogate-specific reasons against 13.2% for the 7B** — roughly double. The paper used the 1.5B as its headline surrogate and never measured what its own drop policy removed. Cap-hit is per-surrogate, so the acceptance band is too: 10-45% for the 7B, 10-58% for the 1.5B, and split A's 15,999 usable rows exhaust at **68.75%** (5,000 kept needs a 31.25% keep rate) — the one threshold that is arithmetic rather than judgement. || 7.5 | Split inference engine | vLLM only | victim on llama.cpp, everything else on vLLM | see below |
 | 7.6 | Generation cap | none set (Evalchemy defaults) | **32,768 tokens / 40,960 context**, seed 1234 | see below |
 
 ### 7.5 Why the split engine is acceptable

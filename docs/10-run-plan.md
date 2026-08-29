@@ -13,6 +13,44 @@ full precision.
 
 ---
 
+## Before proposing an experiment
+
+Answer these four **in order**. If any fails, do not propose it.
+
+| # | Question | What does not count as an answer |
+|---|---|---|
+| 1 | **What specific question does it answer?** | "It would be interesting." "For comparison." "As a reference point." The answer must have a possible *outcome that changes what we do*. |
+| 2 | **What is compared to what?** | Name both sides concretely: which artifact, scored by which metric, against which reference. |
+| 3 | **Does anything ELSE vary alongside the variable of interest?** | Provenance, harness, sampling settings, serving stack, system prompt. If so the result is uninterpretable *no matter how cleanly it runs*. |
+| 4 | **Does the machinery exist?** | If not, building it is part of the cost and the proposal carries it. "Cheap to run" is not "cheap." |
+
+> **Cost is never a reason to run an experiment. It is only ever a reason not to.**
+
+**Worked example — the R1-surrogate arm** (`docs/11` §2, considered and rejected). The sequence is the
+instructive part, because every round narrowed a vague proposal toward a concrete one and the concrete
+version was invalid:
+
+| | |
+|---|---|
+| proposed | because generation was free — the traces are already on disk. That is **question 4 answered first, and 1-3 not asked at all**, and it was labelled an "optional reference point", which *defers* justification rather than supplying it. |
+| round 1 | *what is it for?* → an abstract answer about testing flatness across 450× rather than 4.7× |
+| round 2 | *what would you compare the traces to?* → TF1 against the victim's withheld real traces |
+| round 3 | *does the project do that anywhere?* → **no.** No TF1/BLEU/ROUGE code exists. Question 4 was actually *unanswered*: what had been checked was that generation was free, not that scoring existed. |
+| round 4 | *sounds like we're not doing it* → **question 3, finally.** The bundled traces differ from ours in provenance as well as surrogate strength, so the sweep confounds the variable it measures. Fatal — and present from the very beginning. |
+
+The four questions asked up front would have killed it in a minute instead of an hour, and **question 3
+would have killed it outright**.
+
+**The word is the tell.** *"Optional", "reference", "nice to have", "while we're at it", "since it's
+free"* — these are the labels a proposal wears when it has not answered question 1. Treat them as a
+prompt to ask the four questions, not as a category of work.
+
+**The corollary:** a proposal that survives only because nobody asked what it would measure is
+indistinguishable from a good one until someone asks. Here, the user asked. Neither of the two sessions
+running the work did.
+
+---
+
 ## Role assignments
 
 | Role | Model | Format | Engine | Precision | Trained? |
@@ -21,8 +59,8 @@ full precision.
 | **Surrogate** `V'` (primary) | `DeepSeek-R1-Distill-Qwen-7B` | F16 14.19 GiB | llama.cpp | F16 | no |
 | **Surrogate** `V'` (arm 2) | `DeepSeek-R1-Distill-Qwen-1.5B` | BF16 3.32 GiB | llama.cpp | bf16 | no |
 | **Compressor** `C'` | `Qwen/Qwen3.5-4B` | safetensors | vLLM | bf16 | no (zero-shot) |
-| **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 | **yes** |
-| **Student** `S` | `Qwen/Qwen3.5-2B` | safetensors | TRL → vLLM | bf16 (**full FT**) | **yes** |
+| **Inverter** `I` | `Qwen/Qwen3.5-4B` | safetensors | TRL → vLLM | bf16 + **LoRA** (not QLoRA) | **yes** |
+| **Student** `S` | `Qwen/Qwen3.5-2B` | safetensors | TRL → vLLM | bf16 (**full FT**, `max_length` 16384) | **yes** |
 
 **Both surrogates run** — decided on Phase 0 measurements. The 1.5B sits 15 pts *below* the student
 on JEEBench (32.6 vs 47.8), inverting the paper's ordering; the 7B clears it by 12.8 and sits
@@ -72,7 +110,15 @@ Yields `D₂ = {(x', y', b', t')}` — the inverter's training set.
 its two few-shot exemplars were never released. Validate against Table 1's style statistics
 (median ~592 tokens, bold headers ~93%, first-person ~97%, LaTeX ~72%).
 
-Est. ~4 h for both surrogates. **Sweep concurrency first** (`bench/sweep_concurrency.sh`).
+**Over-generate 1.34× and drop capped rows.** 25.5% ± 2.5 of R1's own ground-truth traces on this
+dataset exceed `max_new_tokens 8192`; a capped trace has no `</think>` and poisons the inverter
+(`12` §2). 6,706 rows in, ~5,000 clean out, 31.5 M generated tokens.
+
+Est. **~29-31 h** for both surrogates including compression — revised up from ~4 h, then from
+~15-18 h once the 7B run was measured. **Sweep concurrency at 10,240/slot, not 32,768**
+(`bench/sweep_concurrency.sh`); for the 7B that is 32 slots / 1,270 t/s **swept**. Treat that as a
+*ranking* of slot counts, not an operating rate: the 7B realized ~445 t/s in the real run, so budget
+from the first 30 minutes of the run itself (`11` §5).
 
 ## Phase 2 — Train the inverter *(paper Stage 1 cont.)*
 
@@ -81,8 +127,10 @@ Est. ~4 h for both surrogates. **Sweep concurrency first** (`bench/sweep_concurr
 | 2.1 | Qwen3.5-4B | TRL `SFTTrainer` | `(x', y', b') → t'` — summary setting |
 | 2.2 | Qwen3.5-4B | TRL `SFTTrainer` | `(x', y') → t'` — no-summary setting |
 
-Two separately trained inverters, per §4. FFT if it fits, else LoRA r=32-64.
-Est. ~14 h for both.
+Two separately trained inverters, per §4. **LoRA r=32-64 on a bf16 base** — 4B FFT is confirmed
+impossible (27.81 GiB @8k) and NF4 is not needed (bf16 LoRA is 15.11 GiB @8k). `max_length` **12288**:
+the inverter prompt is ~1,524 tokens (problem 81 + answer 542 + 900-token summary), so a cap-8192
+trace needs ~9,716. Measured in `12` §1 and §3. Est. ~14 h for both.
 
 ## Phase 3 — Query the victim *(paper Stage 2)*
 
@@ -92,8 +140,24 @@ Est. ~14 h for both.
 | 3.2 | Compressor | vLLM | victim summaries `b*` from victim traces |
 
 The victim's real traces `t` are **withheld from the attack** and used only for (a) the
-`Victim-Trace` oracle baseline and (b) Table 2 fidelity scoring. This is what a local victim buys
+`Victim-Trace` oracle baseline. (They were also the Table 2 fidelity reference until that was
+dropped — see Phase 4.) This is what a local victim buys
 that no API victim can.
+
+> **Make the withholding STRUCTURAL here, in 3.1 — not a convention.** The sentence above states the
+> rule, which is exactly what makes it feel handled when nothing enforces it. `t` is simultaneously
+> the **`Victim-Trace` oracle training condition** — the ceiling row of Table 3 — so it must never
+> reach the attack path, and today that rests on remembering, across three phases and however many
+> sessions. The oracle alone is sufficient reason; dropping the fidelity scorer does not weaken this.
+>
+> **Write `t` to a different file from the `(y, b*)` the attack consumes**, so leaking it requires
+> opening a file the attack path has no reason to touch. One wrong join otherwise puts the oracle
+> into the attack, and the result is silently meaningless while *looking like a spectacular success*
+> — the worst available failure shape, and one no gate downstream can catch, because a leaked oracle
+> fails no sanity check. It would silently invalidate the headline result, which is Table 3.
+>
+> **This is a Phase 3 decision and cannot be deferred to Phase 4**: by then the file layout is
+> fixed. Raise it before 3.1 runs.
 
 Est. **~10-15 h** — revised down from 23 h. The victim's measured median is only 3,484 tokens
 (JEEBench) / 593 (MATH500), not the ~5k assumed. Its p95 is 17,795, so per-slot context can drop
@@ -105,7 +169,34 @@ below 32k to buy more slots. **Sweep first at 16k/slot.**
 |---|---|---|---|
 | 4.1 | Inverter (merged) | vLLM | synthetic traces `t̂` from `(x, y, b*)` |
 
-Est. ~4 h. Then score `t̂` against withheld `t` → **Table 2 reproduction**.
+Est. ~4 h. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
+looks sane against the victim's, then run the rest. **No new tooling.** If you want the length as a
+number, point `bench/phase1_stats.py`'s existing length reporting at the output file — a flag on code
+we already have.
+
+> **Considered and rejected: a Table 2 fidelity suite (TF1 / BLEU / ROUGE).** Not a missing tool — the
+> metrics do not measure what their names imply.
+>
+> **They are largely length in disguise.** Across the paper's own six Table 2 rows, Len correlates with
+> ROUGE-1 at **r = +0.945**, TF1 at **+0.916**, ROUGE-L **+0.890**, BLEU **+0.889**, ROUGE-2 **+0.838**
+> (n=6, so this corroborates the structural argument rather than carrying it). Sort Table 2 by length
+> and the fidelity columns sort with it.
+>
+> **The structure is why.** TF1's recall term is `|shared tokens| / |tokens in the real trace|`, so a
+> short trace cannot recall a long one *regardless of reasoning quality*, while precision is nearly free
+> — two traces on the same problem share `the/so/then/we/x/=` in bulk. A trace concluding `x=5` and one
+> concluding `x=7` have near-identical token bags. **The metric cannot separate correct reasoning from
+> incorrect, and it heavily rewards length.**
+>
+> The paper calls these "auxiliary diagnostics" itself, and its headline finding cuts against them:
+> synthesized traces sometimes *beat* the oracle, so lower similarity with better outcomes is the
+> interesting case, not a failure. **Table 3 — downstream student accuracy — carries the entire result.**
+>
+> **Also rejected: a formal length gate.** Either the inverter learns or it does not, and student
+> training reveals that either way. A 1,000-token trace where 4,000 was expected is not a hidden
+> property needing instrumentation — it is the most visible thing about the output file. A gate would
+> earn its place only if Phase 4 fed Phase 5 unattended, and it does not: there is a checkpoint between
+> them. Smoke test, spot-check, proceed.
 
 ## Phase 5 — Train students *(paper Stage 3)*
 
@@ -119,7 +210,7 @@ Five conditions, matching the paper exactly:
 | **Synthesized-Trace (ours)** | `t̂`, `y` |
 | Victim-Trace (oracle) | `t`, `y` — withheld ground truth |
 
-Plus, if the 2B is chosen, the same condition run **FFT and LoRA** to measure what LoRA costs.
+Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to measure what LoRA costs.
 Est. ~20 h.
 
 ## Phase 6 — Evaluate
@@ -134,17 +225,18 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | Phase | Est. |
 |---|---|
 | 0 Baselines | ~30 h *(actual, incl. re-runs)* |
-| 1 Surrogate data (**2 surrogates**) | ~4 h |
+| 1 Surrogate data (**2 surrogates**) | **~29-31 h** *(measured mid-run; see `12` §7)* |
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
-| 3 **Victim queries** | **~23 h** |
+| 3 **Victim queries** | **~10-15 h** |
 | 4 Inversion | ~4 h |
 | 5 Student training | ~20 h |
 | 6 Evaluation | ~8 h |
-| **Total** | **~120 h** (~5 days of GPU time) |
+| **Total** | **~135-150 h** (~6 days of GPU time) |
 
-Every individual stage fits an overnight run. Phase 3 dominates; if it needs cutting, the paper's
-own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and 2k would halve it
-again at some cost to the result.
+Every individual stage fits an overnight run. **Phase 2 now dominates** (~28 h), with Phase 5 next;
+Phase 3 dropped to ~10-15 h once the victim's real trace lengths were measured. If generation needs
+cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
+2k would halve it again at some cost to the result.
 
 ## Engine boundary
 

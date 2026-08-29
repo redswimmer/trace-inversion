@@ -10,7 +10,23 @@
 # so slots and per-slot context trade directly. Per-slot context must still
 # cover the longest generation you expect, or long requests fail.
 #
-# Usage: bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx> [slots...]
+# Probe length costs ~6%, but SWEPT AND REALIZED ARE DIFFERENT NUMBERS (~2.4x).
+# Measured on the 7B at ctx 10240: -ntg 512 gives 1,270 gen t/s and -ntg 4096
+# gives 1,192, so KV depth alone costs only 6.1% at 32 slots. NTG stays a knob
+# because 6% is real, but it is NOT the big term.
+#
+# The big term is that llama-batched-bench runs N sequences at IDENTICAL depth —
+# a perfectly rectangular batch — while llama-server runs them at RAGGED depths
+# under continuous batching. The real 7B run sustained ~430-555 t/s against a
+# swept 1,192: about 2.4x optimistic. GPU sat at 37-47% utilization with all 32
+# slots busy, not CPU-bound, not swapping, no context shift — consistent with the
+# ragged-batch attention path, on this Vulkan build, being the limit.
+#
+# So: use a sweep to pick SLOT COUNT, which it ranks correctly. Do NOT use its
+# absolute t/s to build a time budget. Budget from the first 30 minutes of the
+# real run with a full queue. NTG defaults to 4096; set it near your median.
+#
+# Usage: [NTG=<gen_tokens>] bench/sweep_concurrency.sh <model.gguf> <per_slot_ctx> [slots...]
 set -uo pipefail
 
 MODEL="${1:?usage: sweep_concurrency.sh <model.gguf> <per_slot_ctx> [slots...]}"
@@ -19,18 +35,22 @@ shift 2
 SLOTS=("${@:-1 4 8 16 24 32}")
 [[ $# -eq 0 ]] && SLOTS=(1 4 8 16 24 32)
 
+NTG="${NTG:-4096}"
 MODELS="${HOME}/trace-inversion-bench/models"
 [[ -f "$MODEL" ]] || MODEL="${MODELS}/${MODEL}"
 [[ -f "$MODEL" ]] || { echo "no such model: $MODEL"; exit 1; }
 
 TAG=$(basename "$MODEL" .gguf)
-OUT="${HOME}/Development/papers/trace-inversion/docs/results/sweeps/${TAG}-ctx${CTX}.md"
+OUT="${HOME}/Development/papers/trace-inversion/docs/results/sweeps/${TAG}-ctx${CTX}-ntg${NTG}.md"
 mkdir -p "$(dirname "$OUT")"
 
 {
   echo "# Concurrency sweep — ${TAG}"
   echo
-  echo "Per-slot context: ${CTX} · KV cache q8_0 · flash-attn on · $(date '+%Y-%m-%d %H:%M')"
+  echo "Per-slot context: ${CTX} · **generation probe: ${NTG} tokens** · KV q8_0 · flash-attn on · $(date '+%Y-%m-%d %H:%M')"
+  echo
+  echo "Numbers below are only valid for generations near ${NTG} tokens. A shorter probe"
+  echo "overstates sustained throughput because per-token attention cost grows with KV depth."
   echo
   echo "| Slots | Total KV | Gen t/s | Total t/s | Result |"
   echo "|---:|---:|---:|---:|---|"
@@ -40,9 +60,9 @@ BEST_S=0; BEST_TPS=0
 for S in "${SLOTS[@]}"; do
   TOTAL=$(( CTX * S ))
   echo "[$(date +%H:%M:%S)] probing ${S} slots (total ctx ${TOTAL})…"
-  # short generations keep the probe quick; we want relative scaling, not absolutes
-  RES=$(timeout 1800 llama-batched-bench -m "$MODEL" -ngl 999 -c "$TOTAL" \
-        -npp 512 -ntg 512 -npl "$S" -fa on -ctk q8_0 -ctv q8_0 2>&1)
+  # probe at the real generation length — see the header comment for why 512 lies
+  RES=$(timeout 3600 llama-batched-bench -m "$MODEL" -ngl 999 -c "$TOTAL" \
+        -npp 512 -ntg "$NTG" -npl "$S" -fa on -ctk q8_0 -ctv q8_0 2>&1)
 
   ROW=$(echo "$RES" | grep -E "^\|" | tail -1)
   if [[ -z "$ROW" ]]; then
