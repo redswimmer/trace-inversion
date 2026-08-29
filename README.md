@@ -19,15 +19,23 @@ withheld from the attack, so we can measure exactly how close the forgeries get 
 
 ## The cast
 
-Five roles, four sets of weights. Two are trained; the rest are only ever run.
+Five roles. Three are only ever run; two are trained — and those two are trained **more than once
+each**, because the experiment is a grid, not a single pipeline.
 
-| Role | Symbol | Here | Trained? | Job |
-|---|---|---|---|---|
-| **Victim** | `V` | Qwen3.8-27B, 4-bit, llama.cpp | never | The strong model being stolen from. Answers problems, shows a summary, hides its trace. |
-| **Surrogate** | `V'` | DeepSeek-R1-Distill-Qwen-7B, and -1.5B as a second arm | never | A weaker reasoner we run ourselves, so its traces are visible. Exists only to manufacture the inverter's training data. |
-| **Compressor** | `C'` | Qwen3.5-4B, zero-shot with a fixed prompt | never | Writes a victim-style summary of each surrogate trace, so the training data has the "summary" column the victim will later provide. |
-| **Inverter** | `I` | Qwen3.5-4B + LoRA | **yes** | Learns *(problem, answer, summary) → trace* from surrogate data. Then pointed at the victim's outputs. |
-| **Student** | `S` | Qwen3.5-2B, full fine-tune | **yes** | The model we are trying to improve. Trained on the forged traces; benchmarked on MATH500 and JEEBench. |
+| Role | Symbol | Here | Trained? | How many | Job |
+|---|---|---|---|---|---|
+| **Victim** | `V` | Qwen3.8-27B, 4-bit, llama.cpp | never | 1 | The strong model being stolen from. Answers problems, shows a summary, hides its trace. |
+| **Surrogate** | `V'` | DeepSeek-R1-Distill-Qwen-**7B** and **-1.5B** | never | **2 arms** — each runs through the whole pipeline | A weaker reasoner we run ourselves, so its traces are visible. Exists only to manufacture the inverter's training data. |
+| **Compressor** | `C'` | Qwen3.5-4B, zero-shot with a fixed prompt | never | 1 | Writes a victim-style summary of each surrogate trace, so the training data has the "summary" column the victim will later provide. |
+| **Inverter** | `I` | Qwen3.5-4B + LoRA | **yes** | **4 adapters** — {7B arm, 1.5B arm} × {victim shows a summary, victim shows only the answer} | Learns *(problem, answer[, summary]) → trace* from one arm's surrogate data. Then pointed at the victim's outputs. |
+| **Student** | `S` | Qwen3.5-2B, full fine-tune | **yes** | **5 checkpoints** — one per training-data condition (below) | The model we are trying to improve. Benchmarked on MATH500 and JEEBench. |
+
+Why the inverter is trained four times rather than once: the two *settings* are different input
+formats (an inverter trained with summaries can't be fed inputs without them, and the paper keeps
+them separate so each setting's number is that setting's alone), and the two *arms* are different
+training data (the point of the second arm is to change one thing — the surrogate — and watch what
+happens downstream, which needs one inverter per surrogate with everything else identical). The
+paper's own Table 2 has the same four.
 
 Problems come from OpenThoughts-114k, in two disjoint splits — one the surrogate sees, one the victim sees.
 
