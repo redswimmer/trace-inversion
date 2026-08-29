@@ -181,7 +181,7 @@ answer.
 
 | | |
 |---|---|
-| loss @ step 1 / 10 / 20 | **0.5579 / 0.4368 / 0.4369**; half-means 0.4881 → 0.4404, first five 0.5208 → last five 0.4264; `grad_norm` 1.36 → 0.124; token accuracy 0.816 → 0.843. Starts higher than the 7B arm's 0.47: the 1.5B surrogate's traces are less predictable to the base model |
+| loss @ step 1 / 10 / 20 | **0.5579 / 0.4368 / 0.4369**; half-means 0.4881 → 0.4404, first five 0.5208 → last five 0.4264; `grad_norm` 1.36 → 0.124; token accuracy 0.816 → 0.843. Starts higher than the 7B arm's 0.47 (token accuracy 0.816 vs 0.83): the 1.5B surrogate's traces are less predictable to the base model, which sits next to Phase 1's dispersion measurement — the 1.5B's kept traces were more spread than R1's on the same prompts, p75/p25 3.69 vs 2.66 (`phase1.md` §4) — cited, not explained |
 | peak VRAM | **15.39 GiB** allocated / 16.80 reserved |
 | realized train tokens/s | **2,102** steady-state (2,101 overall) |
 | projection @ 2,102 tok/s | 1.5B-sum **9.3 h** · 1.5B-nosum 8.0 h · remaining two 17.3 h |
