@@ -8,6 +8,7 @@
 # projection is reported before the long run starts. Never edit this file while it runs.
 set -uo pipefail
 cd /home/asavala/Development/papers/trace-inversion
+export PYTHONUNBUFFERED=1   # trainer log dicts otherwise sit in a stdout buffer until exit
 
 ARM="${1:?usage: run_phase2.sh <7b|1.5b> <sum|nosum> [attn]}"
 SET="${2:?setting}"
@@ -31,6 +32,7 @@ note "train done; merge"
 .venv/bin/python bench/phase2_train.py --arm "$ARM" --setting "$SET" --merge >> "$LOG" 2>&1
 rc=$?
 if [[ $rc -ne 0 ]]; then note "MERGE FAILED rc=${rc}"; tail -30 "$LOG"; exit $rc; fi
+cp "$MERGED/merge-check.json" "$OUT/merge-check.json"   # the merged dir is deleted below; keep its check
 note "merge done; invert the holdout (vLLM)"
 PATH="$PWD/.venv-vllm/bin:$PATH" .venv-vllm/bin/python bench/invert.py \
     --model "$MERGED" --data "$HOLD" --out "$INV" >> "$LOG" 2>&1
