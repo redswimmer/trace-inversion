@@ -31,25 +31,18 @@ def load_model(attn):
                                               attn_implementation=attn, device_map={"": 0})
 
 
-def kernel_path(fn):
-    """Which implementation transformers resolved for a `use_kernel_func_from_hub_with_fallback`
-    function: the original package (fla / causal_conv1d) or the silent torch fallback."""
-    seen, stack = set(), [fn]
-    while stack:
-        g = stack.pop()
-        if id(g) in seen or not callable(g):
-            continue
-        seen.add(id(g))
-        try:
-            nl = inspect.getclosurevars(g).nonlocals
-        except (TypeError, ValueError):
-            nl = {}
-        if "is_new_implementation" in nl:
-            impl = nl["implementation"]
-            where = getattr(impl, "__module__", None) or type(impl).__name__
-            return ("PACKAGE " if nl["is_new_implementation"] else "TORCH FALLBACK ") + str(where)
-        stack += [v for v in nl.values() if callable(v)] + [getattr(g, "__wrapped__", None)]
-    return "unknown"
+def kernel_path(func_name, package):
+    """Replicates transformers' `use_kernel_func_from_hub_with_fallback` resolution: the original
+    package's function if it imports, else the silent torch fallback (docs/06 §4.6)."""
+    import importlib
+    from transformers.integrations.hub_kernels import _KERNELS_INTERNAL_PATH_MAPPINGS as MAP
+    sub = MAP.get(func_name)
+    try:
+        mod = importlib.import_module(package if sub is None else f"{package}.{sub}")
+        fn = getattr(mod, func_name)
+        return f"PACKAGE {mod.__name__}.{func_name} ({type(fn).__name__})"
+    except Exception as e:                                    # noqa: BLE001 — that is the fallback condition
+        return f"TORCH FALLBACK ({type(e).__name__}: {e})"
 
 
 def describe(model):
@@ -63,8 +56,10 @@ def describe(model):
         print(f"  target {t:12s} {len(hits):3d} modules   e.g. {hits[0] if hits else 'NONE — check the name'}")
     print(f"  visual modules {sum('visual' in n for n in names)}   mtp modules {sum('.mtp' in n or n.startswith('mtp') for n in names)}"
           f"   tie_word_embeddings {model.config.tie_word_embeddings}")
-    print(f"  DeltaNet chunk rule  -> {kernel_path(m.torch_chunk_gated_delta_rule)}")
-    print(f"  causal_conv1d_fn     -> {kernel_path(m.causal_conv1d_fn)}")
+    print(f"  DeltaNet chunk rule  -> {kernel_path('chunk_gated_delta_rule', 'fla')}")
+    print(f"  DeltaNet recurrent   -> {kernel_path('fused_recurrent_gated_delta_rule', 'fla')}")
+    print(f"  causal_conv1d_fn     -> {kernel_path('causal_conv1d_fn', 'causal_conv1d')}")
+    assert m.torch_chunk_gated_delta_rule is not None
     for pkg in ("fla", "causal_conv1d"):
         try:
             mod = __import__(pkg)
@@ -133,7 +128,8 @@ def train(args):
         gradient_checkpointing=True,
         per_device_train_batch_size=1, gradient_accumulation_steps=24,
         num_train_epochs=3, max_steps=args.max_steps if probe else -1,
-        learning_rate=1e-4, lr_scheduler_type="cosine", warmup_ratio=0.1,
+        learning_rate=1e-4, lr_scheduler_type="cosine",
+        warmup_steps=0.1,                                     # the 0.1 warmup RATIO: transformers 5 folded warmup_ratio into warmup_steps (float in [0,1))
         optim="adamw_torch_fused", bf16=True,
         logging_steps=1 if probe else 5,                      # the probe reports steps 1 / 10 / 20
         save_strategy="no" if probe else "epoch",
@@ -237,7 +233,20 @@ def merge(args):
     base = load_model("sdpa")
     model = PeftModel.from_pretrained(base, str(adapter))
     model = model.merge_and_unload()
-    model.save_pretrained(str(merged), safe_serialization=True)
+    # Not model.save_pretrained(): transformers 5.16 reverts its load-time key conversion on save
+    # (modeling_utils.revert_weight_conversion), writing VL-style `model.language_model.*` names
+    # that vLLM 0.27.1's text-only Qwen3_5ForCausalLM loader rejects ("no module or parameter named
+    # 'language_model'", measured 2026-08-28). Write the module-tree names vLLM expects instead;
+    # lm_head is tied to embed_tokens (tie_word_embeddings=True) and is not stored, as in the original.
+    from safetensors.torch import save_file
+    merged.mkdir(parents=True, exist_ok=True)
+    sd = {k: v.contiguous() for k, v in model.state_dict().items() if k != "lm_head.weight"}
+    assert all(k.startswith(("model.layers.", "model.embed_tokens.", "model.norm.")) for k in sd), sorted(sd)[:3]
+    save_file(sd, str(merged / "model.safetensors"), metadata={"format": "pt"})
+    model.config.architectures = [type(model).__name__]      # vLLM keys its registry on this; None -> 'Qwen3_5TextModel', unsupported
+    model.config.save_pretrained(str(merged))
+    if model.generation_config is not None:
+        model.generation_config.save_pretrained(str(merged))
     AutoTokenizer.from_pretrained(MODEL).save_pretrained(str(merged))
     size = sum(p.stat().st_size for p in merged.glob("*")) / 1e9
     print(f"merged {adapter} -> {merged}  ({size:.2f} GB, {type(model).__name__}, "
@@ -252,8 +261,11 @@ if __name__ == "__main__":
     ap.add_argument("--merge", action="store_true")
     ap.add_argument("--adapter", help="merge: adapter dir (default: the run's final adapter)")
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--attn", default="kernels-community/flash-attn2",
-                    help="attn_implementation; 'sdpa' is the documented fallback (docs/13 §6)")
+    ap.add_argument("--attn", default="sdpa",
+                    help="attn_implementation. docs/13 §6 preferred kernels-community/flash-attn2; measured "
+                         "2026-08-28: its torch-stable-abi210-cu130 build loads and runs forward under torch "
+                         "2.13.0 but its backward raises 'Dimension out of range' (built against torch 2.14), "
+                         "so sdpa — the documented fallback — is the default")
     a = ap.parse_args()
     if a.smoke:
         smoke(a)

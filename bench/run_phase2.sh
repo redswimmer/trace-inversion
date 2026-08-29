@@ -11,7 +11,7 @@ cd /home/asavala/Development/papers/trace-inversion
 
 ARM="${1:?usage: run_phase2.sh <7b|1.5b> <sum|nosum> [attn]}"
 SET="${2:?setting}"
-ATTN="${3:-kernels-community/flash-attn2}"
+ATTN="${3:-sdpa}"   # flash-attn2 hub kernel: forward ok, backward crashes under torch 2.13 (see phase2_train.py --help)
 TAG="${ARM}-${SET}"
 OUT="bench/results/phase2/inverter-${TAG}"
 MERGED="bench/results/phase2/merged-${TAG}"
