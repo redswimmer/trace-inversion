@@ -35,7 +35,7 @@ formats (an inverter trained with summaries can't be fed inputs without them, an
 them separate so each setting's number is that setting's alone), and the two *arms* are different
 training data (the point of the second arm is to change one thing — the surrogate — and watch what
 happens downstream, which needs one inverter per surrogate with everything else identical). The
-paper's own Table 2 has the same four.
+paper trains the same four.
 
 Problems come from OpenThoughts-114k, in two disjoint splits — one the surrogate sees, one the victim sees.
 
@@ -66,14 +66,30 @@ trained on what the victim actually shows, and on the surrogate's own traces —
 get to the one trained on the victim's real, withheld traces? If yes and close, hiding the chain of
 thought protected nothing.
 
+The paper's own numbers for exactly that comparison — its Qwen2.5-7B student, the weak 1.5B
+surrogate, victim = DeepSeek-R1, accuracy in %:
+
+| Student trained on | MATH500 | JEEBench |
+|---|---|---|
+| nothing (base model) | 71.2 | 28.3 |
+| the victim's answers only | 61.0 | 21.6 |
+| the victim's summaries + answers | 63.0 | 24.0 |
+| the surrogate's own traces | 63.2 | 19.7 |
+| **forged traces** | **71.8** | **36.3** |
+| the victim's real traces (oracle) | 72.2 | 43.7 |
+
+Everything the victim actually shows makes the student *worse* than doing nothing; forgeries built
+from those same outputs carry it most of the way to the oracle. That is the result being reproduced.
+
 The inverter is never benchmarked and never asked to solve anything. It is handed the answer. Its
 only test is whether the traces it writes make the student better.
 
 ## Two things the paper didn't do
 
 - **The oracle row exists.** The paper's black-box victim (GPT-5.4 mini) could never reveal its real
-  traces, so its Table 3 ceiling came from a different, open-weight victim. Ours is one model: the
-  victim that gets attacked is the victim whose real traces set the ceiling.
+  traces, so the ceiling in its results — a student trained on the victim's *real* traces — had to
+  come from a different, open-weight victim. Ours is one model: the victim that gets attacked is the
+  victim whose real traces set the ceiling.
 - **A midpoint on surrogate strength.** The paper's most useful claim — a *weak* surrogate is nearly
   as good as a strong one — was tested at two points 450× apart (a 1.5B distill and 685B R1). We run
   the 1.5B (the paper's exact model) and a 7B on identical prompts, settings and cap, so the
@@ -85,7 +101,7 @@ only test is whether the traces it writes make the student better.
 |---|---|---|
 | 0 — baselines | done | Harness calibrated: the paper's own surrogate scores 32.6 % JEEBench here vs 32.6 % in the paper. Roles fixed on measurement: student 47.8 < surrogate 60.6 < victim 86.2 on JEEBench — the regime the argument needs. |
 | 1 — surrogate data | done | `D₂` built for both arms (5,006 / 5,028 rows). Summaries pass all four of the paper's style targets. ~21 h of generation per arm. |
-| 2 — train inverters | planned | `docs/13-phase2-handoff.md`, `docs/PHASE2-GOAL.txt`. Four LoRA inverters: {7B, 1.5B arm} × {with, without summary}. ~53 h projected. |
+| 2 — train inverters | **running** | Four LoRA inverters: {7B, 1.5B arm} × {with, without summary}. The 20-step probe measured 2,153 train tokens/s → ~34 h for all four. Plan: `docs/13-phase2-handoff.md`. |
 | 3 — query the victim | next | ~10–15 h |
 | 4 — invert | | ~4 h |
 | 5 — train students | | five conditions, ~20 h |
@@ -127,7 +143,7 @@ VRAM and 30 GB of RAM. The running log, with the reason and expected effect of e
 | Student | Qwen2.5-7B-Instruct, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at the paper's 16,384 context | fits full fine-tuning, so the method matches. It is a model that already reasons, so the claim becomes "inversion *improves* reasoning," measured against the same four baselines |
 | Data | 2 × 10 k prompts | 2 × 5 k | the paper's own scaling curve shows 5 k delivers most of the MATH500 gain; generation is the dominant cost |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | translated, not copied — the two frameworks' defaults differ |
-| Trace-fidelity metrics (Table 2) | BLEU / TF1 / ROUGE | not run | across the paper's own table they track trace *length* at r ≈ 0.9; student accuracy carries the result |
+| Trace-fidelity metrics | BLEU / TF1 / ROUGE against the victim's real traces | not run | across the paper's own results they track trace *length* at r ≈ 0.9; student accuracy carries the result |
 | Inverter input format | unspecified | the paper's own zero-shot prompt, format-matched to its compressor | the paper never says what the trained inverter was given; its v2 prompts also contradict each other on summary format |
 | Seeds / variance | none reported | 3 seeds on at least one condition | the paper's headline margins are 0.4–2.4 points on single runs |
 
