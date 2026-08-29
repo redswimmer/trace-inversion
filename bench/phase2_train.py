@@ -230,9 +230,25 @@ def merge(args):
     tag = f"{args.arm}-{args.setting}"
     adapter = Path(args.adapter) if args.adapter else DATA / f"inverter-{tag}"
     merged = DATA / f"merged-{tag}"
-    base = load_model("sdpa")
+    if args.cpu:                                              # the GPU may be training; 8 GB fits in RAM
+        from transformers import Qwen3_5ForCausalLM
+        base = Qwen3_5ForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16, attn_implementation="sdpa")
+    else:
+        base = load_model("sdpa")
+    # Keep two base tensors (one DeltaNet target, one attention target) to prove the merge folded
+    # something in: given answer + summary the bare base already writes coherent traces, so a
+    # serving check alone cannot tell a merged model from the base wearing an adapter's name.
+    PROBE_KEYS = ("model.layers.0.linear_attn.in_proj_qkv.weight", "model.layers.3.self_attn.q_proj.weight")
+    before = {k: base.state_dict()[k].detach().clone() for k in PROBE_KEYS}
     model = PeftModel.from_pretrained(base, str(adapter))
     model = model.merge_and_unload()
+    check = {}
+    for k in PROBE_KEYS:
+        after = model.state_dict()[k]
+        assert not torch.equal(after, before[k]), f"merge was a no-op on {k}"
+        delta = (after.float() - before[k].float()).abs()
+        check[k] = {"max_abs_delta": delta.max().item(), "frac_changed": (delta > 0).float().mean().item()}
+        print(f"merge check {k}: max|Δ| {check[k]['max_abs_delta']:.3e}  changed {100*check[k]['frac_changed']:.1f}% of elements")
     # Not model.save_pretrained(): transformers 5.16 reverts its load-time key conversion on save
     # (modeling_utils.revert_weight_conversion), writing VL-style `model.language_model.*` names
     # that vLLM 0.27.1's text-only Qwen3_5ForCausalLM loader rejects ("no module or parameter named
@@ -248,6 +264,12 @@ def merge(args):
     if model.generation_config is not None:
         model.generation_config.save_pretrained(str(merged))
     AutoTokenizer.from_pretrained(MODEL).save_pretrained(str(merged))
+    from safetensors import safe_open
+    with safe_open(str(merged / "model.safetensors"), "pt") as f:    # what is on disk is the MERGED tensor
+        for k in PROBE_KEYS:
+            assert torch.equal(f.get_tensor(k), model.state_dict()[k].cpu()), f"saved tensor != merged tensor: {k}"
+    check["adapter"] = str(adapter)
+    json.dump(check, open(merged / "merge-check.json", "w"), indent=1)
     size = sum(p.stat().st_size for p in merged.glob("*")) / 1e9
     print(f"merged {adapter} -> {merged}  ({size:.2f} GB, {type(model).__name__}, "
           f"architectures {model.config.architectures})")
@@ -260,6 +282,7 @@ if __name__ == "__main__":
     ap.add_argument("--max-steps", type=int, default=0, help="probe: run N steps of the real config")
     ap.add_argument("--merge", action="store_true")
     ap.add_argument("--adapter", help="merge: adapter dir (default: the run's final adapter)")
+    ap.add_argument("--cpu", action="store_true", help="merge on the CPU (GPU busy)")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--attn", default="sdpa",
                     help="attn_implementation. docs/13 §6 preferred kernels-community/flash-attn2; measured "
