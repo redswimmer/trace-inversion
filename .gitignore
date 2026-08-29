@@ -15,3 +15,7 @@ bench/logs*/
 
 __pycache__/
 *.pyc
+
+# Phase 2 adapters and merged weights — the adapter is the record, merged weights are derived
+bench/results/phase2/inverter-*/
+bench/results/phase2/merged-*/
