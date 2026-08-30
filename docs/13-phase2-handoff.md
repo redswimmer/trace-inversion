@@ -471,8 +471,10 @@ holdout row — with a one-line note each on whether the trace reaches the given
 
 | Item | Phase | Note |
 |---|---|---|
-| Which epoch's adapter Phase 4 serves | 4 | user decision from the epoch-1/2/3 eval-loss curves and the holdout lengths |
-| Whether Phase 4 inverts with the 1.5B-arm inverters at all | 4 | depends on the Phase 2 comparison; the arm exists to measure inversion-vs-surrogate-strength |
+| Which epoch's adapter Phase 4 serves | 4 | **Decided 2026-08-30: epoch 2, all four inverters** (`checkpoint-402` on the 7B arms, `checkpoint-404` on the 1.5B arms). Lowest held-out loss on every arm — the one deterministic signal; the generation differences between epochs are single draws inside the measured ~15 % flip-rate noise; one rule keeps the arms comparable. `10` Phase 4, `results/phase2.md` §5.5 |
+| Whether Phase 4 inverts with the 1.5B-arm inverters at all | 4 | **Decided 2026-08-30: yes, all four** — the surrogate-strength and summary/no-summary comparisons need all four synthetic-trace sets |
+| What Phase 4 does with capped forgeries (`finish_reason == "length"` at 8,192: 3–17 % of held-out rows depending on arm and epoch) | 4 | **Decided 2026-08-30: regenerate at a new seed, up to three draws; drop what still caps; report the count** — same policy on every arm and setting; keep the first-draw outputs and report their cap-hit as the inverter's property. A severed `t̂` in `[t̂; y]` teaches non-termination (`12` §2); dropping alone would shrink the 1.5B-arm student's data more than the 7B's and confound the surrogate-strength comparison; capping is mostly a property of the draw (`results/phase2.md` §5.4). `09` row 7.14 |
+| Answer-inconsistent forgeries (~3 % of gradable held-out rows argue away from the conditioned answer) | 4 → 5 | **Decided 2026-08-30: no filtering in the main condition**, matching the paper; report the rate per arm. A consistency-filtered student condition is a separate Phase 5 proposal with its own `10` four-questions justification. `09` row 7.15 |
 | **Make victim-trace withholding structural before 3.1 runs** | 3 | `docs/10` Phase 3 — write `t` to a separate file from the `(y, b*)` the attack consumes; a wrong join leaks the oracle silently |
 | Sweep the victim at 16k/slot | 3 | p95 17,795; more slots than the 6 Phase 0 used |
 | 2B looping / eval protocol | 6 | unchanged |
