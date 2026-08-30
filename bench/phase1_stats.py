@@ -307,7 +307,23 @@ def summaries(rows, tk):
     return [f"Table 1: {name} = {got}, target {want}" for name, got, want, ok in rowsout if not ok]
 
 
-def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None):
+def r1_answers(idxs):
+    """Boxed answer in each OpenThoughts row's own R1 solution (the assistant text after </think>).
+    idx is the row position in llamafactory/OpenThoughts-114k, as everywhere in this project."""
+    from datasets import load_dataset
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed
+    ds = load_dataset("llamafactory/OpenThoughts-114k", split="train")
+    idxs = sorted(idxs)
+    out = {}
+    for i, row in zip(idxs, ds.select(idxs)):
+        a = row["messages"][2]["content"]
+        out[i] = extract_boxed(a.split("</think>")[-1] if "</think>" in a else a)
+    return out
+
+
+def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None):
     """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
     (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
     counts the same traces with R1-Distill's, so say which before comparing across docs.
@@ -361,6 +377,31 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None
         per_row[r["idx"]] = {"gold": gold, "pred": pred, "bucket": b, "finish_reason": r["finish_reason"]}
     n_graded = len(buckets["match"]) + len(buckets["mismatch"])
     nobox_cap = sum(per_row[i]["finish_reason"] == "length" for i in buckets["no box in t_hat"])
+    # On the surrogate holdout y is the SURROGATE's answer and is sometimes wrong, so "t_hat matches
+    # y" mixes inverter fidelity with surrogate error. Grade both against the boxed answer in the
+    # OpenThoughts row's own R1 solution — "R1's answer (the dataset's solution)", not ground truth —
+    # to split the mismatches into "inverter wrong" and "inverter right, surrogate wrong".
+    if r1 is not None:
+        for r in rows:
+            k = per_row[r["idx"]]; g = r1.get(r["idx"])
+            k["r1"] = g
+            k["y_vs_r1"] = None if (g is None or k["gold"] is None) else grade(k["gold"], g, "MATH")
+            k["t_hat_vs_r1"] = None if (g is None or k["pred"] is None) else grade(k["pred"], g, "MATH")
+        def _rate(key):
+            v = [k[key] for k in per_row.values() if k[key] is not None]
+            return f"{sum(v)}/{len(v)} ({100*sum(v)/max(len(v),1):.1f}%)"
+        split = {"inverter wrong (y = R1, t_hat != R1)": 0, "inverter right, surrogate wrong (t_hat = R1, y != R1)": 0,
+                 "both match R1 (equivalent forms)": 0, "neither matches R1": 0, "R1 has no box": 0}
+        for i in buckets["mismatch"]:
+            k = per_row[i]
+            if k["r1"] is None: split["R1 has no box"] += 1
+            elif k["y_vs_r1"] and not k["t_hat_vs_r1"]: split["inverter wrong (y = R1, t_hat != R1)"] += 1
+            elif k["t_hat_vs_r1"] and not k["y_vs_r1"]: split["inverter right, surrogate wrong (t_hat = R1, y != R1)"] += 1
+            elif k["t_hat_vs_r1"] and k["y_vs_r1"]: split["both match R1 (equivalent forms)"] += 1
+            else: split["neither matches R1"] += 1
+        print(f"  against R1's answer (the dataset's solution, not ground truth): y vs R1 {_rate('y_vs_r1')}   "
+              f"t_hat vs R1 {_rate('t_hat_vs_r1')}   R1 unboxed {sum(k['r1'] is None for k in per_row.values())}")
+        print("  mismatch split: " + "  ".join(f"{k} {v}" for k, v in split.items()))
     print(f"\nanswer consistency (last boxed in t_hat vs y; report only):  "
           + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
           + (f"   match rate among graded {100*len(buckets['match'])/n_graded:.1f}% (n={n_graded})" if n_graded else ""))
@@ -425,6 +466,8 @@ def main():
     ap.add_argument("--holdout", default="bench/phase2/holdout.json",
                     help="inverted mode: every idx must be in this file; '' to skip")
     ap.add_argument("--tag", default="", help="inverted mode: label for the table row")
+    ap.add_argument("--no-r1", action="store_true",
+                    help="inverted mode: skip grading y and t_hat against the OpenThoughts row's R1 answer")
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
@@ -434,9 +477,10 @@ def main():
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
     if args.mode == "inverted":
         hold = set(json.load(open(args.holdout))["idx"]) if args.holdout else None
+        r1 = None if args.no_r1 else r1_answers([r["idx"] for r in rows])
         fails = inverted(rows, tok(args.summary_tokenizer), args.cap, hold,
                          len(hold) if hold else None, args.tag,
-                         out_json=args.file.replace(".jsonl", "") + "-consistency.json")
+                         out_json=args.file.replace(".jsonl", "") + "-consistency.json", r1=r1)
         print(f"\n=== gates ===")
         for f in fails:
             print(f"  FAIL  {f}")

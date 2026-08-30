@@ -189,6 +189,18 @@ answer.
 | rows at `max_length` / tokens per epoch (TRL) | 0 / 22,604,920 (= the formatter's count), max row 10,425; row 0: 1,501 tokens, loss mask 245 |
 | wall clock | 1,046 s for 20 steps |
 
+### 1.5B-nosum probe — `bench/logs/phase2-probe-1.5b-nosum.log`, 2026-08-29 23:35
+
+| | |
+|---|---|
+| loss @ step 1 / 10 / 20 | **0.5455 / 0.4342 / 0.4358**; half-means 0.4790 → 0.4385, first five 0.5060 → last five 0.4253; `grad_norm` 1.20 → 0.114; token accuracy 0.819 → 0.843 |
+| peak VRAM | **15.19 GiB** allocated / 16.80 reserved |
+| realized train tokens/s | **2,139** steady-state (2,134 overall) |
+| projection @ 2,139 tok/s | 1.5B-nosum **7.8 h** (the last run) |
+| paths | DeltaNet `fla` · conv torch fallback · attention `sdpa` |
+| rows at `max_length` / tokens per epoch (TRL) | 0 / 19,354,876 (= the formatter's count), max row 9,787; row 0: 1,089 tokens, loss mask 245 |
+| wall clock | 881 s for 20 steps |
+
 ---
 
 ## 4. Per-inverter records
@@ -202,6 +214,7 @@ window" is the mean train loss over the last 50 steps of the epoch.
 |---|---:|---:|---:|---:|---|---|---|---|---:|
 | 7B-sum | 4,806 / 0 | 603 | 9.12 h (32,848 s) | 2,141 | 15.44 / 18.39 GiB | **0.3866 / 0.3810 / 0.3847** | 0.374 / 0.349 / 0.313 | +0.012 / +0.032 / +0.072 | 488 MB |
 | 7B-nosum | 4,806 / 0 | 603 | 8.12 h (29,214 s) | 2,085 | 15.27 / 17.54 GiB | **0.3896 / 0.3840 / 0.3876** | 0.375 / 0.349 / 0.314 | +0.015 / +0.035 / +0.074 | 488 MB |
+| 1.5B-sum | 4,828 / 0 | 606 | 8.89 h (31,986 s) | 2,123 | 15.41 / 17.99 GiB | **0.4296 / 0.4233 / 0.4257** | 0.397 / 0.374 / 0.351 | +0.033 / +0.049 / +0.075 | 488 MB |
 
 ### 7B-sum — `bench/results/phase2/inverter-7b-sum/`, 2026-08-28 20:14 → 08-29 05:21
 
@@ -241,6 +254,20 @@ each epoch boundary, eval best at epoch 2 by 0.006 and 0.004 back at epoch 3, ga
 with it. Merge check on the epoch-3 adapter: `in_proj_qkv` 2.7e-3 / 88.5 %, `q_proj` 3.3e-3 / 84.8 %
 (`merge-check.json`). Disk after the run: 43 GB free.
 
+### 1.5B-sum — `bench/results/phase2/inverter-1.5b-sum/`, 2026-08-29 14:23 → 23:16
+
+```
+epoch 1:  0.4520  0.4094  0.4107  0.3966      eval 0.4296  (tok-acc 0.852, entropy 0.429)
+epoch 2:  0.3845  0.3763  0.3794  0.3739      eval 0.4233  (tok-acc 0.853, entropy 0.402)
+epoch 3:  0.3633  0.3575  0.3464  0.3502      eval 0.4257  (tok-acc 0.853, entropy 0.380)
+```
+
+Same shape as the 7B arms — front-loaded, eval best at epoch 2 by 0.006 and 0.002 back at epoch 3 —
+offset ~0.04 higher throughout (probe start 0.56 vs 0.47; `phase1.md` §4's dispersion cross-reference
+in §3), with the train–eval gap opening earlier: +0.033 at epoch 1 where the 7B arms had +0.012 /
++0.015. 202 steps per epoch (4,828 rows). Merge check on the epoch-3 adapter: `in_proj_qkv` 2.9e-3 /
+88.4 %, `q_proj` 3.8e-3 / 84.0 %. Disk after the run: 36 GB free.
+
 ---
 
 ## 5. Held-out inversion — paired lengths on the same 200 rows
@@ -257,6 +284,27 @@ inverted`. Gates: 0 empty · 200 rows · every idx in the holdout · median t̂ 
 | 7B-sum, epoch 3 | **2,149** / 2,627 / 181 / 8,000 | 2,172 / 2,574 / 190 / 6,390 | **0.99** | 5.0 % (10) | 0 |
 | 7B-nosum, epoch 3 | **1,966** / 2,530 / 196 / 7,563 | 2,172 / 2,574 / 190 / 6,390 | **0.91** | 5.0 % (10) | 0 |
 | 7B-sum, epoch 2 (`checkpoint-402`) | **2,241** / 2,507 / 157 / 6,777 | 2,172 / 2,574 / 190 / 6,390 | **1.03** | 3.0 % (6) | 0 |
+| 1.5B-sum, epoch 3 | **1,964** / 2,974 / 283 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.90** | **13.0 % (26)** | 0 |
+| 1.5B-sum, epoch 2 (`checkpoint-404`) | **2,063** / 3,066 / 305 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.95** | **17.0 % (34)** | 0 |
+
+The 1.5B arm's `t_true` column is the 1.5B surrogate's own traces for the same 200 prompts (the holdout
+is paired on prompts; each arm's ground truth is its own surrogate), so the true-length columns differ
+slightly between arms.
+
+**Arm-level finding, stated as measured.** The 1.5B-arm inverter runs away far more than the 7B-arm
+inverters — cap-hit 13.0 % (epoch 3) / 17.0 % (epoch 2) against 5.0 % / 3.0 % — although every training
+target on both arms terminated under the cap (`D₂` is kept rows only). Its capped rows are not the
+long-truth rows (their `t_true` spans 383–6,934 tokens) and 25 of 26 are still computing at the cut.
+This sits next to Phase 1's surrogate cap-hit of 45.9 % (1.5B) vs 34.6 % (7B) on identical prompts: the
+weak surrogate's runaway tendency reaches the inverter through the style of its kept traces, not through
+severed targets. It is the first arm-level difference that would matter in Phase 4 — more capped
+forgeries to handle.
+
+**Epoch 2 vs 3, per arm, unresolved on the 1.5B arm.** On 7B-sum epoch 2 had fewer cap-hits (6 vs 10)
+and a higher graded match (95.8 vs 93.8 %); on 1.5B-sum the direction reverses (34 vs 26; 91.2 vs
+94.2 %) while eval loss still favours epoch 2 by 0.002. One sampled draw each at temperature 0.7, and
+Phase 1 measured a ~15 % cap-hit flip rate between two draws of the same model — directions, not
+differences; not averaged across arms.
 
 Direction, stated as measured and not explained: the no-summary inverter's traces are **shorter** than
 the summary inverter's at the median here (1,966 vs 2,149; 0.91 vs 0.99 of the true length). The paper's
@@ -274,6 +322,34 @@ student target `[t̂; y]` contradictory), and **wrong** = genuine.
 | 7B-sum, epoch 3 | 105 / 112 | 3 | 0 | 3 | 1 (60498, proof with no canonical box) | 109 / 112 | **3 / 112** | 3 / 112 |
 | 7B-nosum, epoch 3 | 105 / 114 | 4 | 1 | 3 | 1 (42804, cap-severed) | 110 / 113 | **4 / 113** | 3 / 113 |
 | 7B-sum, epoch 2 | 113 / 118 | 3 | 1 | 1 | 0 | 116 / 118 | **2 / 118** | 1 / 118 |
+| 1.5B-sum, epoch 3 | 97 / 103 | 0 | 0 | 6 | 0 | 97 / 103 | **6 / 103** | 6 / 103 |
+| 1.5B-sum, epoch 2 | 93 / 102 | 2 | 0 (+1 unverified) | 6 | 0 | 95 / 102 | **7 / 102** | 6 / 102 |
+
+**Against R1's answer** — the boxed answer in each OpenThoughts row's own R1 solution (the assistant
+text after `</think>` in `llamafactory/OpenThoughts-114k`, same idx): *the dataset's solution, not
+ground truth*. On the surrogate holdout `y` is the surrogate's answer and is sometimes wrong, so
+"t̂ matches y" mixes inverter fidelity with surrogate error; grading both against R1 splits the genuine
+cases. Same grader (`extract_boxed` + `grade`), so equivalent forms fail here too; R1 is unboxed on 51
+of the 200 rows. Per-row values (`r1`, `y_vs_r1`, `t_hat_vs_r1`) are in every `-consistency.json`.
+
+| inverter | y vs R1 (the surrogate's own answer) | t̂ vs R1 | of the graded mismatches: inverter wrong (y = R1, t̂ ≠ R1) | inverter right, surrogate wrong (t̂ = R1, y ≠ R1) | neither | R1 unboxed |
+|---|---:|---:|---:|---:|---:|---:|
+| 7B-sum, epoch 3 | 113 / 145 (77.9 %) | 85 / 105 (81.0 %) | 4 | 0 | 3 | 0 |
+| 7B-nosum, epoch 3 | 113 / 145 (77.9 %) | 86 / 105 (81.9 %) | 3 | 0 | 3 | 3 |
+| 7B-sum, epoch 2 | 113 / 145 (77.9 %) | 91 / 109 (83.5 %) | 1 | 0 | 4 | 0 |
+| 1.5B-sum, epoch 3 | 104 / 144 (72.2 %) | 84 / 98 (85.7 %) | 2 | **4** | 0 | 0 |
+| 1.5B-sum, epoch 2 | 104 / 144 (72.2 %) | 83 / 98 (84.7 %) | 3 | **4** | 2 | 0 |
+
+Measured: on the 7B arm the surrogate's answer agrees with R1 on 78 % of gradable rows and no genuine
+mismatch is the inverter correcting it; on the 1.5B arm the surrogate agrees with R1 on 72 %, and four
+of the six genuine epoch-3 mismatches are the inverter landing on R1's answer against a surrogate `y`
+that does not (18067, 14587, 21120 among them). The inverters' traces agree with R1 more often than
+the surrogates' own answers do (81–86 % vs 72–78 %) — partly because the gradable set differs (rows
+where t̂ boxes at all). On victim data (Phase 4) `y` will mostly be right, so the override behaviour
+that helps here would mostly hurt there; that is a Phase 4/5 decision.
+
+The 1.5B arm's idx 15523 is the clearest style-inheritance example: a plan-only trace with no number,
+matching the surrogate's own plan-only trace on that prompt (`t_true` never computes 243 either).
 
 ### 7B-sum, epoch 3 — `bench/results/phase2/holdout-7b-sum.jsonl`
 
@@ -380,3 +456,42 @@ on identical rows and sampling: cap-hit 6 vs 10, p95 6,777 vs 8,000, graded matc
 median ratio 1.03 vs 0.99 — one draw each at temperature 0.7, so the differences carry the resampling
 noise Phase 1 measured (cap-hit flips on ~15 % of rows between two draws of the same model). Which
 adapter Phase 4 serves is the user's decision.
+
+### 1.5B-sum, epoch 3 — `bench/results/phase2/holdout-1.5b-sum.jsonl`
+
+Per-row ratio median 1.01; t̂ shorter on 49.5 %. The tail is the finding: **26 cap-hits** (20 math,
+5 code, 1 physics) against the 7B arm's 10, p95 at the cap, mean 2,974 against a true mean of 2,667
+while the median is 10 % under. The capped rows are not the long-true-trace rows — their `t_true` runs
+from 383 to 6,934 tokens — and 1 of the 26 is a repetition loop (idx 59048, a 40-char chunk repeated
+8× in its last 4,000 chars); the other 25 are still computing when cut. By domain, t̂ / t_true median:
+math 2,163 / 2,396 (n=151) · code 2,318 / 2,366 (28) · physics 841 / 1,046 (9) · biology 856 / 927
+(5) · puzzle 416 / 459 (5) · chemistry 779 / 2,378 (2).
+
+| row | t_true → t̂ tokens | reaches the given answer? |
+|---|---|---|
+| short, idx 15523 (car rental, y = 243 km) | 113 → 97 | **No number stated** — a four-step plan ending "I'll check which of the given options matches", exactly the shape of the 1.5B surrogate's own trace for this row, which also never computes 243. |
+| median, idx 3282 (three lines through one point; y = A) | 2,229 → 1,570 | **Yes.** Tests each option, boxes A. |
+| long, idx 57422 (unique n with Sₙ an integer; y = 12) | 7,758 → 2,409 | **Yes**, in a third of the surrogate's length: Minkowski-style bound, 145 = 17²−12²… boxes 12. |
+
+Consistency: match 97, mismatch 6, no box in t̂ 47 (19 cap-severed + 28 prose), no box in y 50 —
+94.2 % graded (n=103). All six mismatches are **genuine** (no equivalent-form or alternative-valid
+cases): 47586 (cone lateral area (√13/3)πR² for πR²√5), 21551 (option A for B), 63867 (8,682,544 for
+8,682,572), 8576 (boxes BC = 7,033 where y has 6,745 — the two legs swapped), and two where the trace
+argues away from a surrogate answer that is itself the wrong one: 18067 (y = 201 companies, trace 101 —
+the 7B surrogate's y was 101) and 14587 (y = 5/2, trace 2:5 — the 7B surrogate's y was 2:5). Consistency
+measures agreement with the conditioned answer, not correctness; on this arm the conditioned answer is
+the weaker surrogate's.
+
+### 1.5B-sum, epoch 2 — `bench/results/phase2/holdout-1.5b-sum-ep2.jsonl`
+
+t̂ 2,063 / 3,066 / 305 / 8,192; ratio at the median 0.95 (per-row 1.02); **cap-hit 34/200 (17.0 %)**
+against epoch 3's 26; empty 0; merge check 2.8e-3 / 87.7 %, 3.5e-3 / 83.1 %. Consistency 93 / 9 / 48
+(21 cap-severed + 27 prose) / 50 — 91.2 % graded (n=102). The nine, read: **equivalent-form 2** —
+84388 (the same four pairs boxed in another order; the grader takes the last box), 15523 (computes 243
+and boxes the option letter `C`); **genuine 6** — 25140 (12√26/5 for 12/5), 21120 (y says the integral
+converges, the trace says it diverges — ∫₁^∞ sin²x/x dx does diverge), 21551 (A for B), 6618 (202 for
+21), 74895 (34 for 19), 14587 (2:5 for y's 5/2 again); **different answer, validity not verified 1** —
+16770 (`15+28n` for y's `3+12n`). By hand 95/102; inconsistent with the conditioned answer 7/102;
+wrong 6/102. Median 3282 ✓ (A, 1,783 tokens), long 57422 ✓ (12, 3,450 tokens). Epoch 2 against epoch 3
+on this arm: cap-hit 34 vs 26, graded match 91.2 vs 94.2 %, ratio 0.95 vs 0.90 — the opposite
+direction from 7B-sum's epoch-2-vs-3 comparison; one draw each.

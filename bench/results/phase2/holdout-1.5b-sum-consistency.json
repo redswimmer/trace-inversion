@@ -1,4 +1,13 @@
 {
+ "62365": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "stop",
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
  "109835": {
   "gold": null,
   "pred": null,
@@ -8,27 +17,18 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
- "62365": {
-  "gold": "0.5\\%",
-  "pred": "0.5\\%",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": null,
-  "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
  "18067": {
-  "gold": "101",
+  "gold": "201",
   "pred": "101",
-  "bucket": "match",
+  "bucket": "mismatch",
   "finish_reason": "stop",
   "r1": "101",
-  "y_vs_r1": true,
+  "y_vs_r1": false,
   "t_hat_vs_r1": true
  },
  "46590": {
-  "gold": "\\left( \\dfrac{p + 1}{2} \\right)^2",
-  "pred": "\\left( \\dfrac{p + 1}{2} \\right)^2",
+  "gold": "\\dfrac{(p + 1)^2}{4}",
+  "pred": "\\dfrac{(p + 1)^2}{4}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "\\left( \\frac{p + 1}{2} \\right)^2",
@@ -45,8 +45,8 @@
   "t_hat_vs_r1": true
  },
  "85440": {
-  "gold": "\\dfrac{2e^x}{3 - e^2} + x",
-  "pred": "\\dfrac{2e^x}{3 - e^2} + x",
+  "gold": "x + \\dfrac{2e^x}{3 - e^2}",
+  "pred": "x + \\dfrac{2e^x}{3 - e^2}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "x + \\dfrac{2e^x}{3 - e^2}",
@@ -63,7 +63,7 @@
   "t_hat_vs_r1": true
  },
  "32747": {
-  "gold": "(a, b, c) = (4, 1, 2)",
+  "gold": "(4, 1, 2)",
   "pred": "(4, 1, 2)",
   "bucket": "match",
   "finish_reason": "stop",
@@ -90,16 +90,16 @@
   "t_hat_vs_r1": null
  },
  "98073": {
-  "gold": "\\text{new\\_score} = \\{ \\text{team1}, \\text{team2} \\}",
+  "gold": null,
   "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
+  "bucket": "no box in y",
+  "finish_reason": "length",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
  "61413": {
-  "gold": "\\dfrac{3}{4}",
+  "gold": "\\frac{3}{4}",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -118,12 +118,12 @@
  },
  "47586": {
   "gold": "\\pi R^2 \\sqrt{5}",
-  "pred": "\\pi R^2 \\sqrt{5}",
-  "bucket": "match",
+  "pred": "\\frac{\\sqrt{13}}{3} \\pi R^2",
+  "bucket": "mismatch",
   "finish_reason": "stop",
   "r1": "\\pi R^2 \\sqrt{5}",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": false
  },
  "91790": {
   "gold": null,
@@ -163,12 +163,12 @@
  },
  "74659": {
   "gold": "729",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "pred": "729",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "729",
   "y_vs_r1": true,
-  "t_hat_vs_r1": null
+  "t_hat_vs_r1": true
  },
  "111060": {
   "gold": null,
@@ -180,9 +180,9 @@
   "t_hat_vs_r1": null
  },
  "25352": {
-  "gold": "k \\mid p - 1",
+  "gold": "p - 1",
   "pred": "p - 1",
-  "bucket": "mismatch",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "\\text{The period length divides } p-1",
   "y_vs_r1": false,
@@ -199,20 +199,20 @@
  },
  "25140": {
   "gold": "\\dfrac{12}{5}",
-  "pred": "\\dfrac{12}{5}",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "\\dfrac{12}{5}",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": null
  },
  "30800": {
-  "gold": "90\\ \\text{m}",
+  "gold": "E",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "E",
-  "y_vs_r1": false,
+  "y_vs_r1": true,
   "t_hat_vs_r1": null
  },
  "84388": {
@@ -234,13 +234,13 @@
   "t_hat_vs_r1": true
  },
  "27165": {
-  "gold": "\\dfrac{\\rho g \\pi H^3}{6 a^2}",
-  "pred": "\\dfrac{\\rho g \\pi H^3}{6 a^2}",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": "\\dfrac{\\pi \\rho g H^3}{6 a^2}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "\\dfrac{\\rho g \\pi H^3}{6 a^2}",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": null
  },
  "69676": {
   "gold": "\\dfrac{1}{10}",
@@ -261,31 +261,31 @@
   "t_hat_vs_r1": true
  },
  "60096": {
-  "gold": "13",
-  "pred": "13",
+  "gold": "\\sqrt{119}",
+  "pred": "\\sqrt{119}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "13",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "y_vs_r1": false,
+  "t_hat_vs_r1": false
  },
  "71546": {
   "gold": "432",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "pred": "432",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "432",
   "y_vs_r1": true,
-  "t_hat_vs_r1": null
+  "t_hat_vs_r1": true
  },
  "21120": {
-  "gold": "\\infty",
-  "pred": "\\infty",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": "\\text{Converges}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "\\text{divergent}",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "3421": {
   "gold": "65",
@@ -297,13 +297,13 @@
   "t_hat_vs_r1": null
  },
  "59048": {
-  "gold": "\\text{bad}",
-  "pred": "\\text{bad}",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": "\\text{More \"good\" labyrinths}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "\\text{There are more \"bad\" labyrinths.}",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "112761": {
   "gold": "E: lumberyard",
@@ -324,11 +324,20 @@
   "t_hat_vs_r1": true
  },
  "23836": {
-  "gold": "2023",
-  "pred": "2023",
+  "gold": "n \\text{ is divisible by } 13 \\iff q + 4r \\equiv 0 \\pmod{13}",
+  "pred": "n \\text{ is divisible by } 13 \\iff q + 4r \\equiv 0 \\pmod{13}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "13",
+  "y_vs_r1": false,
+  "t_hat_vs_r1": false
+ },
+ "29482": {
+  "gold": "(a, b) = (165 - 11k, 12k + 2)",
+  "pred": "(a, b) = (165 - 11k, 12k + 2)",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "(a, b) = (11k, 182 - 12k)",
   "y_vs_r1": false,
   "t_hat_vs_r1": false
  },
@@ -336,25 +345,16 @@
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
- },
- "29482": {
-  "gold": "(a, b) = (165 - 11k, 12k + 2) \\text{ for integers } 0 \\leq k \\leq 14",
-  "pred": "(a, b) = (165 - 11k, 12k + 2)",
-  "bucket": "mismatch",
-  "finish_reason": "stop",
-  "r1": "(a, b) = (11k, 182 - 12k)",
-  "y_vs_r1": false,
-  "t_hat_vs_r1": false
  },
  "98600": {
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
@@ -396,12 +396,12 @@
   "t_hat_vs_r1": true
  },
  "21401": {
-  "gold": "75",
+  "gold": "The Shanghai team scored 75 points",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "75",
-  "y_vs_r1": true,
+  "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "15523": {
@@ -417,7 +417,7 @@
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": "D_{\\text{max}} \\approx 0.1 \\times \\left( \\frac{\\mathcal{M}}{M_\\odot} \\right)^{5/6} \\left( \\frac{f_{\\text{peak}}}{100 \\, \\text{Hz}} \\right)^{-7/6} \\text{Gpc}",
   "y_vs_r1": null,
   "t_hat_vs_r1": null
@@ -441,9 +441,9 @@
   "t_hat_vs_r1": true
  },
  "54798": {
-  "gold": "4 \\times \\text{sign}(\\sin x) \\times \\text{sign}(\\cos x)",
-  "pred": "4 \\times \\text{sign}(\\sin 2x)",
-  "bucket": "mismatch",
+  "gold": "f(x)",
+  "pred": "f(x)",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "f(x) = \\begin{cases} \n4 & \\text{if } x \\text{ is in the first or third quadrant} \\\\\n-4 & \\text{if } x \\text{ is in the second or fourth quadrant}\n\\end{cases}",
   "y_vs_r1": false,
@@ -459,8 +459,8 @@
   "t_hat_vs_r1": null
  },
  "28153": {
-  "gold": "(234, 415)",
-  "pred": "(234, 415)",
+  "gold": "415",
+  "pred": "415",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": null,
@@ -494,23 +494,23 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "21551": {
-  "gold": "A",
-  "pred": "A",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "A",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "69793": {
-  "gold": "\\text{The parallelogram is a rhombus.}",
-  "pred": "\\text{The parallelogram is a rhombus.}",
-  "bucket": "match",
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
   "finish_reason": "stop",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
+ },
+ "21551": {
+  "gold": "B",
+  "pred": "A",
+  "bucket": "mismatch",
+  "finish_reason": "stop",
+  "r1": "A",
+  "y_vs_r1": false,
+  "t_hat_vs_r1": true
  },
  "99179": {
   "gold": null,
@@ -539,15 +539,6 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "20434": {
-  "gold": "21",
-  "pred": "21",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "21",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "111063": {
   "gold": null,
   "pred": null,
@@ -557,8 +548,17 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
+ "20434": {
+  "gold": "21",
+  "pred": "21",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "21",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
  "77473": {
-  "gold": "100\\,\\text{square feet}",
+  "gold": "100",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -576,13 +576,13 @@
   "t_hat_vs_r1": null
  },
  "38440": {
-  "gold": "12",
-  "pred": "12",
-  "bucket": "match",
+  "gold": "The alphabet has 12 letters",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "12",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "y_vs_r1": false,
+  "t_hat_vs_r1": null
  },
  "73428": {
   "gold": "60",
@@ -594,21 +594,12 @@
   "t_hat_vs_r1": null
  },
  "69125": {
-  "gold": "\\text{The shortest path touches each side of the triangle, achieved by reflecting the destination point over each side and connecting the points with straight lines.}",
-  "pred": "\\text{The shortest path touches each side of the triangle, achieved by reflecting the destination point over each side and connecting the points with straight lines.}",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "length",
   "r1": null,
   "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
- "11456": {
-  "gold": "120",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": "120",
-  "y_vs_r1": true,
   "t_hat_vs_r1": null
  },
  "88320": {
@@ -620,6 +611,15 @@
   "y_vs_r1": false,
   "t_hat_vs_r1": false
  },
+ "11456": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "stop",
+  "r1": "120",
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
  "3186": {
   "gold": "C",
   "pred": "C",
@@ -630,22 +630,22 @@
   "t_hat_vs_r1": true
  },
  "63867": {
-  "gold": "8682544",
+  "gold": "8682572",
   "pred": "8682544",
-  "bucket": "match",
+  "bucket": "mismatch",
   "finish_reason": "stop",
   "r1": "8682544",
-  "y_vs_r1": true,
+  "y_vs_r1": false,
   "t_hat_vs_r1": true
  },
  "13806": {
-  "gold": "20.8\\%",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "gold": "B",
+  "pred": "B",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "B",
-  "y_vs_r1": false,
-  "t_hat_vs_r1": null
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
  },
  "109743": {
   "gold": null,
@@ -657,13 +657,13 @@
   "t_hat_vs_r1": null
  },
  "83688": {
-  "gold": "25",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "gold": "23",
+  "pred": "23",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "23",
-  "y_vs_r1": false,
-  "t_hat_vs_r1": null
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
  },
  "107100": {
   "gold": null,
@@ -721,12 +721,12 @@
  },
  "6618": {
   "gold": "21",
-  "pred": "20",
-  "bucket": "mismatch",
-  "finish_reason": "stop",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "21",
   "y_vs_r1": true,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "110303": {
   "gold": null,
@@ -765,7 +765,7 @@
   "t_hat_vs_r1": null
  },
  "74284": {
-  "gold": "200,\\!000",
+  "gold": "200,000",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -777,7 +777,7 @@
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
@@ -810,31 +810,31 @@
   "t_hat_vs_r1": true
  },
  "59223": {
-  "gold": "13",
+  "gold": "E)14",
   "pred": null,
   "bucket": "no box in t_hat",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": "D",
   "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "74248": {
   "gold": "24",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "pred": "24",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "24",
   "y_vs_r1": true,
-  "t_hat_vs_r1": null
+  "t_hat_vs_r1": true
  },
  "16770": {
-  "gold": "7 + 8k",
-  "pred": "3 + 9k",
-  "bucket": "mismatch",
-  "finish_reason": "stop",
+  "gold": "3 + 12n",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "3 + 36n",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "70638": {
   "gold": "127",
@@ -845,15 +845,6 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "72973": {
-  "gold": "4",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": "4",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": null
- },
  "2820": {
   "gold": "6",
   "pred": "6",
@@ -863,23 +854,32 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "76857": {
-  "gold": "10",
+ "72973": {
+  "gold": "The smallest number of hot dog packages she can buy is 4",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
-  "r1": "10",
-  "y_vs_r1": true,
+  "r1": "4",
+  "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
- "39587": {
-  "gold": "P",
-  "pred": "P",
+ "76857": {
+  "gold": "10",
+  "pred": "10",
   "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "10",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "39587": {
+  "gold": "Vasia > Tolya > Petr > Kolya",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "The ranking is Vasia > Tolya > Kolya > Petr",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "46250": {
   "gold": "2006",
@@ -908,15 +908,6 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
- "2471": {
-  "gold": "0",
-  "pred": "0",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\mathbf{0}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "80188": {
   "gold": "3",
   "pred": "3",
@@ -925,6 +916,15 @@
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
+ },
+ "2471": {
+  "gold": "0",
+  "pred": "0",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "\\mathbf{0}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
  },
  "48515": {
   "gold": "1002",
@@ -935,21 +935,21 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "76278": {
-  "gold": "-8",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": "-8",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": null
- },
  "16633": {
   "gold": "326",
   "pred": "326",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "326",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "76278": {
+  "gold": "-8",
+  "pred": "-8",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "-8",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
@@ -971,15 +971,6 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "5576": {
-  "gold": "Yes",
-  "pred": "Yes",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\text{Yes}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "82678": {
   "gold": "f(x) = x + C",
   "pred": "f(x) = x + C",
@@ -998,6 +989,15 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
+ "5576": {
+  "gold": "Yes",
+  "pred": "Yes",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "\\text{Yes}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
  "73660": {
   "gold": "\\begin{pmatrix} -2 \\\\ 0 \\\\ 6 \\end{pmatrix}",
   "pred": "\\begin{pmatrix} -2 \\\\ 0 \\\\ 6 \\end{pmatrix}",
@@ -1008,7 +1008,7 @@
   "t_hat_vs_r1": true
  },
  "20017": {
-  "gold": "64",
+  "gold": "Grandma was 23,732 days old on her last birthday",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -1017,12 +1017,12 @@
   "t_hat_vs_r1": null
  },
  "113504": {
-  "gold": null,
+  "gold": "C: pillow",
   "pred": null,
-  "bucket": "no box in y",
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "B: bird cage",
-  "y_vs_r1": null,
+  "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "10202": {
@@ -1044,22 +1044,22 @@
   "t_hat_vs_r1": null
  },
  "49318": {
-  "gold": "No",
-  "pred": "No",
-  "bucket": "match",
+  "gold": "Petya cannot achieve an equal number of two-kopeck and ten-kopeck coins",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "No, Petya cannot end up with an equal number of two-kopeck and ten-kopeck coins",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "70443": {
-  "gold": "\\text{Such two inhabitants exist}",
-  "pred": "\\text{Such two inhabitants exist}",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": "2048",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "\\text{Such two inhabitants exist.}",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "75488": {
   "gold": "1",
@@ -1088,29 +1088,29 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "82024": {
-  "gold": "7",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": "7",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": null
- },
  "3208": {
-  "gold": "-\\dfrac{1 + \\sqrt{5}}{2}",
-  "pred": "-\\dfrac{1 + \\sqrt{5}}{2}",
+  "gold": "-\\dfrac{\\sqrt{5} + 1}{2}",
+  "pred": "-\\dfrac{\\sqrt{5} + 1}{2}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "-\\dfrac{\\sqrt{5} + 1}{2}",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
+ "82024": {
+  "gold": "7",
+  "pred": "7",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "7",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
  "7702": {
-  "gold": "\\text{E}",
+  "gold": "E) \u00a315 to Adam and \u00a315 to Bill",
   "pred": null,
   "bucket": "no box in t_hat",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": "C) \u00a318 to Adam and \u00a312 to Bill",
   "y_vs_r1": false,
   "t_hat_vs_r1": null
@@ -1134,19 +1134,19 @@
   "t_hat_vs_r1": null
  },
  "34191": {
-  "gold": "C",
-  "pred": "C",
-  "bucket": "match",
-  "finish_reason": "stop",
+  "gold": "A",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
   "r1": "D",
   "y_vs_r1": false,
-  "t_hat_vs_r1": false
+  "t_hat_vs_r1": null
  },
  "97845": {
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
-  "finish_reason": "length",
+  "finish_reason": "stop",
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
@@ -1170,8 +1170,8 @@
   "t_hat_vs_r1": true
  },
  "29501": {
-  "gold": "\\dfrac{4 - \\pi}{4}",
-  "pred": "\\dfrac{4 - \\pi}{4}",
+  "gold": "1 - \\dfrac{\\pi}{4}",
+  "pred": "1 - \\dfrac{\\pi}{4}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "1 - \\dfrac{\\pi}{4}",
@@ -1225,39 +1225,39 @@
  },
  "8576": {
   "gold": "6745",
-  "pred": "6745",
-  "bucket": "match",
+  "pred": "7033",
+  "bucket": "mismatch",
   "finish_reason": "stop",
   "r1": "6745",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": false
  },
  "36849": {
-  "gold": "The old lady will encounter 5 trains on her way to Madville",
+  "gold": "The old lady will encounter 10 trains on her way",
   "pred": null,
   "bucket": "no box in t_hat",
-  "finish_reason": "stop",
+  "finish_reason": "length",
   "r1": "9",
   "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "32805": {
-  "gold": "\\dfrac{R(\\sqrt{5} - 1)}{2}",
-  "pred": "\\dfrac{R(\\sqrt{5} - 1)}{2}",
+  "gold": "2R \\sin(18^\\circ)",
+  "pred": "2R \\sin(18^\\circ)",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "\\frac{R(\\sqrt{5} - 1)}{2}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "y_vs_r1": false,
+  "t_hat_vs_r1": false
  },
  "76184": {
-  "gold": "\\dfrac{18}{5}",
-  "pred": "\\dfrac{18}{5}",
-  "bucket": "match",
+  "gold": "3.6",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "\\dfrac{18}{5}",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": null
  },
  "106831": {
   "gold": null,
@@ -1296,7 +1296,7 @@
   "t_hat_vs_r1": null
  },
  "27457": {
-  "gold": "80",
+  "gold": "C. 80",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -1322,14 +1322,14 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "40770": {
-  "gold": "9.5",
-  "pred": "9.5",
-  "bucket": "match",
+ "98666": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
   "finish_reason": "stop",
-  "r1": "\\dfrac{19}{2}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
  },
  "33886": {
   "gold": "1",
@@ -1337,6 +1337,24 @@
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "1",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "76110": {
+  "gold": "4",
+  "pred": "4",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "4",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "40770": {
+  "gold": "\\dfrac{19}{2}",
+  "pred": "9.5",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "\\dfrac{19}{2}",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
@@ -1350,49 +1368,22 @@
   "t_hat_vs_r1": true
  },
  "112292": {
+  "gold": "The bond dissociation energy of the O-H bond in H2O at 298 K is approximately 105 kJ/mol",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "stop",
+  "r1": "498.8 \\, \\text{kJ/mol}",
+  "y_vs_r1": false,
+  "t_hat_vs_r1": null
+ },
+ "61555": {
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
   "finish_reason": "stop",
-  "r1": "498.8 \\, \\text{kJ/mol}",
-  "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
- "76110": {
-  "gold": "4",
-  "pred": "4",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "4",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "98666": {
-  "gold": "\\frac{n(n + 1)(3n^2 - n - 2)}{12}",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": null,
-  "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
- "61555": {
-  "gold": "\\text{Any motion of the first kind is either a rotation or a translation.}",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "length",
   "r1": "\\text{All orientation-preserving isometries are translations or rotations.}",
-  "y_vs_r1": false,
+  "y_vs_r1": null,
   "t_hat_vs_r1": null
- },
- "6960": {
-  "gold": "Yes",
-  "pred": "Yes",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\text{Yes}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
  },
  "78660": {
   "gold": "E",
@@ -1421,12 +1412,12 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "62474": {
-  "gold": "-\\dfrac{1}{12}",
-  "pred": "-\\dfrac{1}{12}",
+ "6960": {
+  "gold": "Yes",
+  "pred": "Yes",
   "bucket": "match",
   "finish_reason": "stop",
-  "r1": "-\\dfrac{1}{12}",
+  "r1": "\\text{Yes}",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
@@ -1439,15 +1430,6 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
- "68239": {
-  "gold": "\\sqrt{3}",
-  "pred": "\\sqrt{3}",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\sqrt{3}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "107176": {
   "gold": null,
   "pred": null,
@@ -1455,6 +1437,33 @@
   "finish_reason": "stop",
   "r1": null,
   "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
+ "62474": {
+  "gold": "-\\dfrac{1}{12}",
+  "pred": "-\\dfrac{1}{12}",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "-\\dfrac{1}{12}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "68239": {
+  "gold": "\\sqrt{3}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "\\sqrt{3}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": null
+ },
+ "85697": {
+  "gold": "3",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "3",
+  "y_vs_r1": true,
   "t_hat_vs_r1": null
  },
  "95137": {
@@ -1466,15 +1475,6 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
- "85697": {
-  "gold": "3",
-  "pred": "3",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "3",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "104317": {
   "gold": null,
   "pred": null,
@@ -1485,7 +1485,7 @@
   "t_hat_vs_r1": null
  },
  "113225": {
-  "gold": "A: pain",
+  "gold": "B: frustration",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
@@ -1494,31 +1494,22 @@
   "t_hat_vs_r1": null
  },
  "42010": {
-  "gold": "6\\ \\text{kg}",
+  "gold": "An adult needs 6 kg of salt for one year",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "6",
-  "y_vs_r1": true,
+  "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "37296": {
-  "gold": "1549277",
+  "gold": "1,549,277",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "1549277",
   "y_vs_r1": true,
   "t_hat_vs_r1": null
- },
- "79973": {
-  "gold": "A",
-  "pred": "A",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "A",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
  },
  "60498": {
   "gold": "0",
@@ -1530,31 +1521,40 @@
   "t_hat_vs_r1": false
  },
  "46396": {
-  "gold": "\\dfrac{1}{3}",
-  "pred": "\\dfrac{1}{3}",
+  "gold": "\\frac{1}{3}",
+  "pred": "\\frac{1}{3}",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "\\prod_{i=1}^n \\frac{1 - x_i}{1 + x_i} \\geq \\frac{1}{3}",
   "y_vs_r1": false,
   "t_hat_vs_r1": false
  },
- "30170": {
-  "gold": "6",
+ "79973": {
+  "gold": "A",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "length",
-  "r1": "-6",
-  "y_vs_r1": false,
+  "r1": "A",
+  "y_vs_r1": true,
   "t_hat_vs_r1": null
  },
  "77340": {
   "gold": "125",
-  "pred": null,
-  "bucket": "no box in t_hat",
+  "pred": "125",
+  "bucket": "match",
   "finish_reason": "stop",
   "r1": "125",
   "y_vs_r1": true,
-  "t_hat_vs_r1": null
+  "t_hat_vs_r1": true
+ },
+ "30170": {
+  "gold": "-6",
+  "pred": "-6",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "-6",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
  },
  "90574": {
   "gold": null,
@@ -1574,6 +1574,15 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
+ "73695": {
+  "gold": "1 \\text{ inch}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "stop",
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
  "2407": {
   "gold": "15",
   "pred": "15",
@@ -1583,13 +1592,13 @@
   "y_vs_r1": null,
   "t_hat_vs_r1": null
  },
- "73695": {
-  "gold": "1",
-  "pred": "1",
-  "bucket": "match",
+ "112837": {
+  "gold": "C: cool down",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
-  "r1": null,
-  "y_vs_r1": null,
+  "r1": "B. punch",
+  "y_vs_r1": false,
   "t_hat_vs_r1": null
  },
  "63712": {
@@ -1601,15 +1610,6 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "112837": {
-  "gold": "C: cool off",
-  "pred": null,
-  "bucket": "no box in t_hat",
-  "finish_reason": "stop",
-  "r1": "B. punch",
-  "y_vs_r1": false,
-  "t_hat_vs_r1": null
- },
  "100774": {
   "gold": null,
   "pred": null,
@@ -1618,15 +1618,6 @@
   "r1": null,
   "y_vs_r1": null,
   "t_hat_vs_r1": null
- },
- "38653": {
-  "gold": "\\text{Such a quadrilateral always exists.}",
-  "pred": "\\text{Such a quadrilateral always exists.}",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\text{Such a quadrilateral always exists.}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
  },
  "77965": {
   "gold": "D",
@@ -1637,12 +1628,66 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
+ "38653": {
+  "gold": "\\text{Such a quadrilateral exists.}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "\\text{Such a quadrilateral always exists.}",
+  "y_vs_r1": false,
+  "t_hat_vs_r1": null
+ },
  "7959": {
   "gold": "11",
   "pred": "11",
   "bucket": "match",
   "finish_reason": "stop",
   "r1": "11",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "97640": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "stop",
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
+ "20366": {
+  "gold": "\\ln\\left|x - 3 + \\sqrt{x^2 - 6x + 3}\\right| + C",
+  "pred": "\\ln\\left|x - 3 + \\sqrt{x^2 - 6x + 3}\\right| + C",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "\\ln\\left| x - 3 + \\sqrt{x^2 - 6x + 3} \\right| + C",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "14587": {
+  "gold": "\\dfrac{5}{2}",
+  "pred": "\\dfrac{2}{5}",
+  "bucket": "mismatch",
+  "finish_reason": "stop",
+  "r1": "\\dfrac{2}{5}",
+  "y_vs_r1": false,
+  "t_hat_vs_r1": true
+ },
+ "109428": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "stop",
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
+ "54445": {
+  "gold": "No",
+  "pred": "\\text{No}",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "No",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
@@ -1655,77 +1700,14 @@
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
- "14587": {
-  "gold": "2:5",
-  "pred": "\\dfrac{2}{5}",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\dfrac{2}{5}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "97640": {
-  "gold": null,
-  "pred": null,
-  "bucket": "no box in y",
-  "finish_reason": "length",
-  "r1": null,
-  "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
- "54445": {
-  "gold": "No",
-  "pred": "No",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "No",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "20366": {
-  "gold": "\\ln\\left| x - 3 + \\sqrt{x^2 - 6x + 3} \\right| + C",
-  "pred": "\\ln\\left| x - 3 + \\sqrt{x^2 - 6x + 3} \\right| + C",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "\\ln\\left| x - 3 + \\sqrt{x^2 - 6x + 3} \\right| + C",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "109428": {
-  "gold": null,
-  "pred": null,
-  "bucket": "no box in y",
-  "finish_reason": "stop",
-  "r1": null,
-  "y_vs_r1": null,
-  "t_hat_vs_r1": null
- },
- "15635": {
-  "gold": "b - 1 \\leq a \\leq 2\\sqrt{b}",
-  "pred": "b - 1 \\leq a \\leq 2\\sqrt{b}",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "b - 1 \\leq a \\leq 2\\sqrt{b}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
  "54488": {
-  "gold": "384\\, \\text{cm}^2",
+  "gold": "384 \\, \\text{cm}^2",
   "pred": null,
   "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "384",
   "y_vs_r1": true,
   "t_hat_vs_r1": null
- },
- "80062": {
-  "gold": "E",
-  "pred": "E",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "E",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
  },
  "6487": {
   "gold": "27",
@@ -1736,58 +1718,49 @@
   "y_vs_r1": false,
   "t_hat_vs_r1": false
  },
- "110779": {
-  "gold": "The image is real, inverted, twice as large as the object, and located 30 cm from the lens on the opposite side",
-  "pred": "30 \\text{ cm}",
+ "15635": {
+  "gold": "b - 1 \\leq a \\leq 2\\sqrt{b}",
+  "pred": "b - 1 \\leq a \\leq 2\\sqrt{b}",
   "bucket": "match",
   "finish_reason": "stop",
-  "r1": "30 \\, \\text{cm}",
+  "r1": "b - 1 \\leq a \\leq 2\\sqrt{b}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": true
+ },
+ "80062": {
+  "gold": "E",
+  "pred": "E",
+  "bucket": "match",
+  "finish_reason": "stop",
+  "r1": "E",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
  },
  "6543": {
-  "gold": "\\dfrac{\\pi}{2}",
-  "pred": "\\dfrac{\\pi}{2}",
-  "bucket": "match",
+  "gold": "\\frac{\\pi}{2}",
+  "pred": null,
+  "bucket": "no box in t_hat",
   "finish_reason": "stop",
   "r1": "\\dfrac{\\pi}{2}",
   "y_vs_r1": true,
-  "t_hat_vs_r1": true
+  "t_hat_vs_r1": null
  },
- "81360": {
-  "gold": "11",
-  "pred": "11",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "11",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "47459": {
-  "gold": "C",
-  "pred": "C",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "C",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "44106": {
-  "gold": "e^{-14}",
-  "pred": "e^{-14}",
-  "bucket": "match",
-  "finish_reason": "stop",
-  "r1": "e^{-14}",
-  "y_vs_r1": true,
-  "t_hat_vs_r1": true
- },
- "94364": {
+ "110779": {
   "gold": null,
   "pred": null,
   "bucket": "no box in y",
   "finish_reason": "stop",
-  "r1": null,
+  "r1": "30 \\, \\text{cm}",
   "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
+ "81360": {
+  "gold": "11",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "11",
+  "y_vs_r1": true,
   "t_hat_vs_r1": null
  },
  "12759": {
@@ -1798,5 +1771,32 @@
   "r1": "45^\\circ",
   "y_vs_r1": true,
   "t_hat_vs_r1": true
+ },
+ "44106": {
+  "gold": "e^{-14}",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "e^{-14}",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": null
+ },
+ "94364": {
+  "gold": null,
+  "pred": null,
+  "bucket": "no box in y",
+  "finish_reason": "stop",
+  "r1": null,
+  "y_vs_r1": null,
+  "t_hat_vs_r1": null
+ },
+ "47459": {
+  "gold": "C",
+  "pred": null,
+  "bucket": "no box in t_hat",
+  "finish_reason": "length",
+  "r1": "C",
+  "y_vs_r1": true,
+  "t_hat_vs_r1": null
  }
 }
