@@ -511,3 +511,34 @@ converges, the trace says it diverges — ∫₁^∞ sin²x/x dx does diverge), 
 wrong 6/102. Median 3282 ✓ (A, 1,783 tokens), long 57422 ✓ (12, 3,450 tokens). Epoch 2 against epoch 3
 on this arm: cap-hit 34 vs 26, graded match 91.2 vs 94.2 %, ratio 0.95 vs 0.90 — the opposite
 direction from 7B-sum's epoch-2-vs-3 comparison; one draw each.
+
+---
+
+## 6. Method notes that cost time
+
+- **Pair before comparing, again.** The unpaired R1 comparison said the forged traces agree with R1
+  more often than their surrogates' own answers (81–86 % vs 72–78 %). Paired on the same rows it
+  *reversed* for the 7B arm (−3 to −4 points, rows only lost) and shrank to +1–2 for the 1.5B arm. Same
+  shape as Phase 1's trace-length comparison that read "within 1.4 %" until it was paired: the
+  denominators differed because t̂ boxes on fewer rows, and those rows were the easier ones.
+- **A hub kernel that loads and runs forward can still be broken.** `kernels-community/flash-attn2`
+  (build `torch-stable-abi210-cu130`, compiled against torch 2.14) passed the smoke forward and crashed
+  in its backward at probe step 0 under torch 2.13. The probe is the check; the smoke test is not.
+- **transformers 5.16 `save_pretrained` reverts its load-time key mapping.** A `Qwen3_5ForCausalLM`
+  loaded text-only saves `model.language_model.*` names and `architectures: null`, which vLLM's
+  text-only loader rejects. The merge writes the module-tree state dict itself.
+- **A serving check that would pass on the bare base is not a check.** Given answer + summary, the
+  base model already writes coherent traces ending in the right box; the merge assert (tensor before ≠
+  after, saved == merged) is what proves an adapter was folded in.
+- **The grader is a lower bound; read every mismatch.** Of 7 + 9 + 5 + 6 + 9 mismatches across the five
+  inversions, 3 + 4 + 3 + 0 + 2 were equivalent forms the matcher rejects (a k-range in the prose, `c`
+  vs `C`, an option letter for its value, the same set boxed in another order). Labels: equivalent-form
+  / alternative-valid / genuine, with "inconsistent with the conditioned answer" = genuine +
+  alternative-valid.
+- **`y` on a surrogate holdout is the surrogate's answer, not the truth.** Grading `y` and t̂ against the
+  dataset's own R1 solution is what separated "inverter wrong" from "inverter right, surrogate wrong"
+  — 0 vs 4 of the genuine cases on the two arms.
+- **Trainer log lines sit in a stdout buffer under `nohup`** until the process exits; the per-epoch
+  `trainer_state.json` is the record. `PYTHONUNBUFFERED=1` in the driver from the second run on.
+- **Checkpoints are 1.4 GB, not ~250 MB**: `save_strategy="epoch"` stores the optimizer state with
+  each adapter. Twelve of them plus a transient 8.4 GB merge fit in the 59 GB the cache deletion freed.
