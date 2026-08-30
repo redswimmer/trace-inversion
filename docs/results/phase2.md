@@ -215,6 +215,13 @@ window" is the mean train loss over the last 50 steps of the epoch.
 | 7B-sum | 4,806 / 0 | 603 | 9.12 h (32,848 s) | 2,141 | 15.44 / 18.39 GiB | **0.3866 / 0.3810 / 0.3847** | 0.374 / 0.349 / 0.313 | +0.012 / +0.032 / +0.072 | 488 MB |
 | 7B-nosum | 4,806 / 0 | 603 | 8.12 h (29,214 s) | 2,085 | 15.27 / 17.54 GiB | **0.3896 / 0.3840 / 0.3876** | 0.375 / 0.349 / 0.314 | +0.015 / +0.035 / +0.074 | 488 MB |
 | 1.5B-sum | 4,828 / 0 | 606 | 8.89 h (31,986 s) | 2,123 | 15.41 / 17.99 GiB | **0.4296 / 0.4233 / 0.4257** | 0.397 / 0.374 / 0.351 | +0.033 / +0.049 / +0.075 | 488 MB |
+| 1.5B-nosum | 4,828 / 0 | 606 | 7.67 h (27,596 s) | 2,106 | 15.29 / 17.10 GiB | **0.4310 / 0.4248 / 0.4272** | 0.397 / 0.375 / 0.351 | +0.034 / +0.050 / +0.076 | 488 MB |
+
+Four runs, one shape: a front-loaded drop in the first ~100 steps, a train-side step at each epoch
+boundary that eval does not follow, eval best at epoch 2 by 0.004–0.006 and 0.002–0.004 back at epoch
+3, the train–eval gap widening to +0.07 by epoch 3. The summary costs the inverter 0.002–0.003 of
+eval loss on both arms; the arm costs 0.04. Total training wall clock **33.8 h** (9.12 + 8.12 + 8.89
++ 7.67) at 2,085–2,141 tok/s — the probes projected 34.3 h at 2,153.
 
 ### 7B-sum — `bench/results/phase2/inverter-7b-sum/`, 2026-08-28 20:14 → 08-29 05:21
 
@@ -268,6 +275,17 @@ in §3), with the train–eval gap opening earlier: +0.033 at epoch 1 where the 
 +0.015. 202 steps per epoch (4,828 rows). Merge check on the epoch-3 adapter: `in_proj_qkv` 2.9e-3 /
 88.4 %, `q_proj` 3.8e-3 / 84.0 %. Disk after the run: 36 GB free.
 
+### 1.5B-nosum — `bench/results/phase2/inverter-1.5b-nosum/`, 2026-08-29 23:48 → 08-30 07:28
+
+```
+epoch 1:  0.4500  0.4098  0.4113  0.3974      eval 0.4310  (tok-acc 0.851, entropy 0.431)
+epoch 2:  0.3853  0.3769  0.3801  0.3745      eval 0.4248  (tok-acc 0.853, entropy 0.404)
+epoch 3:  0.3639  0.3581  0.3471  0.3508      eval 0.4272  (tok-acc 0.853, entropy 0.381)
+```
+
+Within 0.002 of 1.5B-sum at every point. Merge check on the epoch-3 adapter: `in_proj_qkv` 3.4e-3 /
+87.6 %, `q_proj` 3.2e-3 / 84.3 %. Disk after the run: 30 GB free.
+
 ---
 
 ## 5. Held-out inversion — paired lengths on the same 200 rows
@@ -286,6 +304,9 @@ inverted`. Gates: 0 empty · 200 rows · every idx in the holdout · median t̂ 
 | 7B-sum, epoch 2 (`checkpoint-402`) | **2,241** / 2,507 / 157 / 6,777 | 2,172 / 2,574 / 190 / 6,390 | **1.03** | 3.0 % (6) | 0 |
 | 1.5B-sum, epoch 3 | **1,964** / 2,974 / 283 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.90** | **13.0 % (26)** | 0 |
 | 1.5B-sum, epoch 2 (`checkpoint-404`) | **2,063** / 3,066 / 305 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.95** | **17.0 % (34)** | 0 |
+| 1.5B-nosum, epoch 3 | **1,930** / 2,749 / 268 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.89** | **10.5 % (21)** | 0 |
+| 1.5B-nosum, epoch 2 (`checkpoint-404`) | **2,071** / 3,175 / 284 / 8,192 | 2,178 / 2,667 / 283 / 6,633 | **0.95** | **14.5 % (29)** | 0 |
+| 7B-nosum, epoch 2 (`checkpoint-402`) | **2,095** / 2,683 / 151 / 8,192 | 2,172 / 2,574 / 190 / 6,390 | **0.96** | 7.0 % (14) | 0 |
 
 The 1.5B arm's `t_true` column is the 1.5B surrogate's own traces for the same 200 prompts (the holdout
 is paired on prompts; each arm's ground truth is its own surrogate), so the true-length columns differ
@@ -324,6 +345,9 @@ student target `[t̂; y]` contradictory), and **wrong** = genuine.
 | 7B-sum, epoch 2 | 113 / 118 | 3 | 1 | 1 | 0 | 116 / 118 | **2 / 118** | 1 / 118 |
 | 1.5B-sum, epoch 3 | 97 / 103 | 0 | 0 | 6 | 0 | 97 / 103 | **6 / 103** | 6 / 103 |
 | 1.5B-sum, epoch 2 | 93 / 102 | 2 | 0 (+1 unverified) | 6 | 0 | 95 / 102 | **7 / 102** | 6 / 102 |
+| 1.5B-nosum, epoch 3 | 98 / 104 | 1 | 0 | 5 | 0 | 99 / 104 | **5 / 104** | 5 / 104 (3 inverter-wrong + 2 where R1 sides with the trace) |
+| 1.5B-nosum, epoch 2 | 88 / 99 | 1 | 0 | 10 | 0 | 89 / 99 | **10 / 99** | 10 / 99 (5 inverter-wrong + 5 where R1 sides with the trace) |
+| 7B-nosum, epoch 2 | 102 / 108 | 3 | 0 | 2 | 1 (42804, proof) | 105 / 107 | **2 / 108** | 2 / 108 (1 inverter-wrong + 1 where R1 sides with the trace) |
 
 **Against R1's answer** — the boxed answer in each OpenThoughts row's own R1 solution (the assistant
 text after `</think>` in `llamafactory/OpenThoughts-114k`, same idx): *the dataset's solution, not
@@ -339,6 +363,9 @@ of the 200 rows. Per-row values (`r1`, `y_vs_r1`, `t_hat_vs_r1`) are in every `-
 | 7B-sum, epoch 2 | 113 / 145 (77.9 %) | 91 / 109 (83.5 %) | 1 | 0 | 4 | 0 |
 | 1.5B-sum, epoch 3 | 104 / 144 (72.2 %) | 84 / 98 (85.7 %) | 2 | **4** | 0 | 0 |
 | 1.5B-sum, epoch 2 | 104 / 144 (72.2 %) | 83 / 98 (84.7 %) | 3 | **4** | 2 | 0 |
+| 1.5B-nosum, epoch 3 | 104 / 144 (72.2 %) | 83 / 99 (83.8 %) | 2 | 1 | 2 | 1 |
+| 1.5B-nosum, epoch 2 | 104 / 144 (72.2 %) | 80 / 96 (83.3 %) | 4 | 5 | 2 | 0 |
+| 7B-nosum, epoch 2 | 113 / 145 (77.9 %) | 86 / 100 (86.0 %) | 1 | 1 | 3 | 1 |
 
 The unpaired columns above have different denominators (`y` gradable on 144–145 rows, t̂ on 98–109,
 because t̂ often does not box and the rows where it does may be the easier ones), so they are not
@@ -351,6 +378,9 @@ compared. **Paired, on the rows gradable on both sides** (`docs/11` §5):
 | 7B-sum, epoch 2 | 109 | 92 (84.4 %) | 91 (83.5 %) | 1 | 0 |
 | 1.5B-sum, epoch 3 | 98 | 82 (83.7 %) | 84 (85.7 %) | 2 | 4 |
 | 1.5B-sum, epoch 2 | 98 | 82 (83.7 %) | 83 (84.7 %) | 3 | 4 |
+| 1.5B-nosum, epoch 3 | 99 | 84 (84.8 %) | 83 (83.8 %) | 2 | 1 |
+| 1.5B-nosum, epoch 2 | 96 | 79 (82.3 %) | 80 (83.3 %) | 4 | 5 |
+| 7B-nosum, epoch 2 | 100 | 86 (86.0 %) | 86 (86.0 %) | 1 | 1 |
 
 Arm-paired on the 86 idx gradable on both sides for both arms' epoch-3 summary inverters: 7B `y`
 76/86 (88.4 %), t̂ 74/86 (86.0 %); 1.5B `y` 72/86 (83.7 %), t̂ 74/86 (86.0 %).
@@ -373,8 +403,8 @@ Per-row ratio median 1.00; t̂ shorter than t_true on exactly 50.0 % of rows. By
 median: math 2,362 / 2,429 (n=151) · code 2,053 / 2,355 (28) · physics 1,065 / 1,001 (9) · biology
 905 / 893 (5) · puzzle 584 / 388 (5) · chemistry 710 / 800 (2). t̂'s p95 sits at the cap (8,000) where
 t_true's is 6,390: the inverter's tail is heavier than the surrogate's — the 10 cap-hits are all math
-rows (t_true 2,272–6,075 tokens) whose tails are still running case checks (most repeated 40-char chunk
-in the last 4,000 chars occurs once), i.e. long computations, not repetition loops. vLLM throughput on
+rows (t_true 2,272–6,075 tokens); 8 of the 10 are still running case checks at the cut and 2 show a
+repeated 40-char chunk (≥3× in the last 4,000 chars), the loop test used for every inversion in §5.4. vLLM throughput on
 the 200 rows: ~5.5 min wall for 525k generated tokens.
 
 Three rows read (shortest, median, longest t_true):
@@ -512,6 +542,96 @@ wrong 6/102. Median 3282 ✓ (A, 1,783 tokens), long 57422 ✓ (12, 3,450 tokens
 on this arm: cap-hit 34 vs 26, graded match 91.2 vs 94.2 %, ratio 0.95 vs 0.90 — the opposite
 direction from 7B-sum's epoch-2-vs-3 comparison; one draw each.
 
+### 1.5B-nosum, epoch 3 — `bench/results/phase2/holdout-1.5b-nosum.jsonl`
+
+Per-row ratio median 0.98; t̂ shorter on 52.0 %. Cap-hit 21/200 (18 math, 3 code; `t_true` 689–6,934
+tokens), of which **4 are repetition loops** (idx 21120 ×10, 8576 ×11, 32805 ×3, 79973 ×7) — the
+1.5B-sum epoch-3 inverter had 1 of 26. Merge check: `in_proj_qkv` 3.4e-3 / 87.6 %, `q_proj` 3.2e-3 /
+84.3 %. By domain, t̂ / t_true median: math 2,110 / 2,396 (n=151) · code 2,421 / 2,366 (28) · physics
+852 / 1,046 (9) · biology 831 / 927 (5) · puzzle 491 / 459 (5) · chemistry 1,007 / 2,378 (2).
+
+| row | t_true → t̂ tokens | reaches the given answer? |
+|---|---|---|
+| short, idx 15523 (car rental, y = 243 km) | 113 → 220 | **Yes**, in prose: 74.16 − 45 = 29.16, ÷ 0.12 = 243, then verified. With no summary to inherit, the plan-only shape of the surrogate's trace (and of the summary inverter's) does not appear. |
+| median, idx 3282 (three lines; y = A) | 2,229 → 2,120 | **Yes.** Boxes A. |
+| long, idx 57422 (unique n; y = 12) | 7,758 → 4,151 | **Yes.** Boxes 12. |
+
+Consistency: match 98, mismatch 6, no box in t̂ 46 (18 cap-severed + 28 prose), no box in y 50 —
+94.2 % graded (n=104). The six, read: **equivalent-form 1** — 25352 (boxes `d | (p − 1)` for y's
+`p − 1`; R1 says "the period length divides p−1"); **genuine 5**, split by R1's answer: *inverter wrong*
+3 — 28153 (proof that x²+y²=61³ has a solution: boxes a pair with 671² > 61³), 41089 (arc length 4√2/3
+for 4/3, R1 4/3), 26596 (5√15/13 for √15/5, R1 √15/5); *inverter right, surrogate wrong* 2 — 59048
+(labyrinths: "more bad" = R1, y says "more good"), 21551 (option A = R1, y says B). By hand 99/104;
+inconsistent with the conditioned answer 5/104; wrong 3/104.
+
+### 1.5B-nosum, epoch 2 — `bench/results/phase2/holdout-1.5b-nosum-ep2.jsonl`
+
+t̂ 2,071 / 3,175 / 284 / 8,192; ratio 0.95 (per-row 1.03); cap-hit 29/200 (14.5 %), 4 loops; merge
+check 3.3e-3 / 86.8 %, 3.1e-3 / 83.4 %. Consistency 88 / 11 / 51 (21 cap-severed + 30 prose) / 50 —
+88.9 % graded (n=99). The eleven, read: **equivalent-form 1** — 32805 (`R(√5−1)/2` = `2R sin 18°`;
+the last of two equivalent boxes); **genuine 10**: *inverter right, surrogate wrong* 5 — 60096 (13 =
+R1, y √119), 21120 (diverges = R1), 59048, 21551, 63867 (8,682,544 = R1, y 8,682,572); *inverter
+wrong* 5 — 71649 (14 for 16), 74895 (6 for 19), 16770 (`15+6n`: 189 = 15+6·29 = 5³+4³, so invalid),
+59441 (√13 for √7), 30170 (boxes four candidates, the last wrong; y and R1 −6). By hand 89/99;
+inconsistent 10/99; wrong 5/99. Short 15523 → 243 in prose ✓, median 3282 ✓, long 57422 ✓ (2,979
+tokens).
+
+### 5.4 Cap-hits across inversions — prompt-level or arm-level?
+
+Capped idx sets, all 200-row inversions (`finish_reason == "length"`), with the loop test (a 40-char
+chunk repeated ≥3× in the trace's last 4,000 chars):
+
+| inversion | capped | of which loops |
+|---|---:|---:|
+| 7B-sum e3 | 10 | 2 |
+| 7B-nosum e3 | 10 | 0 |
+| 1.5B-sum e3 | 26 | 1 |
+| 1.5B-nosum e3 | 21 | 4 |
+| 7B-sum e2 | 6 | 1 |
+| 1.5B-sum e2 | 34 | 3 |
+| 1.5B-nosum e2 | 29 | 4 |
+| 7B-nosum e2 | 14 | 0 |
+
+Pairwise overlap of the epoch-3 capped sets: 7B-sum ∩ 7B-nosum **2** · 1.5B-sum ∩ 1.5B-nosum **11** ·
+across arms 3–4 per pair. Union over the four: 44 idx; capped in one inversion only 25, in two 15, in
+three 4 (idx 38653, 47459, 79973, 100774), in all four **0**. Arm unions: 7B 18, 1.5B 36, intersection
+10. Same inverter, epoch 2 ∩ epoch 3: 7B-sum 1 (of 10 and 6), 7B-nosum 4 (of 10 and 14), 1.5B-sum 10
+(of 26 and 34), 1.5B-nosum 9 (of 21 and 29). Measured: no prompt caps every inverter; the 1.5B arm's two inverters share half
+their capped rows with each other and a quarter with the 7B arm's — the runaway is mostly arm-level
+with a prompt-level core of ~4–10 rows, and on any single inverter it moves between draws (Phase 1's
+flip-rate finding again). Loops are a 1.5B-nosum and epoch-2 feature (3–4 per inversion) and rare
+elsewhere (0–2).
+
+### 5.5 Epoch 2 vs epoch 3, side by side
+
+`eval_loss` is deterministic; every generation column is one sampled draw at temperature 0.7 on the same
+200 rows (Phase 1 measured a ~15 % cap-hit flip rate between two draws of one model), so those columns
+are directions, not differences. Not averaged across arms.
+
+| inverter | eval_loss e2 / e3 | t̂ median ratio e2 / e3 | cap-hit e2 / e3 | graded match e2 / e3 | inconsistent with y e2 / e3 | wrong e2 / e3 |
+|---|---|---|---|---|---|---|
+| 7B-sum | **0.3810** / 0.3847 | 1.03 / 0.99 | 6 / 10 | 95.8 % / 93.8 % | 2/118 / 3/112 | 1/118 / 3/112 |
+| 7B-nosum | **0.3840** / 0.3876 | 0.96 / 0.91 | 14 / 10 | 94.4 % / 92.1 % | 2/108 / 4/113 | 1/108 / 3/113 |
+| 1.5B-sum | **0.4233** / 0.4257 | 0.95 / 0.90 | 34 / 26 | 91.2 % / 94.2 % | 7/102 / 6/103 | 6/102 / 6/103 |
+| 1.5B-nosum | **0.4248** / 0.4272 | 0.95 / 0.89 | 29 / 21 | 88.9 % / 94.2 % | 10/99 / 5/104 | 5/99 / 3/104 |
+
+Across the four inverters epoch 2 has the lower eval loss every time; on generation the 7B arm's
+epoch-2 adapters cap fewer rows (6 vs 10; 14 vs 10 is the one exception) and grade higher, the 1.5B
+arm's cap more and grade lower. Which adapter Phase 4 serves is the user's decision.
+
+### 7B-nosum, epoch 2 — `bench/results/phase2/holdout-7b-nosum-ep2.jsonl`
+
+Run in the last GPU gap. t̂ 2,095 / 2,683 / 151 / 8,192; ratio 0.96 (per-row 1.00); cap-hit 14/200
+(7.0 %), 0 loops, 4 shared with epoch 3's ten; merge check 2.8e-3 / 87.9 %, 3.1e-3 / 84.1 %.
+Consistency 102 / 6 / 48 (12 cap-severed + 36 prose) / 44 — 94.4 % graded (n=108). The six, read:
+**equivalent-form 3** — 29482 (k-range in prose), 54798 (`4·sgn(sin x cos x)`), 70443 (a two-part
+answer: boxes part (a)'s 2048, states part (b)'s "such two inhabitants exist" in prose = y);
+**ambiguous 1** — 42804 (a proof with "for which other numbers?" — boxes `n`); **genuine 2** — 6618
+(20 for 21 = R1, inverter wrong), 34191 (option D = R1 against y's C, surrogate wrong). By hand
+105/107; inconsistent 2/108; wrong 1/108. Paired vs R1 (n=100): 86.0 % / 86.0 %, one row each way.
+Short 77473 → 100 in prose ✓; median 84388 ✓; long 14587 **capped** at 8,192 mid-computation (the
+only read row that hit the cap in any inversion).
+
 ---
 
 ## 6. Method notes that cost time
@@ -542,3 +662,22 @@ direction from 7B-sum's epoch-2-vs-3 comparison; one draw each.
   `trainer_state.json` is the record. `PYTHONUNBUFFERED=1` in the driver from the second run on.
 - **Checkpoints are 1.4 GB, not ~250 MB**: `save_strategy="epoch"` stores the optimizer state with
   each adapter. Twelve of them plus a transient 8.4 GB merge fit in the 59 GB the cache deletion freed.
+
+---
+
+## 7. Definition of done (`docs/13` §10), with the evidence
+
+| item | status | where |
+|---|---|---|
+| training venv built from `pyproject.toml`; `trl env` recorded | done | `pyproject.toml` / `uv.lock`; §0 |
+| `bench/phase2/prompts.py` (sha256-asserted), `bench/phase2/holdout.json` (200 idx, seed 20260828) committed | done | commit `0b6983b`; §1 |
+| formatter + self-test committed; over-length drop count reported per file (expected 0) | done — 0 of 10,034 | `bench/phase2_format.py`, `bench/test_phase2_format.py`; §1 table |
+| four adapters on disk, three per-epoch checkpoints each, `log_history.json` + peak VRAM per run | done | `bench/results/phase2/inverter-{7b,1.5b}-{sum,nosum}/{checkpoint-*,log_history.json,peak_vram.txt,run.json}` (gitignored); §4 |
+| held-out eval loss per epoch, per inverter | done | §4 table and per-inverter blocks |
+| held-out inversion for all four inverters: paired length table, cap-hit, empties, three read examples each | done, plus the epoch-2 adapters | §5 (tables), §5.x per inverter; raw text in `bench/results/phase2/holdout-*.jsonl` (gitignored), per-row grading in `holdout-*-consistency.json` (committed) |
+| every long run preceded by a probe whose projection was reported before the run started | done, four probes | §3; `bench/logs/phase2-probe-*.log` |
+| `docs/results/phase2.md` committed; `docs/09` rows added; `.gitignore` covers the adapters | done | this file; `docs/09` rows 3.2, 3.4, 4.7, 6.2, 6.4, 7.12, 7.13; `.gitignore` `bench/results/phase2/inverter-*/`, `merged-*/` |
+
+Wall clock, whole phase: 2026-08-28 19:30 → 08-30 07:45 — 33.8 h of training, ~2.5 h of probes, merges,
+inversions and the 7B-sum serving-path check, the rest reading and writing. Disk at the end: 30 GB
+free (four adapters with checkpoints ≈ 20 GB; no merged weights left on disk).
