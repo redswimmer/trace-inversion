@@ -503,6 +503,19 @@ median ratio 1.03 vs 0.99 — one draw each at temperature 0.7, so the differenc
 noise Phase 1 measured (cap-hit flips on ~15 % of rows between two draws of the same model). Which
 adapter Phase 4 serves is the user's decision.
 
+### 7B-nosum, epoch 2 — `bench/results/phase2/holdout-7b-nosum-ep2.jsonl`
+
+Run in the last GPU gap. t̂ 2,095 / 2,683 / 151 / 8,192; ratio 0.96 (per-row 1.00); cap-hit 14/200
+(7.0 %), 0 loops, 4 shared with epoch 3's ten; merge check 2.8e-3 / 87.9 %, 3.1e-3 / 84.1 %.
+Consistency 102 / 6 / 48 (12 cap-severed + 36 prose) / 44 — 94.4 % graded (n=108). The six, read:
+**equivalent-form 3** — 29482 (k-range in prose), 54798 (`4·sgn(sin x cos x)`), 70443 (a two-part
+answer: boxes part (a)'s 2048, states part (b)'s "such two inhabitants exist" in prose = y);
+**ambiguous 1** — 42804 (a proof with "for which other numbers?" — boxes `n`); **genuine 2** — 6618
+(20 for 21 = R1, inverter wrong), 34191 (option D = R1 against y's C, surrogate wrong). By hand
+105/107; inconsistent 2/108; wrong 1/108. Paired vs R1 (n=100): 86.0 % / 86.0 %, one row each way.
+Short 77473 → 100 in prose ✓; median 84388 ✓; long 14587 **capped** at 8,192 mid-computation (the
+only read row that hit the cap in any inversion).
+
 ### 1.5B-sum, epoch 3 — `bench/results/phase2/holdout-1.5b-sum.jsonl`
 
 Per-row ratio median 1.01; t̂ shorter on 49.5 %. The tail is the finding: **26 cap-hits** (20 math,
@@ -618,19 +631,6 @@ are directions, not differences. Not averaged across arms.
 Across the four inverters epoch 2 has the lower eval loss every time; on generation the 7B arm's
 epoch-2 adapters cap fewer rows (6 vs 10; 14 vs 10 is the one exception) and grade higher, the 1.5B
 arm's cap more and grade lower. Which adapter Phase 4 serves is the user's decision.
-
-### 7B-nosum, epoch 2 — `bench/results/phase2/holdout-7b-nosum-ep2.jsonl`
-
-Run in the last GPU gap. t̂ 2,095 / 2,683 / 151 / 8,192; ratio 0.96 (per-row 1.00); cap-hit 14/200
-(7.0 %), 0 loops, 4 shared with epoch 3's ten; merge check 2.8e-3 / 87.9 %, 3.1e-3 / 84.1 %.
-Consistency 102 / 6 / 48 (12 cap-severed + 36 prose) / 44 — 94.4 % graded (n=108). The six, read:
-**equivalent-form 3** — 29482 (k-range in prose), 54798 (`4·sgn(sin x cos x)`), 70443 (a two-part
-answer: boxes part (a)'s 2048, states part (b)'s "such two inhabitants exist" in prose = y);
-**ambiguous 1** — 42804 (a proof with "for which other numbers?" — boxes `n`); **genuine 2** — 6618
-(20 for 21 = R1, inverter wrong), 34191 (option D = R1 against y's C, surrogate wrong). By hand
-105/107; inconsistent 2/108; wrong 1/108. Paired vs R1 (n=100): 86.0 % / 86.0 %, one row each way.
-Short 77473 → 100 in prose ✓; median 84388 ✓; long 14587 **capped** at 8,192 mid-computation (the
-only read row that hit the cap in any inversion).
 
 ---
 
