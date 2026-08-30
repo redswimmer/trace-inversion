@@ -53,8 +53,8 @@ Phase 0   benchmark every candidate zero-shot → fix the roles above           
 Phase 1   split A → surrogate → (problem, trace, answer)
                                    └→ compressor → summary
           = D₂: (problem, answer, summary, trace) × ~5,000 rows, once per surrogate arm     done
-Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    ← now
-Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked
+Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    done
+Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked   ← next
 Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000
 Phase 5   train the student five ways on split B:
             answer-only | summary+answer | surrogate's own traces | forged traces | real victim traces
@@ -101,7 +101,7 @@ only test is whether the traces it writes make the student better.
 |---|---|---|
 | 0 — baselines | done | Harness calibrated: the paper's own surrogate scores 32.6 % JEEBench here vs 32.6 % in the paper. Roles fixed on measurement: student 47.8 < surrogate 60.6 < victim 86.2 on JEEBench — the regime the argument needs. |
 | 1 — surrogate data | done | `D₂` built for both arms (5,006 / 5,028 rows). Summaries pass all four of the paper's style targets. ~21 h of generation per arm. |
-| 2 — train inverters | **running** | Four LoRA inverters: {7B, 1.5B arm} × {with, without summary}. The 20-step probe measured 2,153 train tokens/s → ~34 h for all four. Plan: `docs/13-phase2-handoff.md`. |
+| 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
 | 3 — query the victim | next | ~10–15 h |
 | 4 — invert | | ~4 h |
 | 5 — train students | | five conditions, ~20 h |
@@ -109,7 +109,7 @@ only test is whether the traces it writes make the student better.
 
 ## What we've found so far
 
-Findings the paper didn't report, from Phases 0 and 1 (full detail in `docs/results/`):
+Findings the paper didn't report, from Phases 0–2 (full detail in `docs/results/`):
 
 - **Capability shows up as brevity.** The 27B victim solves JEEBench in a median 4,295 tokens; the 4B
   takes 21,859 and scores lower. Long generations were smaller models flailing.
@@ -126,6 +126,18 @@ Findings the paper didn't report, from Phases 0 and 1 (full detail in `docs/resu
 - **The paper's "aim for 600–900 tokens" is a calibrated over-ask** that its compressor undershoots
   by ~28 %; ours undershoots by ~17 %, so the exemplars had to be re-sized to land on the paper's
   medians. Swap the compressor and you land somewhere else on the same instruction.
+- **The weak surrogate's habits reach the inverter through style, not through bad targets.** Every
+  trace the inverters trained on terminated under the cap, yet the inverters trained on the 1.5B's
+  traces run past 8,192 tokens on 10–17 % of held-out prompts, against 3–5 % for the 7B's — and they
+  loop where the 7B-arm inverters never do.
+- **A forged trace sometimes argues itself out of the answer it was handed.** About 3 % of gradable
+  held-out traces conclude something other than the answer they were conditioned on — a spurious
+  units "correction", 21 talked down to 20, a Yes turned into No. On the weak arm, most of those are
+  the inverter being *right* where its surrogate was wrong. The paper does no filtering; what to do
+  with such traces before student training is an open decision.
+- **The inverter needs almost nothing to acquire the format.** Loss drops in the first ~100 steps
+  and is flat after; a 20-step adapter already wrote traces at the true length ending in the right
+  boxed answer. Epochs 2–3 fit the training rows (held-out loss is best at epoch 2 on all four).
 
 <details>
 <summary><strong>How this differs from the paper</strong></summary>
