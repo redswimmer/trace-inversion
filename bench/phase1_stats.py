@@ -415,6 +415,8 @@ def vs_r1(rows, out_json):
                   f"on an equivalent form)")
     if nb + nf and rate < 75:
         print("  ** under 75% on gradable rows — STOP AND ASK (docs/14 §6); reported, not gated **")
+    from pathlib import Path as _P
+    _P(out_json).parent.mkdir(parents=True, exist_ok=True)
     json.dump(per_row, open(out_json, "w"), indent=1)
     print(f"  per-row (y_answer, how, r1_boxed, bucket) -> {out_json}")
 

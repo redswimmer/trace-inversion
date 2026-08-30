@@ -71,8 +71,9 @@ if [[ $rc -ne 0 ]]; then
 fi
 note "generation complete"
 tail -12 "$RUNLOG"
-# docs/14 §4.2: a prompt that did not fit its slot is truncated silently; count it here
-note "server log: 'truncated' $(grep -c truncated "$SRVLOG")  'context shift' $(grep -ci 'context shift' "$SRVLOG")  'context' errors $(grep -ci 'context capacity\|context is full\|exceeds' "$SRVLOG")"
+# docs/14 §4.2: a prompt that did not fit its slot is truncated silently. Every slot-release line
+# prints "truncated = N", so count only the NONZERO ones (grep -c truncated matches all of them).
+note "server log: 'truncated = [1-9]' $(grep -cE 'truncated = [1-9]' "$SRVLOG")  'context shift' $(grep -ci 'context shift' "$SRVLOG")  'context' errors $(grep -ci 'context capacity\|context is full\|exceeds' "$SRVLOG")"
 note "measuring (docs/14 §5 step 2)"
 "$PY" bench/phase1_stats.py "$OUT" --mode traces --cap 14336 --cap-hit-band 0 15 \
     --trace-tokenizer Qwen/Qwen3.5-4B --paired --paired-gap-tol 100 \
