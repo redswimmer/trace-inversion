@@ -401,6 +401,15 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None
             else: split["neither matches R1"] += 1
         print(f"  against R1's answer (the dataset's solution, not ground truth): y vs R1 {_rate('y_vs_r1')}   "
               f"t_hat vs R1 {_rate('t_hat_vs_r1')}   R1 unboxed {sum(k['r1'] is None for k in per_row.values())}")
+        # PAIRED: the same rows, gradable on both sides — the unpaired denominators differ because
+        # t_hat often does not box, and the rows where it does may be the easier ones (docs/11 §5).
+        both = [k for k in per_row.values() if k["y_vs_r1"] is not None and k["t_hat_vs_r1"] is not None]
+        if both:
+            print(f"  PAIRED on the {len(both)} rows gradable on both sides: y vs R1 {sum(k['y_vs_r1'] for k in both)}/{len(both)} "
+                  f"({100*sum(k['y_vs_r1'] for k in both)/len(both):.1f}%)   t_hat vs R1 {sum(k['t_hat_vs_r1'] for k in both)}/{len(both)} "
+                  f"({100*sum(k['t_hat_vs_r1'] for k in both)/len(both):.1f}%)   "
+                  f"y right & t_hat wrong {sum(k['y_vs_r1'] and not k['t_hat_vs_r1'] for k in both)}   "
+                  f"t_hat right & y wrong {sum(k['t_hat_vs_r1'] and not k['y_vs_r1'] for k in both)}")
         print("  mismatch split: " + "  ".join(f"{k} {v}" for k, v in split.items()))
     print(f"\nanswer consistency (last boxed in t_hat vs y; report only):  "
           + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())

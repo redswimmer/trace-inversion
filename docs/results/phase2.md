@@ -340,13 +340,29 @@ of the 200 rows. Per-row values (`r1`, `y_vs_r1`, `t_hat_vs_r1`) are in every `-
 | 1.5B-sum, epoch 3 | 104 / 144 (72.2 %) | 84 / 98 (85.7 %) | 2 | **4** | 0 | 0 |
 | 1.5B-sum, epoch 2 | 104 / 144 (72.2 %) | 83 / 98 (84.7 %) | 3 | **4** | 2 | 0 |
 
-Measured: on the 7B arm the surrogate's answer agrees with R1 on 78 % of gradable rows and no genuine
-mismatch is the inverter correcting it; on the 1.5B arm the surrogate agrees with R1 on 72 %, and four
-of the six genuine epoch-3 mismatches are the inverter landing on R1's answer against a surrogate `y`
-that does not (18067, 14587, 21120 among them). The inverters' traces agree with R1 more often than
-the surrogates' own answers do (81–86 % vs 72–78 %) — partly because the gradable set differs (rows
-where t̂ boxes at all). On victim data (Phase 4) `y` will mostly be right, so the override behaviour
-that helps here would mostly hurt there; that is a Phase 4/5 decision.
+The unpaired columns above have different denominators (`y` gradable on 144–145 rows, t̂ on 98–109,
+because t̂ often does not box and the rows where it does may be the easier ones), so they are not
+compared. **Paired, on the rows gradable on both sides** (`docs/11` §5):
+
+| inverter | n (both gradable) | y vs R1 | t̂ vs R1 | y right, t̂ wrong | t̂ right, y wrong |
+|---|---:|---:|---:|---:|---:|
+| 7B-sum, epoch 3 | 105 | 89 (84.8 %) | 85 (81.0 %) | 4 | 0 |
+| 7B-nosum, epoch 3 | 105 | 89 (84.8 %) | 86 (81.9 %) | 3 | 0 |
+| 7B-sum, epoch 2 | 109 | 92 (84.4 %) | 91 (83.5 %) | 1 | 0 |
+| 1.5B-sum, epoch 3 | 98 | 82 (83.7 %) | 84 (85.7 %) | 2 | 4 |
+| 1.5B-sum, epoch 2 | 98 | 82 (83.7 %) | 83 (84.7 %) | 3 | 4 |
+
+Arm-paired on the 86 idx gradable on both sides for both arms' epoch-3 summary inverters: 7B `y`
+76/86 (88.4 %), t̂ 74/86 (86.0 %); 1.5B `y` 72/86 (83.7 %), t̂ 74/86 (86.0 %).
+
+Measured: the unpaired impression that forged traces agree with R1 more often than the surrogates'
+own answers was selection — paired, the 7B-arm inverters are 3–4 points *under* their surrogate's
+answer (4 / 3 / 1 rows lost, none gained) and the 1.5B-arm inverter is 1–2 points over its weaker
+surrogate (4 rows gained, 2–3 lost). On the 7B arm no genuine mismatch is the inverter correcting the
+surrogate; on the 1.5B arm four of the six genuine epoch-3 mismatches are the inverter landing on R1's
+answer against a surrogate `y` that does not (18067, 14587, 21120 among them). On victim data
+(Phase 4) `y` will mostly be right, so the override behaviour that helps on this arm would mostly hurt
+there; that is a Phase 4/5 decision.
 
 The 1.5B arm's idx 15523 is the clearest style-inheritance example: a plan-only trace with no number,
 matching the surrogate's own plan-only trace on that prompt (`t_true` never computes 243 either).
