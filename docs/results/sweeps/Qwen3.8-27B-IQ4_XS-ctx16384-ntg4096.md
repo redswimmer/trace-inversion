@@ -26,8 +26,8 @@ per-slot context if the workload's tail allows it.
 | Slots | Total KV | Peak MiB | |
 |---:|---:|---:|---|
 | 8 | 131072 | 20,741 | |
-| 12 | 196608 | 23,422 | same KV total Phase 0 ran (6 × 32,768, 21,910 MiB in `llama-server`); the batched-bench figure includes a 12 × 512 prompt batch |
-| 16 | 262144 | 23,061 at failure | recurrent-state cache allocation failed at load |
+| 12 | 196608 | 23,422 | same KV total Phase 0 ran (6 × 32,768, 21,910 MiB in `llama-server`); the batched-bench figure includes a 12 × 512 prompt batch. `llama-server` at `-np 12 -c 196608` for the Phase 3 run: 22,940 MiB after load, 23,164 MiB while generating |
+| 16 | 262144 | — | weights loaded (14,440 MiB sampled), then the recurrent-state cache allocation failed and the process exited within ~10 s |
 
 Two points that both load rank monotonically (140.6 → 164.9), so the table is clean enough to rank
 with. It ranks; it does not budget — the realized rate comes from the first 30 minutes of the run
