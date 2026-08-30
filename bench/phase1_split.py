@@ -37,6 +37,12 @@ def main():
                          "generation job holds the prompts file — that file is read once "
                          "at startup, and a resumed job simply sees more rows and still "
                          "stops at --target-kept.")
+    ap.add_argument("--only-b", action="store_true",
+                    help="Phase 3: write split B's prompts and NOTHING else. Recomputes the "
+                         "permutation, asserts it reproduces splits.json's B, and leaves "
+                         "splits.json and promptsA.jsonl untouched. Without this flag the "
+                         "script REWRITES both (docs/14 §0).")
+    ap.add_argument("--prompts-b", default="bench/results/phase3/promptsB.jsonl")
     args = ap.parse_args()
 
     ds = load_dataset(REPO, split="train")
@@ -46,6 +52,42 @@ def main():
     A = sorted(int(i) for i in perm[: args.n])
     B = sorted(int(i) for i in perm[args.n : 2 * args.n])
     assert not (set(A) & set(B)), "splits overlap"
+
+    if args.only_b:
+        # B in permutation order (perm[n:2n]), same row schema as promptsA.jsonl, checked
+        # against the manifest on disk rather than trusted from the recomputation.
+        saved = json.loads((ROOT / args.splits).read_text())
+        assert saved["seed"] == args.seed and saved["n_rows"] == len(ds), "seed/corpus mismatch"
+        assert saved["B"] == B, "recomputed B does not reproduce splits.json"
+        assert not (set(saved["A"]) & set(B)), "B overlaps the (extended) A on disk"
+        order = {int(i): k for k, i in enumerate(perm[args.n : 2 * args.n])}
+        rows = []
+        for i, r in zip(B, ds.select(B)):
+            msgs = r["messages"]
+            roles = [m["role"] for m in msgs]
+            assert roles == ["system", "user", "assistant"], f"row {i}: roles {roles}"
+            rows.append({"idx": i, "order": order[i], "prompt": msgs[1]["content"],
+                         "domain": r["domain"], "source": r["source"]})
+        rows.sort(key=lambda r: r["order"])
+        out = ROOT / args.prompts_b
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w") as f:
+            for r in rows:
+                f.write(json.dumps(r) + "\n")
+        import collections
+        mix = collections.Counter(r["domain"] for r in rows)
+        first = collections.Counter(r["domain"] for r in rows[:200])
+        chars = np.array([len(r["prompt"]) for r in rows])
+        print(f"len(B)       {len(B)}   A∩B {len(set(saved['A']) & set(B))}   "
+              f"B == splits.json['B'] True   len(A on disk) {len(saved['A'])}")
+        print("B domain mix " + "  ".join(
+            f"{d} {100*n/len(rows):.1f}%" for d, n in mix.most_common()))
+        print("first 200    " + "  ".join(f"{d} {n}" for d, n in first.most_common()))
+        print(f"B prompt chars  median {int(np.median(chars))}  p95 {int(np.percentile(chars, 95))}  "
+              f"max {int(chars.max())}  over 5000: {int((chars > 5000).sum())}  "
+              f"over 8000: {int((chars > 8000).sum())}")
+        print(f"wrote        {out}   (splits.json and promptsA.jsonl untouched)")
+        return
 
     # Split A is sized for the WORST arm, not the best. The 1.5B is more verbose than
     # the 7B on every Phase 0 measurement, and generation stops at 5,000 *kept*, so a

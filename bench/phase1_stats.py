@@ -323,6 +323,53 @@ def r1_answers(idxs):
     return out
 
 
+def vs_r1(rows, out_json):
+    """The model's answer vs R1's answer on the SAME prompt (docs/14 §4.6). Report only, never a
+    filter: R1's boxed answer is the dataset's solution, not ground truth, and the symbolic grader
+    rejects some equivalent forms (~3-4% of Phase 2 mismatches). Last \\boxed{} in each KEPT row's
+    post-think answer against the last \\boxed{} in the OpenThoughts row's own R1 solution, graded
+    in the main thread (math_verify uses SIGALRM). A collapse here is the first sign of a template
+    or split error, hours rather than days into a run."""
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed, grade
+    kept = [r for r in rows if not r["capped"]]
+    r1 = r1_answers([r["idx"] for r in kept])
+    buckets = {"agree": [], "disagree": [], "no box in y": [], "no box in R1": []}
+    per_row = {}
+    for r in kept:
+        yb = extract_boxed(r["answer"] if "answer" in r else r.get("y", ""))   # traces or D2 schema
+        gb = r1.get(r["idx"])
+        if yb is None:
+            b = "no box in y"
+        elif gb is None:
+            b = "no box in R1"
+        else:
+            b = "agree" if grade(yb, gb, "MATH") else "disagree"
+        buckets[b].append(r["idx"])
+        per_row[r["idx"]] = {"y_boxed": yb, "r1_boxed": gb, "bucket": b,
+                             "agree": (b == "agree") if b in ("agree", "disagree") else None,
+                             "domain": r.get("domain")}
+    n = len(buckets["agree"]) + len(buckets["disagree"])
+    rate = 100 * len(buckets["agree"]) / max(n, 1)
+    print(f"\n=== y vs R1's answer, same prompt — kept rows, report only (docs/14 §4.6) ===")
+    print("  " + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
+          + f"   agreement on gradable {len(buckets['agree'])}/{n} ({rate:.1f}%)")
+    by = {}
+    for k in per_row.values():
+        if k["agree"] is not None:
+            by.setdefault(k["domain"], []).append(k["agree"])
+    print("  by domain: " + "  ".join(f"{d} {sum(v)}/{len(v)} ({100*sum(v)/len(v):.0f}%)"
+                                      for d, v in sorted(by.items(), key=lambda kv: -len(kv[1]))))
+    if buckets["disagree"]:
+        print(f"  disagree idx: {buckets['disagree'][:30]}  (read three: two models differ, "
+              f"or a grader miss on an equivalent form)")
+    if n and rate < 75:
+        print("  ** under 75% on gradable rows — STOP AND ASK (docs/14 §6); reported, not gated **")
+    json.dump(per_row, open(out_json, "w"), indent=1)
+    print(f"  per-row (y_boxed, r1_boxed, bucket) -> {out_json}")
+
+
 def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None):
     """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
     (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
@@ -480,6 +527,11 @@ def main():
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
+    ap.add_argument("--vs-r1", action="store_true",
+                    help="traces mode, REPORT ONLY: grade each kept row's boxed answer against "
+                         "the OpenThoughts row's own R1 answer (docs/14 §4.6). No filtering follows.")
+    ap.add_argument("--vs-r1-out", default="",
+                    help="per-row json for --vs-r1 (default <file>-vs-r1.json)")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.file)]
@@ -503,6 +555,8 @@ def main():
             fails += paired_reference(rows, tk, args.cap, gap_tol=args.paired_gap_tol)
         else:
             print("\n  (paired cap-hit gate NOT run — pass --paired)")
+        if args.vs_r1:
+            vs_r1(rows, args.vs_r1_out or args.file.replace(".jsonl", "") + "-vs-r1.json")
         print(f"\n=== gates ===")
         for f in fails:
             print(f"  FAIL  {f}")
