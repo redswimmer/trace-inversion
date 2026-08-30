@@ -120,7 +120,7 @@ Est. **~29-31 h** for both surrogates including compression — revised up from 
 *ranking* of slot counts, not an operating rate: the 7B realized ~445 t/s in the real run, so budget
 from the first 30 minutes of the run itself (`11` §5).
 
-## Phase 2 — Train the inverter *(paper Stage 1 cont.)*
+## Phase 2 — Train the inverter *(paper Stage 1 cont.)* ✅ COMPLETE
 
 | Step | Model | Framework | Method |
 |---|---|---|---|
@@ -131,6 +131,13 @@ Two separately trained inverters, per §4. **LoRA r=32-64 on a bf16 base** — 4
 impossible (27.81 GiB @8k) and NF4 is not needed (bf16 LoRA is 15.11 GiB @8k). `max_length` **12288**:
 the inverter prompt is ~1,524 tokens (problem 81 + answer 542 + 900-token summary), so a cap-8192
 trace needs ~9,716. Measured in `12` §1 and §3. Est. ~14 h for both.
+
+**Done 2026-08-30** — four inverters (2 arms × 2 settings), r=64, **33.8 h** of training at ~2,100
+tok/s, peak 15.4 GiB; every long run probed first. Record: `docs/results/phase2.md`; handoff `13`.
+Adapters on disk (gitignored): `bench/results/phase2/inverter-{7b,1.5b}-{sum,nosum}/checkpoint-*`,
+three per inverter. Held-out forged traces run 0.89–0.99× the surrogate's median length and land on
+their given answer ~95–97 % of the time; the 1.5B-arm inverters cap 10–17 % of forgeries at 8,192
+against the 7B arm's 3–5 %. The three Phase 4 decisions that follow from it are under Phase 4.
 
 ## Phase 3 — Query the victim *(paper Stage 2)*
 
@@ -167,12 +174,20 @@ below 32k to buy more slots. **Sweep first at 16k/slot.**
 
 | Step | Model | Engine | Output |
 |---|---|---|---|
-| 4.1 | Inverter (merged) | vLLM | synthetic traces `t̂` from `(x, y, b*)` |
+| 4.1 | Inverter — the **epoch-2 adapter** of each of the four, merged | vLLM (`bench/invert.py`) | synthetic traces `t̂` from `(x, y, b*)` (summary setting) and from `(x, y)` (no-summary), on split B, once per inverter |
 
-Est. ~4 h. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
+Est. ~4 h per inverter — size it from a probe, as every phase has. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
 looks sane against the victim's, then run the rest. **No new tooling.** If you want the length as a
 number, point `bench/phase1_stats.py`'s existing length reporting at the output file — a flag on code
 we already have.
+
+### Decided 2026-08-30, from the Phase 2 results — read before 4.1 runs
+
+| Decision | What | Why (`results/phase2.md`) |
+|---|---|---|
+| **Which adapter** | **Epoch 2, all four inverters** — `checkpoint-402` (7B arms), `checkpoint-404` (1.5B arms). Not epoch 3, not per-arm. | Held-out eval loss is lowest at epoch 2 on every arm and is the only deterministic signal; the generation differences between epochs (cap-hit, consistency) are single draws at temperature 0.7 inside the ~15 % flip-rate noise Phase 1 measured, and they point opposite ways on the two arms. One rule keeps the arms comparable checkpoint-for-checkpoint (§4, §5.5). |
+| **Capped forgeries** (`finish_reason == "length"` at 8,192 — 3–17 % of held-out rows depending on arm and epoch) | **Regenerate at a new seed, up to three draws; drop what still caps; report the count.** Same policy on every arm and setting. Keep the first-draw outputs and report their cap-hit as the inverter's property; the rescued set is the training artifact. Log as `09` row 7.14 — the paper regenerates nothing. | A severed `t̂` in the student target `[t̂; y]` teaches non-termination, the 2B student's documented failure mode (`12` §2) — the same reason Phase 1 dropped capped surrogate traces. Dropping alone would shrink the 1.5B-arm student's data ~10–15 % more than the 7B's and put data quantity into the surrogate-strength comparison. Capping is mostly a property of the draw, not the prompt: no prompt capped on all four inverters, and the same inverter's epoch-2 and epoch-3 capped sets overlap 1 in 10 on the 7B arm (§5.4), so a re-draw rescues most; the ~4–10-row prompt-level core is dropped and reported. |
+| **Answer-inconsistent forgeries** (~3 % of gradable held-out rows argue themselves out of the answer they were conditioned on) | **No filtering in the main condition; report the rate per arm.** `09` row 7.15. | Matches the paper, which filters nothing; filtering would blur the comparison to it. A consistency-filtered student condition is a separate Phase 5 proposal that must pass the four questions above on its own. |
 
 > **Considered and rejected: a Table 2 fidelity suite (TF1 / BLEU / ROUGE).** Not a missing tool — the
 > metrics do not measure what their names imply.
