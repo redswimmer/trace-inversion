@@ -4,9 +4,10 @@
 Runs in the MAIN THREAD over saved raw text, never inside the generation run, so a
 change here is retroactive and costs no GPU time (docs/11 §5).
 
-Two modes:
+Three modes:
   --traces     generation output   -> length distribution, cap-hit rate
   --summaries  compression output  -> the four Table 1 statistics
+  --inverted   invert.py output    -> paired t_hat vs t_true lengths, cap-hit, empties (Phase 2)
 
 Table 1 targets (docs/11 §4): median tokens 540-590, bold-header sections >90%,
 first-person prose >95%, LaTeX >70%. The paper measured these "with light regex
@@ -306,10 +307,149 @@ def summaries(rows, tk):
     return [f"Table 1: {name} = {got}, target {want}" for name, got, want, ok in rowsout if not ok]
 
 
+def r1_answers(idxs):
+    """Boxed answer in each OpenThoughts row's own R1 solution (the assistant text after </think>).
+    idx is the row position in llamafactory/OpenThoughts-114k, as everywhere in this project."""
+    from datasets import load_dataset
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed
+    ds = load_dataset("llamafactory/OpenThoughts-114k", split="train")
+    idxs = sorted(idxs)
+    out = {}
+    for i, row in zip(idxs, ds.select(idxs)):
+        a = row["messages"][2]["content"]
+        out[i] = extract_boxed(a.split("</think>")[-1] if "</think>" in a else a)
+    return out
+
+
+def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None):
+    """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
+    (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
+    counts the same traces with R1-Distill's, so say which before comparing across docs.
+    Cap-hit is vLLM's own finish_reason; gen_tokens is vLLM's own count."""
+    th = np.array([len(tk.encode(r["t_hat"])) for r in rows])
+    tt = np.array([len(tk.encode(r["t_true"])) for r in rows])
+    gen = np.array([r["gen_tokens"] for r in rows])
+    cap_hit = np.array([r["finish_reason"] == "length" for r in rows])
+    empty = [r["idx"] for r in rows if not r["t_hat"].strip()]
+    q = lambda x, p: int(np.percentile(x, p))
+    print(f"rows {len(rows)}   tokenizer: the inverter's (Qwen3.5-4B)")
+    print(dist(th, "t_hat tokens (re-tokenized)"))
+    print(dist(gen, "gen_tokens (vLLM's own count, incl. any stripped think block)"))
+    print(dist(tt, "t_true tokens"))
+    ratio = float(np.median(th) / max(np.median(tt), 1))
+    print(f"t_hat / t_true at the median  {ratio:.2f}    per-row ratio median "
+          f"{float(np.median(th / np.maximum(tt, 1))):.2f}    t_hat shorter on {100*np.mean(th < tt):.1f}% of rows")
+    print(f"cap-hit (finish_reason == length)  {100*cap_hit.mean():.1f}%  ({int(cap_hit.sum())}/{len(rows)})"
+          f"    empty t_hat {len(empty)}")
+    by = {}
+    for r, a, b in zip(rows, th, tt):
+        by.setdefault(r.get("domain", "?"), []).append((a, b))
+    print("by domain: t_hat median / t_true median")
+    for d, v in sorted(by.items(), key=lambda kv: -len(kv[1])):
+        a, b = np.array(v).T
+        print(f"  {d:12s} n={len(v):3d}  {int(np.median(a)):5d} / {int(np.median(b)):5d}")
+    print("\n| inverter | t_hat median / mean / p05 / p95 | t_true median / mean / p05 / p95 "
+          "| t_hat/t_true at median | cap-hit @ cap | empty |")
+    print(f"| {tag or '?'} | {q(th,50)} / {int(th.mean())} / {q(th,5)} / {q(th,95)} "
+          f"| {q(tt,50)} / {int(tt.mean())} / {q(tt,5)} / {q(tt,95)} | {ratio:.2f} "
+          f"| {100*cap_hit.mean():.1f}% ({int(cap_hit.sum())}) | {len(empty)} |")
+    # Answer consistency, report-only (not a gate): a forged trace that does not land on the
+    # answer it was given is the failure the paper's mechanism assumes away. Last \boxed{} in
+    # t_hat against the last \boxed{} in y, graded with eval_baseline's symbolic path (main
+    # thread — docs/11 §5). A trace can reach the answer without boxing it, so "no box" is a
+    # bucket, not a failure count.
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed, grade
+    buckets = {"match": [], "mismatch": [], "no box in t_hat": [], "no box in y": []}
+    per_row = {}
+    for r in rows:
+        gold, pred = extract_boxed(r["y"] or ""), extract_boxed(r["t_hat"])
+        if gold is None:
+            b = "no box in y"
+        elif pred is None:
+            b = "no box in t_hat"
+        else:
+            b = "match" if grade(pred, gold, "MATH") else "mismatch"
+        buckets[b].append(r["idx"])
+        per_row[r["idx"]] = {"gold": gold, "pred": pred, "bucket": b, "finish_reason": r["finish_reason"]}
+    n_graded = len(buckets["match"]) + len(buckets["mismatch"])
+    nobox_cap = sum(per_row[i]["finish_reason"] == "length" for i in buckets["no box in t_hat"])
+    # On the surrogate holdout y is the SURROGATE's answer and is sometimes wrong, so "t_hat matches
+    # y" mixes inverter fidelity with surrogate error. Grade both against the boxed answer in the
+    # OpenThoughts row's own R1 solution — "R1's answer (the dataset's solution)", not ground truth —
+    # to split the mismatches into "inverter wrong" and "inverter right, surrogate wrong".
+    if r1 is not None:
+        for r in rows:
+            k = per_row[r["idx"]]; g = r1.get(r["idx"])
+            k["r1"] = g
+            k["y_vs_r1"] = None if (g is None or k["gold"] is None) else grade(k["gold"], g, "MATH")
+            k["t_hat_vs_r1"] = None if (g is None or k["pred"] is None) else grade(k["pred"], g, "MATH")
+        def _rate(key):
+            v = [k[key] for k in per_row.values() if k[key] is not None]
+            return f"{sum(v)}/{len(v)} ({100*sum(v)/max(len(v),1):.1f}%)"
+        split = {"inverter wrong (y = R1, t_hat != R1)": 0, "inverter right, surrogate wrong (t_hat = R1, y != R1)": 0,
+                 "both match R1 (equivalent forms)": 0, "neither matches R1": 0, "R1 has no box": 0}
+        for i in buckets["mismatch"]:
+            k = per_row[i]
+            if k["r1"] is None: split["R1 has no box"] += 1
+            elif k["y_vs_r1"] and not k["t_hat_vs_r1"]: split["inverter wrong (y = R1, t_hat != R1)"] += 1
+            elif k["t_hat_vs_r1"] and not k["y_vs_r1"]: split["inverter right, surrogate wrong (t_hat = R1, y != R1)"] += 1
+            elif k["t_hat_vs_r1"] and k["y_vs_r1"]: split["both match R1 (equivalent forms)"] += 1
+            else: split["neither matches R1"] += 1
+        print(f"  against R1's answer (the dataset's solution, not ground truth): y vs R1 {_rate('y_vs_r1')}   "
+              f"t_hat vs R1 {_rate('t_hat_vs_r1')}   R1 unboxed {sum(k['r1'] is None for k in per_row.values())}")
+        # PAIRED: the same rows, gradable on both sides — the unpaired denominators differ because
+        # t_hat often does not box, and the rows where it does may be the easier ones (docs/11 §5).
+        both = [k for k in per_row.values() if k["y_vs_r1"] is not None and k["t_hat_vs_r1"] is not None]
+        if both:
+            print(f"  PAIRED on the {len(both)} rows gradable on both sides: y vs R1 {sum(k['y_vs_r1'] for k in both)}/{len(both)} "
+                  f"({100*sum(k['y_vs_r1'] for k in both)/len(both):.1f}%)   t_hat vs R1 {sum(k['t_hat_vs_r1'] for k in both)}/{len(both)} "
+                  f"({100*sum(k['t_hat_vs_r1'] for k in both)/len(both):.1f}%)   "
+                  f"y right & t_hat wrong {sum(k['y_vs_r1'] and not k['t_hat_vs_r1'] for k in both)}   "
+                  f"t_hat right & y wrong {sum(k['t_hat_vs_r1'] and not k['y_vs_r1'] for k in both)}")
+        print("  mismatch split: " + "  ".join(f"{k} {v}" for k, v in split.items()))
+    print(f"\nanswer consistency (last boxed in t_hat vs y; report only):  "
+          + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
+          + (f"   match rate among graded {100*len(buckets['match'])/n_graded:.1f}% (n={n_graded})" if n_graded else ""))
+    print(f"  no box in t_hat = {nobox_cap} severed at the cap + {len(buckets['no box in t_hat']) - nobox_cap} ending in prose")
+    if buckets["mismatch"]:
+        print(f"  mismatch idx: {buckets['mismatch']}  (read them: genuine vs grader miss — docs/11 §5)")
+    if out_json:
+        json.dump(per_row, open(out_json, "w"), indent=1)      # re-gradable without regenerating
+        print(f"  per-row (gold, pred, bucket) -> {out_json}")
+
+    # three rows for a human to read: shortest, median and longest t_true
+    order = np.argsort(tt)
+    print("\nread these (idx, t_true tokens, t_hat tokens, finish):")
+    for lbl, i in (("short", order[0]), ("median", order[len(order) // 2]), ("long", order[-1])):
+        r = rows[i]
+        print(f"  {lbl:6s} idx {r['idx']:6d}  t_true {tt[i]:5d}  t_hat {th[i]:5d}  {r['finish_reason']}")
+
+    fails = []
+    if empty:
+        fails.append(f"{len(empty)} empty t_hat (idx {empty[:5]}) — STOP AND ASK (docs/13 §7)")
+    if n_expected is not None and len(rows) != n_expected:
+        fails.append(f"{len(rows)} rows, expected {n_expected}")
+    dup = len(rows) - len({r["idx"] for r in rows})
+    if dup:
+        fails.append(f"{dup} duplicate idx")
+    if holdout is not None:
+        bad = [r["idx"] for r in rows if r["idx"] not in holdout]
+        if bad:
+            fails.append(f"{len(bad)} rows not in the holdout (idx {bad[:5]})")
+    if ratio < 0.5:
+        fails.append(f"median t_hat is {ratio:.2f}x the paired t_true median — under half; the "
+                     f"adapter did not take — STOP AND ASK (docs/13 §7)")
+    return fails
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file")
-    ap.add_argument("--mode", choices=["traces", "summaries"], required=True)
+    ap.add_argument("--mode", choices=["traces", "summaries", "inverted"], required=True)
     ap.add_argument("--cap", type=int, default=8192)
     ap.add_argument("--trace-tokenizer", default="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
                     help="same family/vocab as the 7B; docs/12 §2 measured 6,005 with it")
@@ -332,6 +472,11 @@ def main():
                          "gate Table 1 only and skip the D2 integrity gates")
     ap.add_argument("--target", type=int, default=5000,
                     help="summaries mode: required D2 row count")
+    ap.add_argument("--holdout", default="bench/phase2/holdout.json",
+                    help="inverted mode: every idx must be in this file; '' to skip")
+    ap.add_argument("--tag", default="", help="inverted mode: label for the table row")
+    ap.add_argument("--no-r1", action="store_true",
+                    help="inverted mode: skip grading y and t_hat against the OpenThoughts row's R1 answer")
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
@@ -339,6 +484,18 @@ def main():
 
     rows = [json.loads(l) for l in open(args.file)]
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
+    if args.mode == "inverted":
+        hold = set(json.load(open(args.holdout))["idx"]) if args.holdout else None
+        r1 = None if args.no_r1 else r1_answers([r["idx"] for r in rows])
+        fails = inverted(rows, tok(args.summary_tokenizer), args.cap, hold,
+                         len(hold) if hold else None, args.tag,
+                         out_json=args.file.replace(".jsonl", "") + "-consistency.json", r1=r1)
+        print(f"\n=== gates ===")
+        for f in fails:
+            print(f"  FAIL  {f}")
+        print("  ** PASSED **" if not fails
+              else f"  ** {len(fails)} GATE FAILURE(S) — DO NOT ACCEPT AS-IS **")
+        sys.exit(1 if fails else 0)
     if args.mode == "traces":
         tk = tok(args.trace_tokenizer)
         fails = traces(rows, tk, args.cap, tuple(args.cap_hit_band), args.err_rate_max)
