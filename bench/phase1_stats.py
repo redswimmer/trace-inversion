@@ -352,15 +352,19 @@ def vs_r1(rows, out_json):
                              "domain": r.get("domain")}
     n = len(buckets["agree"]) + len(buckets["disagree"])
     rate = 100 * len(buckets["agree"]) / max(n, 1)
-    print(f"\n=== y vs R1's answer, same prompt — kept rows, report only (docs/14 §4.6) ===")
+    print(f"\n=== y vs R1's answer, same prompt — KEPT rows only (n={len(kept)} of {len(rows)}), "
+          f"report only (docs/14 §4.6) ===")
     print("  " + "  ".join(f"{k} {len(v)}" for k, v in buckets.items())
           + f"   agreement on gradable {len(buckets['agree'])}/{n} ({rate:.1f}%)")
+    # "no box in y" is mostly domain, not failure: code rows never box. Show every bucket per domain.
     by = {}
     for k in per_row.values():
-        if k["agree"] is not None:
-            by.setdefault(k["domain"], []).append(k["agree"])
-    print("  by domain: " + "  ".join(f"{d} {sum(v)}/{len(v)} ({100*sum(v)/len(v):.0f}%)"
-                                      for d, v in sorted(by.items(), key=lambda kv: -len(kv[1]))))
+        by.setdefault(k["domain"], []).append(k["bucket"])
+    print(f"  {'domain':12s}{'kept':>6s}{'agree':>7s}{'disagr':>7s}{'noboxY':>8s}{'noboxR1':>8s}{'agree%':>8s}")
+    for d, v in sorted(by.items(), key=lambda kv: -len(kv[1])):
+        a, dis = v.count("agree"), v.count("disagree")
+        print(f"  {d:12s}{len(v):6d}{a:7d}{dis:7d}{v.count('no box in y'):8d}{v.count('no box in R1'):8d}"
+              f"{(100*a/(a+dis)) if a+dis else float('nan'):8.1f}")
     if buckets["disagree"]:
         print(f"  disagree idx: {buckets['disagree'][:30]}  (read three: two models differ, "
               f"or a grader miss on an equivalent form)")
