@@ -223,7 +223,7 @@ Qwen3.5-4B thinks by default. The generation prompt ends `<|im_start|>assistant\
 ### 4.3 A shared 200-row holdout, paired across arms
 
 The paper trains on all 10 k rows and measures nothing before inverting the victim. We measure once,
-cheaply, before spending Phase 3's ~10–15 h and Phase 4 on an inverter nobody has looked at.
+cheaply, before spending Phase 3's ~66 h (measured) and Phase 4 on an inverter nobody has looked at.
 
 - **200 `idx`, seed 20260828, drawn from the 3,681 prompts both arms kept**, so the 7B and 1.5B
   inverters are scored on identical inputs. Persisted to `bench/phase2/holdout.json`, committed.

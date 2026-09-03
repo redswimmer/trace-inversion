@@ -102,8 +102,8 @@ only test is whether the traces it writes make the student better.
 | 0 — baselines | done | Harness calibrated: the paper's own surrogate scores 32.6 % JEEBench here vs 32.6 % in the paper. Roles fixed on measurement: student 47.8 < surrogate 60.6 < victim 86.2 on JEEBench — the regime the argument needs. |
 | 1 — surrogate data | done | `D₂` built for both arms (5,006 / 5,028 rows). Summaries pass all four of the paper's style targets. ~21 h of generation per arm. |
 | 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
-| 3 — query the victim | next | ~10–15 h |
-| 4 — invert | | ~4 h |
+| 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
+| 4 — invert | next | ~4 h |
 | 5 — train students | | five conditions, ~20 h |
 | 6 — evaluate | | the result |
 

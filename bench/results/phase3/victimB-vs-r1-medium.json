@@ -1,0 +1,1784 @@
+{
+ "113596": {
+  "y_answer": "B",
+  "y_candidates": [
+   "B"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "puzzle"
+ },
+ "74000": {
+  "y_answer": "5",
+  "y_candidates": [
+   "5"
+  ],
+  "how": "boxed",
+  "r1_boxed": "5",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "61114": {
+  "y_answer": "6",
+  "y_candidates": [
+   "6"
+  ],
+  "how": "boxed",
+  "r1_boxed": "6",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "10385": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "107028": {
+  "y_answer": "\\max(0,\\; X - Y)",
+  "y_candidates": [
+   "\\max(0,\\; X - Y)"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "84722": {
+  "y_answer": "8",
+  "y_candidates": [
+   "8"
+  ],
+  "how": "boxed",
+  "r1_boxed": "8",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66713": {
+  "y_answer": "\\text{All three inequalities hold, with equality at the centroid.}",
+  "y_candidates": [
+   "\\text{All three inequalities hold, with equality at the centroid.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left(h_{1}-u\\right)\\left(h_{2}-v\\right)\\left(h_{3}-w\\right) \\geqslant 8 u v w",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "17578": {
+  "y_answer": "P(n) \\in \\mathbb{Z} \\text{ for all } n \\in \\mathbb{Z}",
+  "y_candidates": [
+   "P(n) \\in \\mathbb{Z} \\text{ for all } n \\in \\mathbb{Z}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "P(x)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "93986": {
+  "y_answer": "2\\ 4\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 1\\ 1\\\\ 1\\ 1\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 2\\ 4\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 1",
+  "y_candidates": [
+   "2\\ 4\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 1\\ 1\\\\ 1\\ 1\\\\ 1\\ 1\\\\ 1\\ 2\\\\ 2\\ 4\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 3\\\\ 1\\ 3\\\\ 1\\ 1\\\\ 1\\ 1"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "44433": {
+  "y_answer": "\\frac{2^{n+2}-n-3}{3}",
+  "y_candidates": [
+   "\\frac{2^{n+2}-n-3}{3}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{2^{n+2} - n - 3}{3}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "113631": {
+  "y_answer": "A",
+  "y_candidates": [
+   "A"
+  ],
+  "how": "boxed",
+  "r1_boxed": "B (better life)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "puzzle"
+ },
+ "71239": {
+  "y_answer": "60",
+  "y_candidates": [
+   "60"
+  ],
+  "how": "boxed",
+  "r1_boxed": "60",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "75541": {
+  "y_answer": "\\sqrt{6}-1",
+  "y_candidates": [
+   "\\sqrt{6}-1"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\sqrt{6} - 1",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "17783": {
+  "y_answer": "4",
+  "y_candidates": [
+   "4"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "18225": {
+  "y_answer": "24",
+  "y_candidates": [
+   "24"
+  ],
+  "how": "boxed",
+  "r1_boxed": "24",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "80579": {
+  "y_answer": "1",
+  "y_candidates": [
+   "1"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "85371": {
+  "y_answer": "\\{1156,\\;1296,\\;1369,\\;1600,\\;1764\\}",
+  "y_candidates": [
+   "\\{1156,\\;1296,\\;1369,\\;1600,\\;1764\\}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1764",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "2125": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "62484": {
+  "y_answer": "2011",
+  "y_candidates": [
+   "2011"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2011",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "18628": {
+  "y_answer": "\\dfrac{2}{\\pi}",
+  "y_candidates": [
+   "\\dfrac{2}{\\pi}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{2}{\\pi}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "17752": {
+  "y_answer": "\\begin{aligned}\n&\\text{In the plane, let } \\Gamma \\text{ be the circle with diameter } AB.\\\\\n&\\text{(a) Acute angle: } P \\text{ lies outside } \\Gamma \\text{ (excluding degenerate collinear points).}\\\\\n&\\text{(b) Obtuse angle: } P \\text{ lies inside } \\Gamma \\text{ (excluding degenerate collinear points).}\n\\end{aligned}",
+  "y_candidates": [
+   "\\begin{aligned}\n&\\text{In the plane, let } \\Gamma \\text{ be the circle with diameter } AB.\\\\\n&\\text{(a) Acute angle: } P \\text{ lies outside } \\Gamma \\text{ (excluding degenerate collinear points).}\\\\\n&\\text{(b) Obtuse angle: } P \\text{ lies inside } \\Gamma \\text{ (excluding degenerate collinear points).}\n\\end{aligned}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{The interior of the circle with diameter } AB",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "94292": {
+  "y_answer": "YES,\\ YES,\\ YES,\\ YES,\\ YES,\\ NO,\\ NO,\\ NO,\\ NO,\\ NO,\\ NO",
+  "y_candidates": [
+   "YES,\\ YES,\\ YES,\\ YES,\\ YES,\\ NO,\\ NO,\\ NO,\\ NO,\\ NO,\\ NO"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "89242": {
+  "y_answer": "1",
+  "y_candidates": [
+   "1"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "107190": {
+  "y_answer": "1",
+  "y_candidates": [
+   "1"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "80277": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "74845": {
+  "y_answer": "67",
+  "y_candidates": [
+   "67"
+  ],
+  "how": "boxed",
+  "r1_boxed": "67",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "62792": {
+  "y_answer": "166667 \\text{ and } 333334",
+  "y_candidates": [
+   "166667 \\text{ and } 333334"
+  ],
+  "how": "boxed",
+  "r1_boxed": "333334",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "59490": {
+  "y_answer": "2+\\sqrt{2}",
+  "y_candidates": [
+   "2+\\sqrt{2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2 + \\sqrt{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "93525": {
+  "y_answer": "C(n) = \\dfrac{1}{n+1}\\dbinom{2n}{n} = \\dfrac{(2n)!}{n!\\,(n+1)!}",
+  "y_candidates": [
+   "C(n) = \\dfrac{1}{n+1}\\dbinom{2n}{n} = \\dfrac{(2n)!}{n!\\,(n+1)!}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "103348": {
+  "y_answer": "30",
+  "y_candidates": [
+   "30"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "100519": {
+  "y_answer": "def smallestKDigitNum(X, K):\n    start = 10 ** (K - 1)\n    remainder = start % X\n    if remainder == 0:\n        return start\n    return start + (X - remainder)",
+  "y_candidates": [
+   "def smallestKDigitNum(X, K):\n    start = 10 ** (K - 1)\n    remainder = start % X\n    if remainder == 0:\n        return start\n    return start + (X - remainder)"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "10642": {
+  "y_answer": "a = b = c = 0",
+  "y_candidates": [
+   "a = b = c = 0"
+  ],
+  "how": "boxed",
+  "r1_boxed": "c = 0",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "96220": {
+  "y_answer": "19",
+  "y_candidates": [
+   "19"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "82114": {
+  "y_answer": "\\frac1{11}",
+  "y_candidates": [
+   "\\frac1{11}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1}{11}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "38015": {
+  "y_answer": "36",
+  "y_candidates": [
+   "36"
+  ],
+  "how": "boxed",
+  "r1_boxed": "36",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "228": {
+  "y_answer": "\\sin \\frac{A}{2}\\,\\sin \\frac{B}{2}\\,\\sin \\frac{C}{2} \\leqslant \\dfrac{1}{8}",
+  "y_candidates": [
+   "\\sin \\frac{A}{2}\\,\\sin \\frac{B}{2}\\,\\sin \\frac{C}{2} \\leqslant \\dfrac{1}{8}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\sin \\frac{A}{2} \\sin \\frac{B}{2} \\sin \\frac{C}{2} \\leqslant \\frac{1}{8}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "113301": {
+  "y_answer": "A",
+  "y_candidates": [
+   "A"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "puzzle"
+ },
+ "74940": {
+  "y_answer": "\\frac{3}{5}",
+  "y_candidates": [
+   "\\frac{3}{5}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{3}{5}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "47237": {
+  "y_answer": "D",
+  "y_candidates": [
+   "D"
+  ],
+  "how": "boxed",
+  "r1_boxed": "D",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "48713": {
+  "y_answer": "f(n)=n\\quad \\forall n\\in\\mathbb N^*",
+  "y_candidates": [
+   "f(n)=n\\quad \\forall n\\in\\mathbb N^*"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(n) = n",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "58307": {
+  "y_answer": "\\cos A + \\cos B + \\cos C \\;<\\; \\sin A + \\sin B + \\sin C",
+  "y_candidates": [
+   "\\cos A + \\cos B + \\cos C \\;<\\; \\sin A + \\sin B + \\sin C"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\cos A + \\cos B + \\cos C < \\sin A + \\sin B + \\sin C",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "109184": {
+  "y_answer": "multi-pronged, \"One Health\" approach",
+  "y_candidates": [
+   "multi-pronged, \"One Health\" approach"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "61696": {
+  "y_answer": "90^\\circ",
+  "y_candidates": [
+   "90^\\circ"
+  ],
+  "how": "boxed",
+  "r1_boxed": "90^\\circ",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "74454": {
+  "y_answer": "67",
+  "y_candidates": [
+   "67"
+  ],
+  "how": "boxed",
+  "r1_boxed": "67",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "110430": {
+  "y_answer": "\\text{Chaos theory explains HRV irregularities as the deterministic, low-dimensional chaotic output of nonlinear autonomic feedback loops (sympathetic/parasympathetic oscillators, baroreflex delays, SA-node dynamics). Mathematical modeling\u2014via nonlinear maps, coupled-delay ODEs, fractional-order systems, and data-driven state-space models\u2014quantifies the underlying attractor (Lyapunov exponents, correlation/fractal dimension, Poincar\u00e9 geometry), distinguishes true chaos from noise, reveals bifurcation pathways between healthy and pathological states, and enables prediction of short-term RR evolution and early detection of cardiovascular decompensation.}",
+  "y_candidates": [
+   "\\text{Chaos theory explains HRV irregularities as the deterministic, low-dimensional chaotic output of nonlinear autonomic feedback loops (sympathetic/parasympathetic oscillators, baroreflex delays, SA-node dynamics). Mathematical modeling\u2014via nonlinear maps, coupled-delay ODEs, fractional-order systems, and data-driven state-space models\u2014quantifies the underlying attractor (Lyapunov exponents, correlation/fractal dimension, Poincar\u00e9 geometry), distinguishes true chaos from noise, reveals bifurcation pathways between healthy and pathological states, and enables prediction of short-term RR evolution and early detection of cardiovascular decompensation.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "physics"
+ },
+ "96271": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "7378": {
+  "y_answer": "(x+y)^2+(x-y)^2",
+  "y_candidates": [
+   "(x+y)^2+(x-y)^2"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "91029": {
+  "y_answer": "1-2-4-3-5",
+  "y_candidates": [
+   "1-2-4-3-5"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "9404": {
+  "y_answer": "C",
+  "y_candidates": [
+   "C"
+  ],
+  "how": "boxed",
+  "r1_boxed": "C",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "96324": {
+  "y_answer": "90",
+  "y_candidates": [
+   "90"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "8356": {
+  "y_answer": "180^{\\circ} < \\alpha + \\beta + \\gamma < 540^{\\circ}",
+  "y_candidates": [
+   "180^{\\circ} < \\alpha + \\beta + \\gamma < 540^{\\circ}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "180^\\circ < \\text{Sum of Dihedral Angles} < 540^\\circ",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "49887": {
+  "y_answer": "\\dfrac{2a^{2}b^{2}}{a^{2}+b^{2}}",
+  "y_candidates": [
+   "\\dfrac{2a^{2}b^{2}}{a^{2}+b^{2}}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{2a^2b^2}{a^2 + b^2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "91193": {
+  "y_answer": "YES",
+  "y_candidates": [
+   "YES"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "56016": {
+  "y_answer": "\\text{The midpoints of the sides of } \\triangle O_1O_2O_3 \\text{ lie on the nine-point circle of } \\triangle ABC.",
+  "y_candidates": [
+   "\\text{The midpoints of the sides of } \\triangle O_1O_2O_3 \\text{ lie on the nine-point circle of } \\triangle ABC."
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{The midpoints of the sides of triangle } O_1O_2O_3 \\text{ lie on the nine-point circle of triangle } ABC.",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "38659": {
+  "y_answer": "4221",
+  "y_candidates": [
+   "4221"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4221",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "69847": {
+  "y_answer": "2\\sqrt{5}",
+  "y_candidates": [
+   "2\\sqrt{5}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2\\sqrt{5}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "33059": {
+  "y_answer": "4011",
+  "y_candidates": [
+   "4011"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4011",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "75092": {
+  "y_answer": "(0, -5, 4)",
+  "y_candidates": [
+   "(0, -5, 4)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(0, -5, 4)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "83706": {
+  "y_answer": "\\dfrac{1}{4} < \\dfrac{AI \\cdot BI \\cdot CI}{AA' \\cdot BB' \\cdot CC'} \\leq \\dfrac{8}{27}",
+  "y_candidates": [
+   "\\dfrac{1}{4} < \\dfrac{AI \\cdot BI \\cdot CI}{AA' \\cdot BB' \\cdot CC'} \\leq \\dfrac{8}{27}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\frac{1}{4} < \\frac{AI \\cdot BI \\cdot CI}{AA' \\cdot BB' \\cdot CC'} \\leq \\frac{8}{27}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "14469": {
+  "y_answer": "IJK \\text{ is a right triangle at } I.",
+  "y_candidates": [
+   "IJK \\text{ is a right triangle at } I."
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\triangle IJK \\text{ is a right triangle at } I",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "49559": {
+  "y_answer": "N \\text{ is composite (divisible by } 9\\text{).}",
+  "y_candidates": [
+   "N \\text{ is composite (divisible by } 9\\text{).}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{The number is composite because it is divisible by 3.}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "48513": {
+  "y_answer": "P = \\frac{A+B+C+D}{4}",
+  "y_candidates": [
+   "P = \\frac{A+B+C+D}{4}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{The lines intersect at the centroid of the quadrilateral } ABCD",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "51922": {
+  "y_answer": "3:4:5 \\text{ and } r=d",
+  "y_candidates": [
+   "3:4:5 \\text{ and } r=d"
+  ],
+  "how": "boxed",
+  "r1_boxed": "r = d",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "58810": {
+  "y_answer": "\\left(\\frac{5}{2};0;0\\right)",
+  "y_candidates": [
+   "\\left(\\frac{5}{2};0;0\\right)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left( \\dfrac{5}{2}; 0; 0 \\right)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "3076": {
+  "y_answer": "16 \\;\\bigm|\\; (5m+3n+1)^5(3m+n+4)^4",
+  "y_candidates": [
+   "16 \\;\\bigm|\\; (5m+3n+1)^5(3m+n+4)^4"
+  ],
+  "how": "boxed",
+  "r1_boxed": "16",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "38652": {
+  "y_answer": "106",
+  "y_candidates": [
+   "106"
+  ],
+  "how": "boxed",
+  "r1_boxed": "106",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "29729": {
+  "y_answer": "\\dfrac{3^{2011}-1}{2}",
+  "y_candidates": [
+   "\\dfrac{3^{2011}-1}{2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{3^{2011} - 1}{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66192": {
+  "y_answer": "84",
+  "y_candidates": [
+   "84"
+  ],
+  "how": "boxed",
+  "r1_boxed": "84",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "93004": {
+  "y_answer": "\\text{Mark all subarray sums of length at least 2 not exceeding } n \\text{ in } O(n^2), \\text{ then count matching elements.}",
+  "y_candidates": [
+   "\\text{Mark all subarray sums of length at least 2 not exceeding } n \\text{ in } O(n^2), \\text{ then count matching elements.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "5806": {
+  "y_answer": "20",
+  "y_candidates": [
+   "20"
+  ],
+  "how": "boxed",
+  "r1_boxed": "20",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "10887": {
+  "y_answer": "f(x_i)",
+  "y_candidates": [
+   "f(x_i)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(x_i)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "3647": {
+  "y_answer": "64",
+  "y_candidates": [
+   "64"
+  ],
+  "how": "boxed",
+  "r1_boxed": "64\\%",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "105809": {
+  "y_answer": "\\begin{verbatim}\nvoid pathCounts(Node* root) {\n    map<int, int> countMap;\n    function<void(Node*, int)> dfs = [&](Node* node, int depth) {\n        if (node == NULL) return;\n        if (node->left == NULL && node->right == NULL) {\n            countMap[depth]++;\n            return;\n        }\n        if (node->left)  dfs(node->left, depth + 1);\n        if (node->right) dfs(node->right, depth + 1);\n    };\n    dfs(root, 1);\n    for (auto& p : countMap) {\n        cout << p.first << \" \" << p.second << \" $\";\n    }\n    cout << endl;\n}\n\\end{verbatim}",
+  "y_candidates": [
+   "\\begin{verbatim}\nvoid pathCounts(Node* root) {\n    map<int, int> countMap;\n    function<void(Node*, int)> dfs = [&](Node* node, int depth) {\n        if (node == NULL) return;\n        if (node->left == NULL && node->right == NULL) {\n            countMap[depth]++;\n            return;\n        }\n        if (node->left)  dfs(node->left, depth + 1);\n        if (node->right) dfs(node->right, depth + 1);\n    };\n    dfs(root, 1);\n    for (auto& p : countMap) {\n        cout << p.first << \" \" << p.second << \" $\";\n    }\n    cout << endl;\n}\n\\end{verbatim}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "31593": {
+  "y_answer": "\\operatorname{Ker}(\\varphi) \\trianglelefteq G",
+  "y_candidates": [
+   "\\operatorname{Ker}(\\varphi) \\trianglelefteq G"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "107510": {
+  "y_answer": "\\texttt{import sys}\n\\texttt{from collections import Counter}\n\\texttt{}\n\\texttt{def solve():}\n\\texttt{    data = sys.stdin.read().split()}\n\\texttt{    idx = 0}\n\\texttt{    n = int(data[idx]); idx += 1}\n\\texttt{    m = int(data[idx]); idx += 1}\n\\texttt{    degree = [0] * (n + 1)}\n\\texttt{    for _ in range(m):}\n\\texttt{        x = int(data[idx]); idx += 1}\n\\texttt{        y = int(data[idx]); idx += 1}\n\\texttt{        degree[x] += 1}\n\\texttt{        degree[y] += 1}\n\\texttt{    dc = Counter(degree[1:])}\n\\texttt{    if dc == {n-1: 1, 1: n-1}:}\n\\texttt{        print(\"star topology\")}\n\\texttt{    elif dc == {2: n}:}\n\\texttt{        print(\"ring topology\")}\n\\texttt{    elif dc == {1: 2, 2: n-2}:}\n\\texttt{        print(\"bus topology\")}\n\\texttt{    else:}\n\\texttt{        print(\"unknown topology\")}\n\\texttt{}\n\\texttt{solve()}",
+  "y_candidates": [
+   "\\texttt{import sys}\n\\texttt{from collections import Counter}\n\\texttt{}\n\\texttt{def solve():}\n\\texttt{    data = sys.stdin.read().split()}\n\\texttt{    idx = 0}\n\\texttt{    n = int(data[idx]); idx += 1}\n\\texttt{    m = int(data[idx]); idx += 1}\n\\texttt{    degree = [0] * (n + 1)}\n\\texttt{    for _ in range(m):}\n\\texttt{        x = int(data[idx]); idx += 1}\n\\texttt{        y = int(data[idx]); idx += 1}\n\\texttt{        degree[x] += 1}\n\\texttt{        degree[y] += 1}\n\\texttt{    dc = Counter(degree[1:])}\n\\texttt{    if dc == {n-1: 1, 1: n-1}:}\n\\texttt{        print(\"star topology\")}\n\\texttt{    elif dc == {2: n}:}\n\\texttt{        print(\"ring topology\")}\n\\texttt{    elif dc == {1: 2, 2: n-2}:}\n\\texttt{        print(\"bus topology\")}\n\\texttt{    else:}\n\\texttt{        print(\"unknown topology\")}\n\\texttt{}\n\\texttt{solve()}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "23605": {
+  "y_answer": "-\\tan^2 2\\alpha",
+  "y_candidates": [
+   "-\\tan^2 2\\alpha"
+  ],
+  "how": "boxed",
+  "r1_boxed": "-\\tan^2 2\\alpha",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "31092": {
+  "y_answer": "\\text{There are at most finitely many such integers } n.",
+  "y_candidates": [
+   "\\text{There are at most finitely many such integers } n."
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{There are only finitely many such integers } n.",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "98793": {
+  "y_answer": "function splitOddAndEven(n) {\n    const str = n.toString();\n    const result = [];\n    let current = str[0];\n\n    for (let i = 1; i < str.length; i++) {\n        const prevIsOdd = (parseInt(str[i - 1]) % 2) === 1;\n        const currIsOdd = (parseInt(str[i]) % 2) === 1;\n\n        if (prevIsOdd === currIsOdd) {\n            current += str[i];\n        } else {\n            result.push(parseInt(current));\n            current = str[i];\n        }\n    }\n    result.push(parseInt(current));\n\n    return result;\n}",
+  "y_candidates": [
+   "function splitOddAndEven(n) {\n    const str = n.toString();\n    const result = [];\n    let current = str[0];\n\n    for (let i = 1; i < str.length; i++) {\n        const prevIsOdd = (parseInt(str[i - 1]) % 2) === 1;\n        const currIsOdd = (parseInt(str[i]) % 2) === 1;\n\n        if (prevIsOdd === currIsOdd) {\n            current += str[i];\n        } else {\n            result.push(parseInt(current));\n            current = str[i];\n        }\n    }\n    result.push(parseInt(current));\n\n    return result;\n}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "97655": {
+  "y_answer": "def elevator(left, right, call):\n    return \"left\" if abs(left - call) < abs(right - call) else \"right\"",
+  "y_candidates": [
+   "def elevator(left, right, call):\n    return \"left\" if abs(left - call) < abs(right - call) else \"right\""
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "69289": {
+  "y_answer": "\\text{From any intersection to any other, there are at least two disjoint paths.}",
+  "y_candidates": [
+   "\\text{From any intersection to any other, there are at least two disjoint paths.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{Between any two intersections, there exist at least two disjoint paths.}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "50100": {
+  "y_answer": "13",
+  "y_candidates": [
+   "13"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "49675": {
+  "y_answer": "2(d_1+d_2)-P",
+  "y_candidates": [
+   "2(d_1+d_2)-P"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2(AC + BD) - P",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "47215": {
+  "y_answer": "V = \\frac{l\\cos\\alpha}{8}\\left(P^2 - 4l^2\\sin^2\\alpha\\right)",
+  "y_candidates": [
+   "V = \\frac{l\\cos\\alpha}{8}\\left(P^2 - 4l^2\\sin^2\\alpha\\right)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{l \\cos \\alpha \\left( P^2 - 4 l^2 \\sin^2 \\alpha \\right)}{8}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "51959": {
+  "y_answer": "k < \\frac{1}{2} + \\sqrt{2n}",
+  "y_candidates": [
+   "k < \\frac{1}{2} + \\sqrt{2n}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "k < \\frac{1}{2} + \\sqrt{2n}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "32064": {
+  "y_answer": "2 \\text{ or } 8",
+  "y_candidates": [
+   "2 \\text{ or } 8"
+  ],
+  "how": "boxed",
+  "r1_boxed": "8",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "82711": {
+  "y_answer": "f(x)=ax+b\\ \\text{for arbitrary }a,b\\in\\mathbb{R}",
+  "y_candidates": [
+   "f(x)=ax+b\\ \\text{for arbitrary }a,b\\in\\mathbb{R}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(x) = ax + b",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "98219": {
+  "y_answer": "\\text{count\\_zeros\\_n\\_double\\_fact}(n)=\n\\begin{cases}\n0, & n \\text{ odd},\\\\[6pt]\n\\displaystyle \\left\\lfloor \\frac{n}{10}\\right\\rfloor\n+\\left\\lfloor \\frac{n}{50}\\right\\rfloor\n+\\left\\lfloor \\frac{n}{250}\\right\\rfloor+\\cdots, & n \\text{ even},\n\\end{cases}\n\\quad \\text{and for } n=30 \\text{ the value is } 3.",
+  "y_candidates": [
+   "\\text{count\\_zeros\\_n\\_double\\_fact}(n)=\n\\begin{cases}\n0, & n \\text{ odd},\\\\[6pt]\n\\displaystyle \\left\\lfloor \\frac{n}{10}\\right\\rfloor\n+\\left\\lfloor \\frac{n}{50}\\right\\rfloor\n+\\left\\lfloor \\frac{n}{250}\\right\\rfloor+\\cdots, & n \\text{ even},\n\\end{cases}\n\\quad \\text{and for } n=30 \\text{ the value is } 3."
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "20096": {
+  "y_answer": "D_1 = 0 \\text{ or } D_2 = 0",
+  "y_candidates": [
+   "D_1 = 0 \\text{ or } D_2 = 0"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{At least one discriminant is zero.}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "109206": {
+  "y_answer": "\\text{Fungal biodegradation offers a cost-effective, environmentally benign, and versatile alternative to traditional pollution-control methods, particularly for recalcitrant organic pollutants (PAHs, dyes, pesticides, PCBs) in soil, water, and air under mild conditions. Its principal advantages are low energy/cost, minimal secondary waste, and the unique ability of white-rot fungal enzymes to mineralize complex xenobiotics. Its main disadvantages are slow kinetics, sensitivity to temperature/pH/oxygen, incomplete mineralization (risk of toxic intermediates), limited efficacy against heavy metals (immobilization only), and regulatory/ecological uncertainties around introduced organisms. In practice, fungal bioremediation is best deployed as a complement to\u2014rather than a wholesale replacement for\u2014physical, chemical, and thermal methods, with the optimal treatment train selected according to pollutant type, environmental setting, concentration, and regulatory timeline.}",
+  "y_candidates": [
+   "\\text{Fungal biodegradation offers a cost-effective, environmentally benign, and versatile alternative to traditional pollution-control methods, particularly for recalcitrant organic pollutants (PAHs, dyes, pesticides, PCBs) in soil, water, and air under mild conditions. Its principal advantages are low energy/cost, minimal secondary waste, and the unique ability of white-rot fungal enzymes to mineralize complex xenobiotics. Its main disadvantages are slow kinetics, sensitivity to temperature/pH/oxygen, incomplete mineralization (risk of toxic intermediates), limited efficacy against heavy metals (immobilization only), and regulatory/ecological uncertainties around introduced organisms. In practice, fungal bioremediation is best deployed as a complement to\u2014rather than a wholesale replacement for\u2014physical, chemical, and thermal methods, with the optimal treatment train selected according to pollutant type, environmental setting, concentration, and regulatory timeline.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "64667": {
+  "y_answer": "a_n=3^n+n^2-n-2",
+  "y_candidates": [
+   "a_n=3^n+n^2-n-2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "a_n = 3^n + n^2 - n - 2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "95139": {
+  "y_answer": "G",
+  "y_candidates": [
+   "G"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "75398": {
+  "y_answer": "4\\sqrt{2}",
+  "y_candidates": [
+   "4\\sqrt{2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4\\sqrt{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "61112": {
+  "y_answer": "\\text{a) } 0 \\qquad \\text{b) } 1 \\qquad \\text{c) } \\dfrac{1-x^{2}}{\\sqrt{1+x^{2}}}",
+  "y_candidates": [
+   "\\text{a) } 0 \\qquad \\text{b) } 1 \\qquad \\text{c) } \\dfrac{1-x^{2}}{\\sqrt{1+x^{2}}}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1 - x^{2}}{\\sqrt{1 + x^{2}}}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "25627": {
+  "y_answer": "\\text{The three lines are concurrent.}",
+  "y_candidates": [
+   "\\text{The three lines are concurrent.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{The three lines intersect at a single point.}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "112117": {
+  "y_answer": "104.5\u00b0",
+  "y_candidates": [
+   "104.5\u00b0"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "chemistry"
+ },
+ "29053": {
+  "y_answer": "-2 < a \\leq 2",
+  "y_candidates": [
+   "-2 < a \\leq 2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(-2, 2]",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "8681": {
+  "y_answer": "A",
+  "y_candidates": [
+   "A"
+  ],
+  "how": "boxed",
+  "r1_boxed": "A",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "36350": {
+  "y_answer": "\\text{No}",
+  "y_candidates": [
+   "\\text{No}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{No}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "73959": {
+  "y_answer": "(2,-3)",
+  "y_candidates": [
+   "(2,-3)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(2, -3)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "80469": {
+  "y_answer": "15",
+  "y_candidates": [
+   "15"
+  ],
+  "how": "boxed",
+  "r1_boxed": "15",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "71124": {
+  "y_answer": "2047",
+  "y_candidates": [
+   "2047"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2047",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "95949": {
+  "y_answer": "17",
+  "y_candidates": [
+   "17"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "109273": {
+  "y_answer": "\\text{Human population growth in the Indus River Basin sharply reduces per-capita freshwater availability through over-extraction, pollution, and competing demands, degrading ecosystems (salinization, biodiversity loss, coastal intrusion) and endangering human health (waterborne disease, chemical poisoning, malnutrition). Mitigation requires an integrated strategy: water-efficient agriculture, wastewater recycling, managed aquifer recharge, strict pollution controls, transboundary IWRM, drought-tolerant crops, progressive water pricing, WASH education, and climate-resilient infrastructure to protect both the environment and public health.}",
+  "y_candidates": [
+   "\\text{Human population growth in the Indus River Basin sharply reduces per-capita freshwater availability through over-extraction, pollution, and competing demands, degrading ecosystems (salinization, biodiversity loss, coastal intrusion) and endangering human health (waterborne disease, chemical poisoning, malnutrition). Mitigation requires an integrated strategy: water-efficient agriculture, wastewater recycling, managed aquifer recharge, strict pollution controls, transboundary IWRM, drought-tolerant crops, progressive water pricing, WASH education, and climate-resilient infrastructure to protect both the environment and public health.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "6421": {
+  "y_answer": "f(x)=cx\\ \\text{for some constant }c\\in\\mathbb{R}",
+  "y_candidates": [
+   "f(x)=cx\\ \\text{for some constant }c\\in\\mathbb{R}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(x) = kx",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "15048": {
+  "y_answer": "200",
+  "y_candidates": [
+   "200"
+  ],
+  "how": "boxed",
+  "r1_boxed": "200",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "7068": {
+  "y_answer": "16",
+  "y_candidates": [
+   "16"
+  ],
+  "how": "boxed",
+  "r1_boxed": "16",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "57633": {
+  "y_answer": "\\alpha + \\beta + \\gamma = 90^\\circ",
+  "y_candidates": [
+   "\\alpha + \\beta + \\gamma = 90^\\circ"
+  ],
+  "how": "boxed",
+  "r1_boxed": "90^\\circ",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66170": {
+  "y_answer": "c > j",
+  "y_candidates": [
+   "c > j"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "9671": {
+  "y_answer": "324",
+  "y_candidates": [
+   "324"
+  ],
+  "how": "boxed",
+  "r1_boxed": "324",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "28757": {
+  "y_answer": "M \\text{ is the orthocenter of } \\triangle ABC.",
+  "y_candidates": [
+   "M \\text{ is the orthocenter of } \\triangle ABC."
+  ],
+  "how": "boxed",
+  "r1_boxed": "M \\text{ is the orthocenter of triangle } ABC",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "110546": {
+  "y_answer": "\\begin{aligned}\n&\\text{An odorant diffuses (Fick / Stokes--Einstein) into the mucus, binds a specific OR GPCR}\\\\\n&\\text{with affinity } K_d\\text{ (}\\Delta G_{\\text{bind}}=-RT\\ln(1/K_d)\\text{, computable via QM/MD),}\\\\\n&\\text{triggering a G}_{\\text{olf}}\\text{\u2192 adenylyl cyclase \u2192 cAMP \u2192 CNG-channel cascade}\\\\\n&\\text{that depolarizes the ORN (Hodgkin--Huxley / Hill kinetics) and evokes spikes.}\\\\\n&\\text{Each odorant activates a unique subset of the }\\sim400\\text{ receptor types,}\\\\\n&\\text{encoding the smell as a high-dimensional activation vector}\\\\\n&\\mathbf{a}=\\bigl([\\text{L}]/(K_{d,i}+[\\text{L}])\\bigr)_{i=1}^{N}\\in\\mathbb{R}^{N}.\\\\\n&\\text{Lateral inhibition in the olfactory bulb sharpens this code, and the}\\\\\n&\\text{piriform/limbic cortex performs pattern recognition, yielding the}\\\\\n&\\text{percept. The full chain is quantitatively modeled by:}\\\\\n&\\quad\\bullet\\;\\text{Stochastic binding (Poisson / Fokker--Planck)},\\\\\n&\\quad\\bullet\\;\\text{Biochemical ODEs with amplification }10^3\\text{--}10^5,\\\\\n&\\quad\\bullet\\;\\text{Membrane electrophysiology (Hodgkin--Huxley)},\\\\\n&\\quad\\bullet\\;\\text{Population coding and Shannon mutual information}\\\\\n&\\qquad I(s;\\mathbf{r})=\\iint P(s)P(\\mathbf{r}|s)\\log\\tfrac{P(\\mathbf{r}|s)}{P(\\mathbf{r})}\\,d\\mathbf{r}\\,ds,\\\\\n&\\text{unifying quantum, statistical, and information physics into a single}\\\\\n&\\text{predictive framework for olfaction.}\n\\end{aligned}",
+  "y_candidates": [
+   "\\begin{aligned}\n&\\text{An odorant diffuses (Fick / Stokes--Einstein) into the mucus, binds a specific OR GPCR}\\\\\n&\\text{with affinity } K_d\\text{ (}\\Delta G_{\\text{bind}}=-RT\\ln(1/K_d)\\text{, computable via QM/MD),}\\\\\n&\\text{triggering a G}_{\\text{olf}}\\text{\u2192 adenylyl cyclase \u2192 cAMP \u2192 CNG-channel cascade}\\\\\n&\\text{that depolarizes the ORN (Hodgkin--Huxley / Hill kinetics) and evokes spikes.}\\\\\n&\\text{Each odorant activates a unique subset of the }\\sim400\\text{ receptor types,}\\\\\n&\\text{encoding the smell as a high-dimensional activation vector}\\\\\n&\\mathbf{a}=\\bigl([\\text{L}]/(K_{d,i}+[\\text{L}])\\bigr)_{i=1}^{N}\\in\\mathbb{R}^{N}.\\\\\n&\\text{Lateral inhibition in the olfactory bulb sharpens this code, and the}\\\\\n&\\text{piriform/limbic cortex performs pattern recognition, yielding the}\\\\\n&\\text{percept. The full chain is quantitatively modeled by:}\\\\\n&\\quad\\bullet\\;\\text{Stochastic binding (Poisson / Fokker--Planck)},\\\\\n&\\quad\\bullet\\;\\text{Biochemical ODEs with amplification }10^3\\text{--}10^5,\\\\\n&\\quad\\bullet\\;\\text{Membrane electrophysiology (Hodgkin--Huxley)},\\\\\n&\\quad\\bullet\\;\\text{Population coding and Shannon mutual information}\\\\\n&\\qquad I(s;\\mathbf{r})=\\iint P(s)P(\\mathbf{r}|s)\\log\\tfrac{P(\\mathbf{r}|s)}{P(\\mathbf{r})}\\,d\\mathbf{r}\\,ds,\\\\\n&\\text{unifying quantum, statistical, and information physics into a single}\\\\\n&\\text{predictive framework for olfaction.}\n\\end{aligned}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "physics"
+ },
+ "67160": {
+  "y_answer": "h_c < 15",
+  "y_candidates": [
+   "h_c < 15"
+  ],
+  "how": "boxed",
+  "r1_boxed": "h_c < 15",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "105125": {
+  "y_answer": "even",
+  "y_candidates": [
+   "even"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "25939": {
+  "y_answer": "61",
+  "y_candidates": [
+   "61"
+  ],
+  "how": "boxed",
+  "r1_boxed": "61",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "37011": {
+  "y_answer": "120",
+  "y_candidates": [
+   "120"
+  ],
+  "how": "boxed",
+  "r1_boxed": "120",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "31901": {
+  "y_answer": "5",
+  "y_candidates": [
+   "5"
+  ],
+  "how": "boxed",
+  "r1_boxed": "5",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "22570": {
+  "y_answer": "\\left[0,\\frac98\\right]",
+  "y_candidates": [
+   "\\left[0,\\frac98\\right]"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left[0, \\dfrac{9}{8}\\right]",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "48702": {
+  "y_answer": "r^2\\!\\left(\\sqrt{3}-\\dfrac{\\pi}{2}\\right)",
+  "y_candidates": [
+   "r^2\\!\\left(\\sqrt{3}-\\dfrac{\\pi}{2}\\right)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "r^2 \\left( \\sqrt{3} - \\frac{\\pi}{2} \\right)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "41605": {
+  "y_answer": "(4,1)",
+  "y_candidates": [
+   "(4,1)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(4, 1)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "93833": {
+  "y_answer": "2(N-1) - \\max(dist(A,v), dist(B,v))",
+  "y_candidates": [
+   "2(N-1) - \\max(dist(A,v), dist(B,v))"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "79751": {
+  "y_answer": "\\textbf{(B) }15",
+  "y_candidates": [
+   "\\textbf{(B) }15"
+  ],
+  "how": "boxed",
+  "r1_boxed": "B",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "9624": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "38277": {
+  "y_answer": "\\frac12",
+  "y_candidates": [
+   "\\frac12"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1}{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66506": {
+  "y_answer": "\\dfrac{4\\sqrt{6}}{9}",
+  "y_candidates": [
+   "\\dfrac{4\\sqrt{6}}{9}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{4\\sqrt{6}}{9}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "100185": {
+  "y_answer": "\\text{YES or NO for each test case as computed above}",
+  "y_candidates": [
+   "\\text{YES or NO for each test case as computed above}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "37063": {
+  "y_answer": "134",
+  "y_candidates": [
+   "134"
+  ],
+  "how": "boxed",
+  "r1_boxed": "134",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "50325": {
+  "y_answer": "14400",
+  "y_candidates": [
+   "14400"
+  ],
+  "how": "boxed",
+  "r1_boxed": "14400",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "90252": {
+  "y_answer": "\\begin{aligned}\n&\\texttt{N, K = map(int, input().split())}\\\\\n&\\texttt{S = input()}\\\\\n&\\texttt{S = S[:K-1] + S[K-1].lower() + S[K:]}\\\\\n&\\texttt{print(S)}\n\\end{aligned}",
+  "y_candidates": [
+   "\\begin{aligned}\n&\\texttt{N, K = map(int, input().split())}\\\\\n&\\texttt{S = input()}\\\\\n&\\texttt{S = S[:K-1] + S[K-1].lower() + S[K:]}\\\\\n&\\texttt{print(S)}\n\\end{aligned}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "109446": {
+  "y_answer": "\\text{Neuroplasticity enables the brain to recover from traumatic injuries (stroke, TBI) and compensate for neurodegenerative diseases (Alzheimer's) through synaptic remodeling, axonal sprouting, cortical remapping, and inter-hemispheric transfer of function. Rehabilitation, exercise, and cognitive enrichment harness these mechanisms to build alternative neural pathways. However, plasticity has limits: it cannot regenerate large numbers of lost neurons, is slower in adults, is impaired by chronic inflammation and neurodegeneration, and in progressive diseases like Alzheimer's, the rate of neuronal loss eventually outpaces the brain's capacity to reorganize, making plasticity a powerful but ultimately finite compensatory resource.}",
+  "y_candidates": [
+   "\\text{Neuroplasticity enables the brain to recover from traumatic injuries (stroke, TBI) and compensate for neurodegenerative diseases (Alzheimer's) through synaptic remodeling, axonal sprouting, cortical remapping, and inter-hemispheric transfer of function. Rehabilitation, exercise, and cognitive enrichment harness these mechanisms to build alternative neural pathways. However, plasticity has limits: it cannot regenerate large numbers of lost neurons, is slower in adults, is impaired by chronic inflammation and neurodegeneration, and in progressive diseases like Alzheimer's, the rate of neuronal loss eventually outpaces the brain's capacity to reorganize, making plasticity a powerful but ultimately finite compensatory resource.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "73228": {
+  "y_answer": "1023",
+  "y_candidates": [
+   "1023"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1023",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "76829": {
+  "y_answer": "10",
+  "y_candidates": [
+   "10"
+  ],
+  "how": "boxed",
+  "r1_boxed": "10",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "100083": {
+  "y_answer": "1",
+  "y_candidates": [
+   "1"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "26192": {
+  "y_answer": "(y_1+y_4)-(y_2+y_3)=2ch(2d+h),\\ \\text{independent of }b;\\quad d=0\\Rightarrow y(b-h)-2y(b)+y(b+h)=2ch^2",
+  "y_candidates": [
+   "(y_1+y_4)-(y_2+y_3)=2ch(2d+h),\\ \\text{independent of }b;\\quad d=0\\Rightarrow y(b-h)-2y(b)+y(b+h)=2ch^2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2ch^2",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "7679": {
+  "y_answer": "9 \\text{ grams of the first alloy and } 10 \\text{ grams of the second alloy}",
+  "y_candidates": [
+   "9 \\text{ grams of the first alloy and } 10 \\text{ grams of the second alloy}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "9 \\text{ grams of the first alloy and } 10 \\text{ grams of the second alloy}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "9280": {
+  "y_answer": "\\arccos\\dfrac{5}{7}",
+  "y_candidates": [
+   "\\arccos\\dfrac{5}{7}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\arccos\\left(\\dfrac{5}{7}\\right)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "55830": {
+  "y_answer": "e_v \\leq q\\left(1-\\frac{4q}{n^2}\\right) \\text{ for at least one member } v",
+  "y_candidates": [
+   "e_v \\leq q\\left(1-\\frac{4q}{n^2}\\right) \\text{ for at least one member } v"
+  ],
+  "how": "boxed",
+  "r1_boxed": "q\\left(1 - \\frac{4q}{n^2}\\right)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "77739": {
+  "y_answer": "\\textbf{(A)}",
+  "y_candidates": [
+   "\\textbf{(A)}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "A",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "84245": {
+  "y_answer": "2 \\cdot 3^{n-1}",
+  "y_candidates": [
+   "2 \\cdot 3^{n-1}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2 \\times 3^{n-1}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "73783": {
+  "y_answer": "-\\frac{5}{3}",
+  "y_candidates": [
+   "-\\frac{5}{3}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "-\\dfrac{5}{3}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "51213": {
+  "y_answer": "6",
+  "y_candidates": [
+   "6"
+  ],
+  "how": "boxed",
+  "r1_boxed": "6",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "4199": {
+  "y_answer": "\\text{Yes}",
+  "y_candidates": [
+   "\\text{Yes}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{No}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "109551": {
+  "y_answer": "\\text{Forest fires acutely reduce local biodiversity by destroying habitat and killing organisms, but over time they create mosaic landscapes, release nutrients, and drive succession that can enhance regional (beta) diversity. In fire-adapted ecosystems, periodic fire maintains diversity by preventing competitive exclusion. Organisms have evolved diverse adaptations: plants use serotiny (heat-released seeds), thick insulating bark, basal resprouting from lignotubers or deep roots, smoke-stimulated germination (karrikin), and rapid life cycles; animals use behavioral fleeing, burrowing, fire-resistant nesting, pyrophilic life cycles (e.g., wood-boring beetles in snags), rapid recolonization, and preferential feeding on post-fire regrowth. These adaptations reflect millions of years of co-evolution with fire, making fire a keystone ecological process in many biomes. However, altered fire regimes due to climate change and suppression threaten to outpace these adaptations, risking biodiversity loss.}",
+  "y_candidates": [
+   "\\text{Forest fires acutely reduce local biodiversity by destroying habitat and killing organisms, but over time they create mosaic landscapes, release nutrients, and drive succession that can enhance regional (beta) diversity. In fire-adapted ecosystems, periodic fire maintains diversity by preventing competitive exclusion. Organisms have evolved diverse adaptations: plants use serotiny (heat-released seeds), thick insulating bark, basal resprouting from lignotubers or deep roots, smoke-stimulated germination (karrikin), and rapid life cycles; animals use behavioral fleeing, burrowing, fire-resistant nesting, pyrophilic life cycles (e.g., wood-boring beetles in snags), rapid recolonization, and preferential feeding on post-fire regrowth. These adaptations reflect millions of years of co-evolution with fire, making fire a keystone ecological process in many biomes. However, altered fire regimes due to climate change and suppression threaten to outpace these adaptations, risking biodiversity loss.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "34813": {
+  "y_answer": "(6,3) \\text{ and } (1,23)",
+  "y_candidates": [
+   "(6,3) \\text{ and } (1,23)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(6, 3)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "100305": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "64334": {
+  "y_answer": "2x^2 - 5y^2 = 7 \\text{ has no integer solutions.}",
+  "y_candidates": [
+   "2x^2 - 5y^2 = 7 \\text{ has no integer solutions.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\text{No integer solutions exist.}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "17985": {
+  "y_answer": "E",
+  "y_candidates": [
+   "E"
+  ],
+  "how": "boxed",
+  "r1_boxed": "E",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "27229": {
+  "y_answer": "(x_1,x_2,\\dots,x_{15})=(1,1,\\dots,1)\\ \\text{or}\\ (-1,-1,\\dots,-1)",
+  "y_candidates": [
+   "(x_1,x_2,\\dots,x_{15})=(1,1,\\dots,1)\\ \\text{or}\\ (-1,-1,\\dots,-1)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "x_1 = x_2 = \\cdots = x_{15} = -1",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "94940": {
+  "y_answer": "40 \\text{ and } 60",
+  "y_candidates": [
+   "40 \\text{ and } 60"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "23452": {
+  "y_answer": "O \\text{ is the center of the prism.}",
+  "y_candidates": [
+   "O \\text{ is the center of the prism.}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "O \\text{ is the center of the prism}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "30440": {
+  "y_answer": "27",
+  "y_candidates": [
+   "27"
+  ],
+  "how": "boxed",
+  "r1_boxed": "27",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "12233": {
+  "y_answer": "800",
+  "y_candidates": [
+   "800"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1520",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "52858": {
+  "y_answer": "12",
+  "y_candidates": [
+   "12"
+  ],
+  "how": "boxed",
+  "r1_boxed": "12",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "108338": {
+  "y_answer": "8",
+  "y_candidates": [
+   "8"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "108122": {
+  "y_answer": "200",
+  "y_candidates": [
+   "200"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "104678": {
+  "y_answer": "4 \\quad 6 \\quad 124 \\quad 6901",
+  "y_candidates": [
+   "4 \\quad 6 \\quad 124 \\quad 6901"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "20964": {
+  "y_answer": "D",
+  "y_candidates": [
+   "D"
+  ],
+  "how": "boxed",
+  "r1_boxed": "D. 48",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "36067": {
+  "y_answer": "0",
+  "y_candidates": [
+   "0"
+  ],
+  "how": "boxed",
+  "r1_boxed": "0",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "8463": {
+  "y_answer": "t_{\\alpha\\beta}\\, t_{\\gamma\\delta} + t_{\\beta\\gamma}\\, t_{\\delta\\alpha} = t_{\\alpha\\gamma}\\, t_{\\beta\\delta}",
+  "y_candidates": [
+   "t_{\\alpha\\beta}\\, t_{\\gamma\\delta} + t_{\\beta\\gamma}\\, t_{\\delta\\alpha} = t_{\\alpha\\gamma}\\, t_{\\beta\\delta}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "t_{\\alpha \\beta} t_{\\gamma \\delta} + t_{\\beta \\gamma} t_{\\delta \\alpha} = t_{\\alpha \\gamma} t_{\\beta \\delta}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "112518": {
+  "y_answer": "\\begin{minipage}{0.92\\textwidth}\nThe electronic structure of a coordination compound\u2014encompassing the metal's d-electron count and oxidation state, the ligand-field splitting (\\(\\Delta_o\\), \\(\\Delta_t\\), square-planar pattern), molecular geometry, spin state, and the degree of \\(\\pi\\)-back-bonding\u2014determines its spectroscopic fingerprints across UV-Vis, IR, and NMR.\n\n**UV-Vis:** d\u2013d transition energies track \\(\\Delta\\). Changing geometry from octahedral to tetrahedral (e.g., \\([\\text{Co(H}_2\\text{O)}_6]^{2+}\\), pink, \\(\\lambda_{\\max}\\approx510\\) nm \\(\\to\\) \\([\\text{CoCl}_4]^{2-}\\), blue, \\(\\lambda_{\\max}\\approx700\\) nm) shifts and intensifies the band. Changing ligand field strength (e.g., \\([\\text{Ni(H}_2\\text{O)}_6]^{2+}\\) green vs.\\ \\([\\text{Ni(CN)}_4]^{2-}\\) square-planar violet) shifts absorption. Charge-transfer bands (\\([\\text{MnO}_4]^-\\) LMCT, \\(\\epsilon>10^3\\); \\([\\text{Ru(bpy)}_3]^{2+}\\) MLCT) report on metal\u2013ligand orbital energy differences and are absent or shifted when oxidation state changes (\\([\\text{Fe(CN)}_6]^{4-}\\) vs.\\ \\([\\text{Fe(CN)}_6]^{3-}\\)).\n\n**IR:** Vibrational frequencies encode bond order and symmetry. In metal carbonyls, \\(\\nu(\\text{CO})\\) decreases with increasing \\(\\pi\\)-back-donation: free CO (2143 cm\\(^{-1}\\)) \\(\\to\\) \\([\\text{Cr(CO)}_6]\\) (2000 cm\\(^{-1}\\)) \\(\\to\\) \\([\\text{V(CO)}_6]^-\\) (1885 cm\\(^{-1}\\)). The \\emph{number} of IR-active CO bands reveals geometry (one for \\(O_h\\), two for \\(T_d\\) or \\(C_{2v}\\)). Nitrosyl stretching distinguishes NO\\(^+\\), NO\\(\\cdot\\), and NO\\(^-\\) bonding (\\([\\text{Fe(CO)}_5\\text{NO}]\\) \\(\\nu\\approx1870\\) vs.\\ \\([\\text{Fe(CO)}_4\\text{NO}]^-\\) \\(\\nu\\approx1550\\) cm\\(^{-1}\\)).\n\n**NMR:** Diamagnetic complexes (\\([\\text{Co(NH}_3)_6]^{3+}\\), \\(S=0\\)) give sharp, narrow \u00b9H/\u00b9\u00b3C signals. Paramagnetic complexes (\\([\\text{Co(H}_2\\text{O)}_6]^{2+}\\), \\(S=3/2\\)) exhibit large contact/pseudocontact shifts (tens\u2013hundreds of ppm) and severe line broadening. \u00b9\u00b3C NMR of carbonyls shifts downfield with greater back-donation (\\([\\text{Cr(CO)}_6]\\) \\(\\delta\\approx188\\) ppm vs.\\ \\([\\text{Ni(CO)}_4]\\) \\(\\delta\\approx205\\) ppm). \u2075\u2077Fe NMR distinguishes high-spin deoxyhemoglobin (broad, \\(\\sim+3000\\) ppm) from low-spin oxyhemoglobin (sharp, \\(\\sim+100\\) ppm), directly reporting the spin-state change upon O\u2082 binding.\n\nIn every case, a change in the coordination environment\u2014ligand identity, geometry, oxidation state, or spin state\u2014alters the d-orbital energies, bond orders, and magnetic properties, and these changes are quantitatively readable in the position, intensity, number, or width of spectroscopic features.\n\\end{minipage}",
+  "y_candidates": [
+   "\\begin{minipage}{0.92\\textwidth}\nThe electronic structure of a coordination compound\u2014encompassing the metal's d-electron count and oxidation state, the ligand-field splitting (\\(\\Delta_o\\), \\(\\Delta_t\\), square-planar pattern), molecular geometry, spin state, and the degree of \\(\\pi\\)-back-bonding\u2014determines its spectroscopic fingerprints across UV-Vis, IR, and NMR.\n\n**UV-Vis:** d\u2013d transition energies track \\(\\Delta\\). Changing geometry from octahedral to tetrahedral (e.g., \\([\\text{Co(H}_2\\text{O)}_6]^{2+}\\), pink, \\(\\lambda_{\\max}\\approx510\\) nm \\(\\to\\) \\([\\text{CoCl}_4]^{2-}\\), blue, \\(\\lambda_{\\max}\\approx700\\) nm) shifts and intensifies the band. Changing ligand field strength (e.g., \\([\\text{Ni(H}_2\\text{O)}_6]^{2+}\\) green vs.\\ \\([\\text{Ni(CN)}_4]^{2-}\\) square-planar violet) shifts absorption. Charge-transfer bands (\\([\\text{MnO}_4]^-\\) LMCT, \\(\\epsilon>10^3\\); \\([\\text{Ru(bpy)}_3]^{2+}\\) MLCT) report on metal\u2013ligand orbital energy differences and are absent or shifted when oxidation state changes (\\([\\text{Fe(CN)}_6]^{4-}\\) vs.\\ \\([\\text{Fe(CN)}_6]^{3-}\\)).\n\n**IR:** Vibrational frequencies encode bond order and symmetry. In metal carbonyls, \\(\\nu(\\text{CO})\\) decreases with increasing \\(\\pi\\)-back-donation: free CO (2143 cm\\(^{-1}\\)) \\(\\to\\) \\([\\text{Cr(CO)}_6]\\) (2000 cm\\(^{-1}\\)) \\(\\to\\) \\([\\text{V(CO)}_6]^-\\) (1885 cm\\(^{-1}\\)). The \\emph{number} of IR-active CO bands reveals geometry (one for \\(O_h\\), two for \\(T_d\\) or \\(C_{2v}\\)). Nitrosyl stretching distinguishes NO\\(^+\\), NO\\(\\cdot\\), and NO\\(^-\\) bonding (\\([\\text{Fe(CO)}_5\\text{NO}]\\) \\(\\nu\\approx1870\\) vs.\\ \\([\\text{Fe(CO)}_4\\text{NO}]^-\\) \\(\\nu\\approx1550\\) cm\\(^{-1}\\)).\n\n**NMR:** Diamagnetic complexes (\\([\\text{Co(NH}_3)_6]^{3+}\\), \\(S=0\\)) give sharp, narrow \u00b9H/\u00b9\u00b3C signals. Paramagnetic complexes (\\([\\text{Co(H}_2\\text{O)}_6]^{2+}\\), \\(S=3/2\\)) exhibit large contact/pseudocontact shifts (tens\u2013hundreds of ppm) and severe line broadening. \u00b9\u00b3C NMR of carbonyls shifts downfield with greater back-donation (\\([\\text{Cr(CO)}_6]\\) \\(\\delta\\approx188\\) ppm vs.\\ \\([\\text{Ni(CO)}_4]\\) \\(\\delta\\approx205\\) ppm). \u2075\u2077Fe NMR distinguishes high-spin deoxyhemoglobin (broad, \\(\\sim+3000\\) ppm) from low-spin oxyhemoglobin (sharp, \\(\\sim+100\\) ppm), directly reporting the spin-state change upon O\u2082 binding.\n\nIn every case, a change in the coordination environment\u2014ligand identity, geometry, oxidation state, or spin state\u2014alters the d-orbital energies, bond orders, and magnetic properties, and these changes are quantitatively readable in the position, intensity, number, or width of spectroscopic features.\n\\end{minipage}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "chemistry"
+ },
+ "90617": {
+  "y_answer": "\\text{Ron or Hermione depending on the conditions above}",
+  "y_candidates": [
+   "\\text{Ron or Hermione depending on the conditions above}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "91931": {
+  "y_answer": "5\\ 8\\ 9\\ 8\\ 5",
+  "y_candidates": [
+   "5\\ 8\\ 9\\ 8\\ 5"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "97844": {
+  "y_answer": "solve :: String -> String -> Int\nsolve s1 s2\n  | any (\\c -> length (filter (== c) s1) >= 2 && not (elem c s2)) (nub s1) = 1\n  | otherwise = 2",
+  "y_candidates": [
+   "solve :: String -> String -> Int\nsolve s1 s2\n  | any (\\c -> length (filter (== c) s1) >= 2 && not (elem c s2)) (nub s1) = 1\n  | otherwise = 2"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ }
+}

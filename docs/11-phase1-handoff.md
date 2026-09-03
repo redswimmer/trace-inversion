@@ -475,7 +475,7 @@ starts**. That is an additional reason to resolve the sampling/looping question 
 | Looping asymmetry | 6 | If training reduces looping, part of any gain is learned termination, not reasoning. Report truncation pre/post, not just accuracy. |
 | Re-measure untrained 2B under the Phase 6 protocol | 6 | The control. Baseline and post-training eval must use identical sampling. |
 | JEEBench Numeric 66.4% on the victim vs MCQ 98.2% | 6 | Probably genuine difficulty, but it is where a grader tolerance bug would hide. Spot-check. |
-| Victim per-slot context can drop below 32k | 3 | p95 is 17,795; more slots would speed the ~10-15 h generation job. Sweep at 16k/slot. |
+| Victim per-slot context can drop below 32k | 3 | p95 is 17,795; more slots would speed the ~66 h generation job (measured, Phase 3). Sweep at 16k/slot. |
 | 0.8B and 4B baselines are under the old card sampling | — | Eliminated candidates; not worth 6 h to refine numbers that change no decision. |
 | OpenAI API victim track | optional | Second track reproducing §5.4. `.env` is gitignored and ready for a key. |
 
