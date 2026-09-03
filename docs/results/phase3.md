@@ -19,6 +19,12 @@ Data and logs live under the **main checkout** (`bench/results/phase3/`, `bench/
 the branch was built in a worktree whose driver runs its own code with the main checkout's
 `.venv-vllm` (`docs/14` §0).
 
+> **`docs/14-phase3-handoff.md` is the pre-run plan; this file is authoritative where they
+> disagree.** Its method, conventions and file layout all held. Several of its numeric expectations
+> did not — the budget (30–50 h → 66.32 h), the cap-hit band (0–15 % → widened to 0–25 % after
+> measuring 16.2 %), "no system prompt" (the template injected one until effort was set to `medium`)
+> and the expected drop rate (≤ 5 % → 16.2 %). `docs/14` carries the same table at its head.
+
 ---
 
 ## 0. Split B, as written
