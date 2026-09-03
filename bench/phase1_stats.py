@@ -421,13 +421,25 @@ def vs_r1(rows, out_json):
     print(f"  per-row (y_answer, how, r1_boxed, bucket) -> {out_json}")
 
 
-def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None):
+def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None,
+             oracle=None, final=False):
     """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
     (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
     counts the same traces with R1-Distill's, so say which before comparing across docs.
-    Cap-hit is vLLM's own finish_reason; gen_tokens is vLLM's own count."""
+    Cap-hit is vLLM's own finish_reason; gen_tokens is vLLM's own count.
+
+    Phase 4 (docs/15 §4.6): split-B rows carry no t_true, so `oracle` — {idx: oracle row} from the
+    ORACLE file, read here and nowhere else on the attack path — supplies t (and y, asserted equal
+    to the row's own y so the pairing is provably on the same row). Also reports the supervision
+    totals t_hat+y vs t_true+y, the Phase 5 student targets. `final`: no row may be capped."""
+    if oracle is not None:
+        for r in rows:
+            o = oracle[r["idx"]]                       # KeyError = an idx the oracle never had
+            assert r["y"].strip() == o["y"].strip(), f"idx {r['idx']}: y differs from the oracle row's — mis-pair"
+            r["t_true"] = o["t"]
     th = np.array([len(tk.encode(r["t_hat"])) for r in rows])
     tt = np.array([len(tk.encode(r["t_true"])) for r in rows])
+    yt = np.array([len(tk.encode(r["y"] or "")) for r in rows])
     gen = np.array([r["gen_tokens"] for r in rows])
     cap_hit = np.array([r["finish_reason"] == "length" for r in rows])
     empty = [r["idx"] for r in rows if not r["t_hat"].strip()]
@@ -435,23 +447,31 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None
     print(f"rows {len(rows)}   tokenizer: the inverter's (Qwen3.5-4B)")
     print(dist(th, "t_hat tokens (re-tokenized)"))
     print(dist(gen, "gen_tokens (vLLM's own count, incl. any stripped think block)"))
-    print(dist(tt, "t_true tokens"))
+    print(dist(tt, "t_true tokens" + (" (paired by idx from the ORACLE file)" if oracle is not None else "")))
     ratio = float(np.median(th) / max(np.median(tt), 1))
-    print(f"t_hat / t_true at the median  {ratio:.2f}    per-row ratio median "
-          f"{float(np.median(th / np.maximum(tt, 1))):.2f}    t_hat shorter on {100*np.mean(th < tt):.1f}% of rows")
+    rr = th / np.maximum(tt, 1)
+    print(f"t_hat / t_true at the median  {ratio:.2f}    per-row ratio p25/median/p75 "
+          f"{np.percentile(rr, 25):.2f} / {np.median(rr):.2f} / {np.percentile(rr, 75):.2f}"
+          f"    t_hat shorter on {100*np.mean(th < tt):.1f}% of rows")
+    print(dist(yt, "y tokens"))
+    print(dist(th + yt, "t_hat + y  (forged supervision target)"))
+    print(dist(tt + yt, "t_true + y (oracle supervision target)"))
+    print(f"supervision totals at the median: t_hat+y / t_true+y = {q(th+yt,50)} / {q(tt+yt,50)} = "
+          f"{np.median(th+yt)/max(np.median(tt+yt),1):.2f}    totals {int((th+yt).sum()):,} vs {int((tt+yt).sum()):,} tokens")
     print(f"cap-hit (finish_reason == length)  {100*cap_hit.mean():.1f}%  ({int(cap_hit.sum())}/{len(rows)})"
           f"    empty t_hat {len(empty)}")
     by = {}
     for r, a, b in zip(rows, th, tt):
         by.setdefault(r.get("domain", "?"), []).append((a, b))
-    print("by domain: t_hat median / t_true median")
+    print("by domain: t_hat median / t_true median (ratio)")
     for d, v in sorted(by.items(), key=lambda kv: -len(kv[1])):
         a, b = np.array(v).T
-        print(f"  {d:12s} n={len(v):3d}  {int(np.median(a)):5d} / {int(np.median(b)):5d}")
+        print(f"  {d:12s} n={len(v):4d}  {int(np.median(a)):5d} / {int(np.median(b)):5d}  ({np.median(a)/max(np.median(b),1):.2f})")
     print("\n| inverter | t_hat median / mean / p05 / p95 | t_true median / mean / p05 / p95 "
-          "| t_hat/t_true at median | cap-hit @ cap | empty |")
+          "| t_hat/t_true at median | per-row ratio median | t_hat+y median | t_true+y median | cap-hit @ cap | empty |")
     print(f"| {tag or '?'} | {q(th,50)} / {int(th.mean())} / {q(th,5)} / {q(th,95)} "
-          f"| {q(tt,50)} / {int(tt.mean())} / {q(tt,5)} / {q(tt,95)} | {ratio:.2f} "
+          f"| {q(tt,50)} / {int(tt.mean())} / {q(tt,5)} / {q(tt,95)} | {ratio:.2f} | {np.median(rr):.2f} "
+          f"| {q(th+yt,50)} | {q(tt+yt,50)} "
           f"| {100*cap_hit.mean():.1f}% ({int(cap_hit.sum())}) | {len(empty)} |")
     # Answer consistency, report-only (not a gate): a forged trace that does not land on the
     # answer it was given is the failure the paper's mechanism assumes away. Last \boxed{} in
@@ -541,6 +561,9 @@ def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None
     if ratio < 0.5:
         fails.append(f"median t_hat is {ratio:.2f}x the paired t_true median — under half; the "
                      f"adapter did not take — STOP AND ASK (docs/13 §7)")
+    if final and cap_hit.any():
+        fails.append(f"{int(cap_hit.sum())} capped rows in a final forged file (idx "
+                     f"{[r['idx'] for r, c in zip(rows, cap_hit) if c][:5]}) — docs/15 §4.4 allows none")
     return fails
 
 
@@ -575,6 +598,11 @@ def main():
     ap.add_argument("--tag", default="", help="inverted mode: label for the table row")
     ap.add_argument("--no-r1", action="store_true",
                     help="inverted mode: skip grading y and t_hat against the OpenThoughts row's R1 answer")
+    ap.add_argument("--oracle", default="",
+                    help="inverted mode, Phase 4: pair t_true (and y) by idx from this ORACLE file — the one "
+                         "read-only read of it on the whole phase, main thread (docs/15 §4.6)")
+    ap.add_argument("--final", action="store_true",
+                    help="inverted mode: this is a final forged file — any finish_reason == length fails")
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
@@ -589,10 +617,18 @@ def main():
     print(f"=== {args.file}  ({args.mode}, n={len(rows)}) ===")
     if args.mode == "inverted":
         hold = set(json.load(open(args.holdout))["idx"]) if args.holdout else None
+        oracle = None
+        if args.oracle:
+            from pathlib import Path as _P
+            assert "ORACLE" in _P(args.oracle).name, "the pairing file must be the one named ORACLE"
+            assert "oracle" not in args.file.lower(), "the forged file must not be one named ORACLE"
+            oracle = {r["idx"]: r for r in (json.loads(l) for l in open(args.oracle))}
+            print(f"paired against {args.oracle} ({len(oracle)} rows) — read-only, lengths only")
         r1 = None if args.no_r1 else r1_answers([r["idx"] for r in rows])
         fails = inverted(rows, tok(args.summary_tokenizer), args.cap, hold,
                          len(hold) if hold else None, args.tag,
-                         out_json=args.file.replace(".jsonl", "") + "-consistency.json", r1=r1)
+                         out_json=args.file.replace(".jsonl", "") + "-consistency.json", r1=r1,
+                         oracle=oracle, final=args.final)
         print(f"\n=== gates ===")
         for f in fails:
             print(f"  FAIL  {f}")

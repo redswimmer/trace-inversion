@@ -13,7 +13,7 @@ Output row: {idx, domain, x, y, b, t_true, t_hat, raw, gen_tokens, finish_reason
 Gates (exit 1, file is still written): 0 empty t_hat · rows out == rows in · every idx in
 --holdout when given.  Launch with .venv-vllm/bin on PATH (docs/06 §1.8).
 """
-import argparse, json, re, sys
+import argparse, json, re, sys, time
 from pathlib import Path
 
 RE_THINK = re.compile(r"^.*?</think>", re.S)
@@ -68,7 +68,12 @@ def main():
               seed=args.seed)
     sp = SamplingParams(temperature=args.temperature, top_p=args.top_p, max_tokens=args.max_tokens,
                         repetition_penalty=args.repetition_penalty, seed=args.seed)
+    t0 = time.time()
     outs = llm.generate(prompts, sp)
+    dt = time.time() - t0
+    tot = sum(len(o.outputs[0].token_ids) for o in outs)
+    print(f"generate wall {dt:.0f}s  gen_tokens {tot:,}  realized {tot / max(dt, 1e-9):.0f} tok/s "
+          f"(vLLM's own token count over llm.generate only; engine load excluded)", flush=True)
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     n_think = n_cap = n_empty = 0

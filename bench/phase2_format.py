@@ -32,7 +32,10 @@ KW = {"enable_thinking": False}
 
 
 def to_row(r, setting):
-    x, y, t = r["x"].strip(), r["y"].strip(), r["t"].strip()
+    """The training row. A row with no `t` — Phase 4's split-B attack rows — gets the same prompt
+    and no `t`/`completion` (docs/15 §4.2: one construction, served byte-identical to training)."""
+    x, y = r["x"].strip(), r["y"].strip()
+    t = r["t"].strip() if "t" in r else None
     if setting == "sum":
         b = r["b"].strip()
         user = SUM_USER.format(user_prompt=x, assistant_answer=y, reasoning_summary=b)
@@ -43,9 +46,11 @@ def to_row(r, setting):
     out = {"idx": r["idx"], "domain": r["domain"], "x": x, "y": y}
     if setting == "sum":
         out["b"] = b
-    out["t"] = t
+    if t is not None:
+        out["t"] = t
     out["prompt"] = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    out["completion"] = [{"role": "assistant", "content": t}]
+    if t is not None:
+        out["completion"] = [{"role": "assistant", "content": t}]
     out["chat_template_kwargs"] = dict(KW)
     return out
 
