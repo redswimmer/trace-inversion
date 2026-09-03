@@ -1,0 +1,30 @@
+/goal Phase 4 of the trace-inversion reproduction is complete: four forged-trace files exist — bench/results/phase4/forged-{7b,1.5b}-{sum,nosum}.jsonl, every row finish_reason != length — with -draw1 files and committed consistency JSONs; the paired t̂-vs-t length table (plus t̂+y vs t+y totals) is in committed docs/results/phase4.md; docs/09 7.14/7.15, docs/10 and README are updated.
+
+Read docs/15-phase4-handoff.md first. Its §0 lists what exists — use it, do not rebuild it. Branch phase4-build. The GPU is free. In a worktree, §0.1 is mandatory.
+
+SUPERVISION. Session big-boss planned this phase and audits it. After each numbered step, each probe, and whenever you stop or are blocked, print and SendMessage it:
+  CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+One turn to object before any run longer than an hour; absent or silent → proceed and say so. It writes nothing to the tree.
+
+FIXED SETTINGS. Decided (docs/10 Phase 4); use them:
+  adapters EPOCH 2, merged: inverter-7b-*/checkpoint-402, inverter-1.5b-*/checkpoint-404 · phase2_train.py --merge · one merged model on disk at a time, deleted after use (28 GB free)
+  input bench/results/phase3/victimB-attack.jsonl and NOTHING named ORACLE — sum inverters get (x, y, b), nosum (x, y), built through phase2_format.to_row's construction byte-identical to training, enable_thinking=false
+  sampling temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · max_tokens 8192 · seed 1234 · --holdout '' · invert.py auto-widens max_model_len (report what it picks)
+  capped rows (finish_reason==length): redraw at seed 1235, then 1236; still capped after 3 draws → DROP and report; draw1 kept intact — its cap-hit is the inverter's property
+  answer-inconsistent t̂: report the rate per inverter, NO filtering
+  the ORACLE file is read exactly once — stats step, main thread, read-only — for the paired length table
+
+PROBE BEFORE ANY RUN LONGER THAN AN HOUR. Per inverter: merge, invert.py --limit 30, read 3 traces, report docs/15 §6's probe list (cap-hit, t̂-vs-t tokens, max_model_len chosen, realized t/s, projection stating the assumed rate). CHECKPOINT, one turn, then the full run.
+
+REPORT, DO NOT REDESIGN. If a fixed setting looks wrong, report the measurement and keep going. A surprising number is a finding, not a reason to act. Do not touch π, the inversion prompts, or the adapters. Expected draw-1 cap-hit (docs/15 §1): 7b-sum 3 %, 7b-nosum 7 %, 1.5b-sum 17 %, 1.5b-nosum 14.5 % — a shift is a finding.
+
+WORK
+0. phase4_format.py + self-test (no t anywhere, no b text in nosum rows, idx set == the attack file's, row 0 printed) → attack-{sum,nosum}.jsonl. phase1_stats.py --mode inverted gains --oracle pairing. run_phase4_invert.sh from run_phase2_invert.sh: merge → invert → redraws → assemble → stats → delete merged. Commit.
+1. Probe 7b-sum. 2. 7b-sum full → forged-7b-sum{-draw1,}.jsonl + consistency.
+3. Same for 7b-nosum, 1.5b-sum, 1.5b-nosum, a 30-row smoke each.
+4. Paired length table, all four inverters: t̂ vs t on the same idx (median/mean/p05/p95, per-row ratio, per-domain) + t̂+y vs t+y; one paragraph resolving phase3.md §5's two-pushes question.
+5. docs/results/phase4.md per docs/15 §6; docs/09 7.14/7.15 measured; docs/10 Phase 4 closed with measured hours; README row. Commit.
+
+CONVENTIONS. docs/11 §5, docs/13 §8, docs/14 §8, docs/15 §8 in full. Hardest: nothing on the attack path opens a file named ORACLE; byte-identical prompts; merge-check before trusting an inversion; never edit a running script; the engine's finish_reason is authoritative; state the tokenizer; explicit paths on git add.
+
+STOP AND ASK IF: draw-1 cap-hit over 15 % (7B arm) or 30 % (1.5B arm); drops after 3 draws over 2 % on any inverter; any empty t̂; loops over 5 % of any final file; t̂ median under 700 or over 4,500 tokens; stripped_think over 2 %; the phase projection passes 30 h or a step runs 2× its estimate; any gate fails twice; anything on the attack path wants a file named ORACLE.
