@@ -1,0 +1,1315 @@
+{
+ "74000": {
+  "y_answer": "11, 31, 41, 61, 71",
+  "y_candidates": [
+   "5",
+   "11, 31, 41, 61, 71"
+  ],
+  "how": "bold",
+  "r1_boxed": "5",
+  "bucket": "agree (bold)",
+  "agree": true,
+  "domain": "math"
+ },
+ "113596": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "puzzle"
+ },
+ "61114": {
+  "y_answer": "6",
+  "y_candidates": [
+   "6"
+  ],
+  "how": "boxed",
+  "r1_boxed": "6",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "107028": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "44433": {
+  "y_answer": "\\frac{2^{n+2}-n-3}{3}",
+  "y_candidates": [
+   "\\frac{2^{n+2}-n-3}{3}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{2^{n+2} - n - 3}{3}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66713": {
+  "y_answer": "(h_1-u)(h_2-v)(h_3-w)\\ge 8uvw",
+  "y_candidates": [
+   "(h_1-u)(h_2-v)(h_3-w)\\ge 8uvw"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left(h_{1}-u\\right)\\left(h_{2}-v\\right)\\left(h_{3}-w\\right) \\geqslant 8 u v w",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "84722": {
+  "y_answer": "8",
+  "y_candidates": [
+   "8"
+  ],
+  "how": "boxed",
+  "r1_boxed": "8",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "17752": {
+  "y_answer": "interior of the circle with diameter \\(AB",
+  "y_candidates": [
+   "interior of the circle with diameter \\(AB"
+  ],
+  "how": "bold",
+  "r1_boxed": "\\text{The interior of the circle with diameter } AB",
+  "bucket": "disagree (bold)",
+  "agree": false,
+  "domain": "math"
+ },
+ "75541": {
+  "y_answer": "\\sqrt{6}-1",
+  "y_candidates": [
+   "\\sqrt{6}-1"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\sqrt{6} - 1",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "10385": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "113631": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "B (better life)",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "puzzle"
+ },
+ "71239": {
+  "y_answer": "60",
+  "y_candidates": [
+   "60"
+  ],
+  "how": "boxed",
+  "r1_boxed": "60",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "17783": {
+  "y_answer": "4 grams",
+  "y_candidates": [
+   "4 grams"
+  ],
+  "how": "bold",
+  "r1_boxed": "4",
+  "bucket": "disagree (bold)",
+  "agree": false,
+  "domain": "math"
+ },
+ "80579": {
+  "y_answer": "1",
+  "y_candidates": [
+   "1"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "18225": {
+  "y_answer": "24\\text{ m}^2",
+  "y_candidates": [
+   "24\\text{ m}^2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "24",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "85371": {
+  "y_answer": "1156,\\ 1296,\\ 1369,\\ 1600,\\ 1764",
+  "y_candidates": [
+   "1156,\\ 1296,\\ 1369,\\ 1600,\\ 1764"
+  ],
+  "how": "boxed",
+  "r1_boxed": "1764",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "74845": {
+  "y_answer": "67",
+  "y_candidates": [
+   "67"
+  ],
+  "how": "boxed",
+  "r1_boxed": "67",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "94292": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "80277": {
+  "y_answer": "2",
+  "y_candidates": [
+   "2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "107190": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "10642": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "c = 0",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "93525": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "82114": {
+  "y_answer": "\\frac1{11}",
+  "y_candidates": [
+   "\\frac1{11}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1}{11}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "59490": {
+  "y_answer": "2+\\sqrt2",
+  "y_candidates": [
+   "2+\\sqrt2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2 + \\sqrt{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "96220": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "100519": {
+  "y_answer": "Space Complexity:",
+  "y_candidates": [
+   "Time Complexity:",
+   "Space Complexity:"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "code"
+ },
+ "48713": {
+  "y_answer": "f(n)=n",
+  "y_candidates": [
+   "f(n)=n"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(n) = n",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "113301": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "puzzle"
+ },
+ "74940": {
+  "y_answer": "\\frac{3}{5}",
+  "y_candidates": [
+   "\\frac{3}{5}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{3}{5}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "58307": {
+  "y_answer": "\\cos A+\\cos B+\\cos C<\\sin A+\\sin B+\\sin C",
+  "y_candidates": [
+   "\\cos A+\\cos B+\\cos C<\\sin A+\\sin B+\\sin C"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\cos A + \\cos B + \\cos C < \\sin A + \\sin B + \\sin C",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "38015": {
+  "y_answer": "36",
+  "y_candidates": [
+   "36"
+  ],
+  "how": "boxed",
+  "r1_boxed": "36",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "228": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "\\sin \\frac{A}{2} \\sin \\frac{B}{2} \\sin \\frac{C}{2} \\leqslant \\frac{1}{8}",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "74454": {
+  "y_answer": "67",
+  "y_candidates": [
+   "67"
+  ],
+  "how": "boxed",
+  "r1_boxed": "67",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "47237": {
+  "y_answer": "D",
+  "y_candidates": [
+   "D"
+  ],
+  "how": "boxed",
+  "r1_boxed": "D",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "110430": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "physics"
+ },
+ "7378": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "96324": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "109184": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "biology"
+ },
+ "91193": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "56016": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "\\text{The midpoints of the sides of triangle } O_1O_2O_3 \\text{ lie on the nine-point circle of triangle } ABC.",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "49887": {
+  "y_answer": "\\frac{2a^2b^2}{a^2+b^2}",
+  "y_candidates": [
+   "\\frac{2a^2b^2}{a^2+b^2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{2a^2b^2}{a^2 + b^2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "75092": {
+  "y_answer": "(0,-5,4)",
+  "y_candidates": [
+   "(0,-5,4)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(0, -5, 4)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "33059": {
+  "y_answer": "4011",
+  "y_candidates": [
+   "4011"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4011",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "51922": {
+  "y_answer": "3:4:5",
+  "y_candidates": [
+   "3:4:5"
+  ],
+  "how": "boxed",
+  "r1_boxed": "r = d",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "66192": {
+  "y_answer": "84",
+  "y_candidates": [
+   "84"
+  ],
+  "how": "boxed",
+  "r1_boxed": "84",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "3076": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "16",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "93004": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "58810": {
+  "y_answer": "A\\left(\\frac{5}{2};0;0\\right)",
+  "y_candidates": [
+   "A\\left(\\frac{5}{2};0;0\\right)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left( \\dfrac{5}{2}; 0; 0 \\right)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "38652": {
+  "y_answer": "106",
+  "y_candidates": [
+   "106"
+  ],
+  "how": "boxed",
+  "r1_boxed": "106",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "29729": {
+  "y_answer": "a_{2011}=\\frac{3^{2011}-1}{2}",
+  "y_candidates": [
+   "a_{2011}=\\frac{3^{2011}-1}{2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{3^{2011} - 1}{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "37425": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "2043231",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "48513": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "\\text{The lines intersect at the centroid of the quadrilateral } ABCD",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "3647": {
+  "y_answer": "64\\%",
+  "y_candidates": [
+   "64\\%"
+  ],
+  "how": "boxed",
+  "r1_boxed": "64\\%",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "31593": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "23605": {
+  "y_answer": "\\frac{\\cos 4\\alpha \\tan 2\\alpha-\\sin 4\\alpha}{\\cos 4\\alpha \\cot 2\\alpha+\\sin 4\\alpha}\n=-\\tan^2 2\\alpha",
+  "y_candidates": [
+   "\\frac{\\cos 4\\alpha \\tan 2\\alpha-\\sin 4\\alpha}{\\cos 4\\alpha \\cot 2\\alpha+\\sin 4\\alpha}\n=-\\tan^2 2\\alpha"
+  ],
+  "how": "boxed",
+  "r1_boxed": "-\\tan^2 2\\alpha",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "5806": {
+  "y_answer": "20",
+  "y_candidates": [
+   "20"
+  ],
+  "how": "boxed",
+  "r1_boxed": "20",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "107510": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "82711": {
+  "y_answer": "f(x)=ax+b",
+  "y_candidates": [
+   "f(x)=ax+b"
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(x) = ax + b",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "105809": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "97655": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "49675": {
+  "y_answer": "S=2(AC+BD)-(AB+BC+CD+DA)",
+  "y_candidates": [
+   "S=2(AC+BD)-(AB+BC+CD+DA)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2(AC + BD) - P",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "98219": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "98793": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "32064": {
+  "y_answer": "2 \\text{ or } 8",
+  "y_candidates": [
+   "2 \\text{ or } 8"
+  ],
+  "how": "boxed",
+  "r1_boxed": "8",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "47215": {
+  "y_answer": "V=\\frac{l\\cos\\alpha}{8}\\left(P^2-4l^2\\sin^2\\alpha\\right)",
+  "y_candidates": [
+   "V=\\frac{l\\cos\\alpha}{8}\\left(P^2-4l^2\\sin^2\\alpha\\right)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{l \\cos \\alpha \\left( P^2 - 4 l^2 \\sin^2 \\alpha \\right)}{8}",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "64667": {
+  "y_answer": "a_n=3^n+n^2-n-2",
+  "y_candidates": [
+   "a_n=3^n+n^2-n-2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "a_n = 3^n + n^2 - n - 2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "50100": {
+  "y_answer": "11 tests",
+  "y_candidates": [
+   "11 tests"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "29053": {
+  "y_answer": "-2<a\\le 2",
+  "y_candidates": [
+   "-2<a\\le 2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(-2, 2]",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "109206": {
+  "y_answer": "slow rate, dependence on environmental conditions, limited ability to destroy inorganic pollutants, and uncertainty in scale-up and long-term performance",
+  "y_candidates": [
+   "biological, often low-energy, site-specific tool",
+   "recalcitrant organic pollutants",
+   "slower and less predictable",
+   "lower cost, lower energy, less disruptive, and more environmentally sustainable",
+   "persistent organics in large, low-concentration, accessible environments",
+   "slow rate, dependence on environmental conditions, limited ability to destroy inorganic pollutants, and uncertainty in scale-up and long-term performance"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "61112": {
+  "y_answer": "\\frac{1-x^2}{\\sqrt{1+x^2}}",
+  "y_candidates": [
+   "\\frac{1-x^2}{\\sqrt{1+x^2}}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1 - x^{2}}{\\sqrt{1 + x^{2}}}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "112117": {
+  "y_answer": "104.5\u00b0",
+  "y_candidates": [
+   "104.5\u00b0"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "chemistry"
+ },
+ "75398": {
+  "y_answer": "4\\sqrt2",
+  "y_candidates": [
+   "4\\sqrt2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "4\\sqrt{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "8681": {
+  "y_answer": "\\text{A}",
+  "y_candidates": [
+   "\\text{A}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "A",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "73959": {
+  "y_answer": "(2,-3)",
+  "y_candidates": [
+   "(2,-3)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(2, -3)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "71124": {
+  "y_answer": "2047",
+  "y_candidates": [
+   "2047"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2047",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "6421": {
+  "y_answer": "f(x)=cx,\\quad c\\in\\mathbb{R}.",
+  "y_candidates": [
+   "f(x)=cx,\\quad c\\in\\mathbb{R}."
+  ],
+  "how": "boxed",
+  "r1_boxed": "f(x) = kx",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "7068": {
+  "y_answer": "16",
+  "y_candidates": [
+   "16"
+  ],
+  "how": "boxed",
+  "r1_boxed": "16",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "95949": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "109273": {
+  "y_answer": "Strengthening governance, equity, and climate resilience",
+  "y_candidates": [
+   "Managing groundwater sustainably",
+   "Restoring ecosystems",
+   "Strengthening governance, equity, and climate resilience"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "9671": {
+  "y_answer": "324",
+  "y_candidates": [
+   "324"
+  ],
+  "how": "boxed",
+  "r1_boxed": "324",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "66170": {
+  "y_answer": "condensed milk causes more weight gain per plate than jam",
+  "y_candidates": [
+   "condensed milk causes more weight gain per plate than jam"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "math"
+ },
+ "105125": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "15048": {
+  "y_answer": "200",
+  "y_candidates": [
+   "200"
+  ],
+  "how": "boxed",
+  "r1_boxed": "200",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "67160": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "h_c < 15",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "25939": {
+  "y_answer": "61",
+  "y_candidates": [
+   "61"
+  ],
+  "how": "boxed",
+  "r1_boxed": "61",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "31901": {
+  "y_answer": "5",
+  "y_candidates": [
+   "5"
+  ],
+  "how": "boxed",
+  "r1_boxed": "5",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "41605": {
+  "y_answer": "(4,1)",
+  "y_candidates": [
+   "(4,1)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(4, 1)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "37011": {
+  "y_answer": "120",
+  "y_candidates": [
+   "120"
+  ],
+  "how": "boxed",
+  "r1_boxed": "120",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "48702": {
+  "y_answer": "T=\\left(\\sqrt{3}-\\frac{\\pi}{2}\\right)r^2",
+  "y_candidates": [
+   "T=\\left(\\sqrt{3}-\\frac{\\pi}{2}\\right)r^2"
+  ],
+  "how": "boxed",
+  "r1_boxed": "r^2 \\left( \\sqrt{3} - \\frac{\\pi}{2} \\right)",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "110546": {
+  "y_answer": "\\text{chemical concentration}\n\\rightarrow\n\\text{binding free energy}\n\\rightarrow\n\\text{conformational probability}\n\\rightarrow\n\\text{second-messenger concentration}\n\\rightarrow\n\\text{ion current}\n\\rightarrow\n\\text{membrane potential}\n\\rightarrow\n\\text{spike train}\n\\rightarrow\n\\text{population pattern}\n\\rightarrow\n\\text{perceived smell}",
+  "y_candidates": [
+   "\\text{chemical concentration}\n\\rightarrow\n\\text{binding free energy}\n\\rightarrow\n\\text{conformational probability}\n\\rightarrow\n\\text{second-messenger concentration}\n\\rightarrow\n\\text{ion current}\n\\rightarrow\n\\text{membrane potential}\n\\rightarrow\n\\text{spike train}\n\\rightarrow\n\\text{population pattern}\n\\rightarrow\n\\text{perceived smell}"
+  ],
+  "how": "boxed",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "physics"
+ },
+ "22570": {
+  "y_answer": "\\left[0,\\frac98\\right]",
+  "y_candidates": [
+   "\\left[0,\\frac98\\right]"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\left[0, \\dfrac{9}{8}\\right]",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "79751": {
+  "y_answer": "15",
+  "y_candidates": [
+   "15"
+  ],
+  "how": "boxed",
+  "r1_boxed": "B",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "9624": {
+  "y_answer": "2\\text{ liters}",
+  "y_candidates": [
+   "2\\text{ liters}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "100185": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "38277": {
+  "y_answer": "\\frac12",
+  "y_candidates": [
+   "\\frac12"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{1}{2}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "109446": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "biology"
+ },
+ "37063": {
+  "y_answer": "134",
+  "y_candidates": [
+   "134"
+  ],
+  "how": "boxed",
+  "r1_boxed": "134",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "90252": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "50325": {
+  "y_answer": "14400",
+  "y_candidates": [
+   "14400"
+  ],
+  "how": "boxed",
+  "r1_boxed": "14400",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "93833": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "73228": {
+  "y_answer": "1023",
+  "y_candidates": [
+   "1023"
+  ],
+  "how": "bold",
+  "r1_boxed": "1023",
+  "bucket": "agree (bold)",
+  "agree": true,
+  "domain": "math"
+ },
+ "34217": {
+  "y_answer": "3\u20134\u20135 triangle",
+  "y_candidates": [
+   "3\u20134\u20135 triangle"
+  ],
+  "how": "bold",
+  "r1_boxed": "(3, 4, 5)",
+  "bucket": "disagree (bold)",
+  "agree": false,
+  "domain": "math"
+ },
+ "76829": {
+  "y_answer": "10",
+  "y_candidates": [
+   "10"
+  ],
+  "how": "bold",
+  "r1_boxed": "10",
+  "bucket": "agree (bold)",
+  "agree": true,
+  "domain": "math"
+ },
+ "100083": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "66506": {
+  "y_answer": "4\\sqrt6:9",
+  "y_candidates": [
+   "4\\sqrt6:9"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\dfrac{4\\sqrt{6}}{9}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "37698": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "20",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "83196": {
+  "y_answer": "\\sqrt[3]{\\frac{32}{3125}}",
+  "y_candidates": [
+   "\\sqrt[3]{\\frac{32}{3125}}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "\\sqrt[3]{\\dfrac{32}{3125}}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "26192": {
+  "y_answer": "c=\\frac{y(b-h)-2y(b)+y(b+h)}{2h^2}",
+  "y_candidates": [
+   "c=\\frac{y(b-h)-2y(b)+y(b+h)}{2h^2}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "2ch^2",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "7679": {
+  "y_answer": "9\\text{ grams of the first alloy and }10\\text{ grams of the second alloy}",
+  "y_candidates": [
+   "9\\text{ grams of the first alloy and }10\\text{ grams of the second alloy}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "9 \\text{ grams of the first alloy and } 10 \\text{ grams of the second alloy}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "4199": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "\\text{No}",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "77739": {
+  "y_answer": "\\textbf{(A)}\\ 36\\pi",
+  "y_candidates": [
+   "\\textbf{(A)}\\ 36\\pi"
+  ],
+  "how": "boxed",
+  "r1_boxed": "A",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "73783": {
+  "y_answer": "-\\frac{5}{3}",
+  "y_candidates": [
+   "-\\frac{5}{3}"
+  ],
+  "how": "boxed",
+  "r1_boxed": "-\\dfrac{5}{3}",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "55830": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "q\\left(1 - \\frac{4q}{n^2}\\right)",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "109551": {
+  "y_answer": "Increased fire intensity",
+  "y_candidates": [
+   "Increased fire intensity"
+  ],
+  "how": "bold",
+  "r1_boxed": null,
+  "bucket": "no box in R1",
+  "agree": null,
+  "domain": "biology"
+ },
+ "51213": {
+  "y_answer": "6 logs",
+  "y_candidates": [
+   "6 logs"
+  ],
+  "how": "bold",
+  "r1_boxed": "6",
+  "bucket": "disagree (bold)",
+  "agree": false,
+  "domain": "math"
+ },
+ "34813": {
+  "y_answer": "(1,23)\\text{ and }(6,3)",
+  "y_candidates": [
+   "(1,23)\\text{ and }(6,3)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "(6, 3)",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "100305": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "17985": {
+  "y_answer": "(E) E",
+  "y_candidates": [
+   "(E) E"
+  ],
+  "how": "boxed",
+  "r1_boxed": "E",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "64334": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": "\\text{No integer solutions exist.}",
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "math"
+ },
+ "27229": {
+  "y_answer": "(x_1,\\dots,x_{15})=(-1,-1,\\dots,-1)",
+  "y_candidates": [
+   "(x_1,\\dots,x_{15})=(-1,-1,\\dots,-1)"
+  ],
+  "how": "boxed",
+  "r1_boxed": "x_1 = x_2 = \\cdots = x_{15} = -1",
+  "bucket": "disagree",
+  "agree": false,
+  "domain": "math"
+ },
+ "94940": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "52858": {
+  "y_answer": "12",
+  "y_candidates": [
+   "12"
+  ],
+  "how": "boxed",
+  "r1_boxed": "12",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "30440": {
+  "y_answer": "27",
+  "y_candidates": [
+   "27"
+  ],
+  "how": "boxed",
+  "r1_boxed": "27",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "20964": {
+  "y_answer": "D. 48",
+  "y_candidates": [
+   "D. 48"
+  ],
+  "how": "boxed",
+  "r1_boxed": "D. 48",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ },
+ "108122": {
+  "y_answer": null,
+  "y_candidates": [],
+  "how": null,
+  "r1_boxed": null,
+  "bucket": "no box/bold in y",
+  "agree": null,
+  "domain": "code"
+ },
+ "36067": {
+  "y_answer": "f'(0)=0",
+  "y_candidates": [
+   "f'(0)=0"
+  ],
+  "how": "boxed",
+  "r1_boxed": "0",
+  "bucket": "agree",
+  "agree": true,
+  "domain": "math"
+ }
+}
