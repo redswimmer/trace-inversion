@@ -40,18 +40,27 @@ def write(path, rows):
     Path(str(path) + ".new").replace(path)
 
 
-def loops(text, chunk=40, window=4000, step=8):
+def loops(text, chunk=40, window=4000, step=8, coverage=0.0):
+    """phase2.md §5.4's test: a 40-char chunk repeated >= 3x in the last 4,000 chars (coverage=0, LOOSE).
+    On split B that flags 31 % of TERMINATED 7b-sum rows — a LaTeX expression or a phrase legitimately
+    recurring three times in a long derivation — so the STRICT variant also requires the repeats to fill
+    `coverage` of the window (0.2 = a 40-char chunk >= 20x in 4,000 chars); the degenerate loops
+    ('000…', 'abab…', a sentence to the cap) sit at 50–100 %. Both are recorded; strict is the count."""
     tail = text[-window:]
+    need = max(3, int(coverage * len(tail) / chunk + 0.999))
     # ponytail: O(n²) scan stepping 8 chars (~10 ms/row); a loop of any period >= 1 still repeats some chunk
-    return any(tail.count(tail[i:i + chunk]) >= 3 for i in range(0, max(len(tail) - chunk, 0) + 1, step))
+    return any(tail.count(tail[i:i + chunk]) >= need for i in range(0, max(len(tail) - chunk, 0) + 1, step))
 
 
 def summarize(rows, n):
-    return {"draw": n, "rows": len(rows), "capped": sum(r["finish_reason"] == CAP for r in rows),
+    capped = [r for r in rows if r["finish_reason"] == CAP]
+    return {"draw": n, "rows": len(rows), "capped": len(capped),
             "empty": sum(not r["t_hat"].strip() for r in rows),
             "stripped_think": sum("</think>" in r["raw"] for r in rows),
-            "loops": sum(loops(r["t_hat"]) for r in rows),
-            "capped_loops": sum(loops(r["t_hat"]) for r in rows if r["finish_reason"] == CAP),
+            "loops": sum(loops(r["t_hat"], coverage=0.2) for r in rows),
+            "capped_loops": sum(loops(r["t_hat"], coverage=0.2) for r in capped),
+            "loops_loose": sum(loops(r["t_hat"]) for r in rows),
+            "capped_loops_loose": sum(loops(r["t_hat"]) for r in capped),
             "gen_tokens": sum(r["gen_tokens"] for r in rows)}
 
 
@@ -89,7 +98,8 @@ def assemble(draws, prompts, out):
     record["dropped_idx"] = sorted(prev_capped)
     ordered = [final[i] for i in pidx if i in final]
     write(out, ordered)
-    record.update(final_rows=len(ordered), final_loops=sum(loops(r["t_hat"]) for r in ordered),
+    record.update(final_rows=len(ordered), final_loops=sum(loops(r["t_hat"], coverage=0.2) for r in ordered),
+                  final_loops_loose=sum(loops(r["t_hat"]) for r in ordered),
                   rows_by_draw={n: sum(r["draw"] == n for r in ordered) for n in range(1, len(draws) + 1)},
                   prompt_rows=len(pidx))
     if t_true:
@@ -110,10 +120,12 @@ def assemble(draws, prompts, out):
     for s in record["draws"]:
         print(f"draw {s['draw']}: rows {s['rows']}  capped {s['capped']}"
               + (f"  rescued {s['rescued']}" if "rescued" in s else f"  ({100 * s['capped'] / max(s['rows'], 1):.1f}% cap-hit)")
-              + f"  empty {s['empty']}  stripped_think {s['stripped_think']}  loops {s['loops']} "
-              f"(of which capped {s['capped_loops']})  gen_tokens {s['gen_tokens']:,}", flush=True)
+              + f"  empty {s['empty']}  stripped_think {s['stripped_think']}  loops strict {s['loops']} "
+              f"(of which capped {s['capped_loops']}) loose {s['loops_loose']} ({s['capped_loops_loose']})  "
+              f"gen_tokens {s['gen_tokens']:,}", flush=True)
     print(f"final: {len(ordered)} rows of {len(pidx)}  by draw {record['rows_by_draw']}  dropped {len(prev_capped)} "
-          f"{record['dropped_idx'][:20]}  loops {record['final_loops']}  -> {out}  record {rec_path}")
+          f"{record['dropped_idx'][:20]}  loops strict {record['final_loops']} loose {record['final_loops_loose']}"
+          f"  -> {out}  record {rec_path}")
     for f in fails:
         print(f"  FAIL  {f}")
     print("  ** PASSED **" if not fails else f"  ** {len(fails)} GATE FAILURE(S) — DO NOT ACCEPT AS-IS **")
@@ -133,12 +145,17 @@ def selftest():
     assert subset(D1, P, R) == 2 and [r["idx"] for r in load(R)] == [3, 9], "subset must keep prompt order"
     write(D2, [row(3, "stop"), row(9, CAP)])
     write(D3, [row(9, CAP, "prose then " + "loop chunk " * 400)])
-    assert loops("loop chunk " * 400) and not loops("no repetition here " + "x" * 50)
+    assert loops("loop chunk " * 400) and loops("loop chunk " * 400, coverage=0.2)
+    assert not loops("no repetition here " + "x" * 50)
+    filler = "".join(str(i * 7919 % 10007) for i in range(900))            # non-repeating, ~3,500 chars
+    thrice = filler[:3000] + "a phrase that recurs three times in prose. " * 3 + filler[3000:]
+    assert loops(thrice) and not loops(thrice, coverage=0.2), "three legitimate repeats: loose yes, strict no"
     assert assemble([D1, D2, D3], P, OUT) == []
     out = load(OUT)
     assert [r["idx"] for r in out] == [5, 3] and [r["draw"] for r in out] == [1, 2] and not any("t_true" in r for r in out)
     rec = json.load(open(OUT.replace(".jsonl", "") + "-draws.json"))
-    assert rec["dropped_idx"] == [9] and rec["draws"][2]["loops"] == 1 and rec["draws"][1]["rescued"] == 1
+    assert rec["dropped_idx"] == [9] and rec["draws"][2]["loops"] == 1 and rec["draws"][2]["loops_loose"] == 1
+    assert rec["draws"][1]["rescued"] == 1
     assert assemble([D1], P, OUT), "dropping after one draw must fail"
     write(D2, [row(3, "stop"), row(5, "stop")])
     assert any("capped set" in f for f in assemble([D1, D2, D3], P, OUT)), "a draw over the wrong idx must fail"
