@@ -47,12 +47,18 @@ reference, and a full run costs ~9 h instead of ~2 h.
       lower bounds (at n=1,011: 35.0% observed, at most 37.0% -> tight to +2.0 pts with 32 slots).
 - [ ] Recheck the ours-only flip rate at end of run — the subset is ~10x larger there (n≈29 now).
       Expect the point estimate to move and the separation from both-cap (p=0.0003) to hold.
-- [ ] **Phase 3, RAISE BEFORE 3.1 RUNS** — make the victim-trace withholding structural, not a
+- [x] **Phase 3, RAISE BEFORE 3.1 RUNS** — make the victim-trace withholding structural, not a
       convention. Write `t` to a separate file from the `(y, b*)` the attack consumes. `t` is the
       **Victim-Trace oracle** training condition — the ceiling row of Table 3 — so a wrong join leaks
       it into the attack and the result is silently meaningless while looking like a spectacular
       success. No downstream gate catches a leaked oracle. Cannot be deferred — by Phase 4 the file
       layout is fixed. (`docs/10` Phase 3)
+      **DONE 2026-09-02.** `bench/phase3_split.py` derives `victimB-attack.jsonl` from
+      `victimB-ORACLE.jsonl` and exits 1 unless: the attack file carries exactly the `D₂`-minus-`t`
+      keys and no `t`/`trace`/`raw`; the idx sequences are identical; every attack row equals its
+      oracle row minus `t`; and no oracle trace occurs inside any attack field. Six mis-join shapes
+      are covered by `--selftest`. Verified again independently after the run (0 leaks on a 400-row
+      substring scan). `docs/results/phase3.md` §8.
 - [ ] `docs/results/phase1.md`: report **LaTeX by domain**, not just the 79.5% headline —
       math n=156 89.1% · code n=29 55.2% · physics n=4 75.0% · chemistry n=3 33.3% ·
       biology n=5 0.0% · puzzle n=3 0.0%. The headline is ~78% a math measurement. Modelling

@@ -323,6 +323,104 @@ def r1_answers(idxs):
     return out
 
 
+RE_BOLD = re.compile(r"\*\*([^*\n]{1,200}?)\*\*")
+RE_ANSWER_LABEL = re.compile(r"\*\*\s*(?:final\s+)?answer\s*[:.]?\s*\*\*\s*[:.]?\s*(.*)", re.I)
+
+
+def extract_bold(text):
+    """Fallback for a model that does not box: the candidate answers it bolded at the end. Qwen3.8
+    with no boxing instruction writes "There are **5** two-digit primes: **11, 31, 41, 61, 71**" or
+    "**Final Answer:** 12". Returns EVERY bold span in the last four non-empty lines (plus the text
+    after a bold "(Final) Answer" label), and the caller counts agreement if ANY of them grades
+    equal to R1's answer — lenient by construction, so it is reported in its own bucket and never
+    merged with the boxed one. Empty list when nothing is bolded."""
+    if not text:
+        return []
+    lines = [l for l in text.strip().splitlines() if l.strip()][-4:]
+    tail = "\n".join(lines)
+    cands = []
+    m = RE_ANSWER_LABEL.search(tail)
+    if m and m.group(1).strip():
+        cands.append(m.group(1).strip().split("\n")[0])
+    cands += [s for s in RE_BOLD.findall(tail)
+              if not re.fullmatch(r"\s*(final\s+)?answer\s*[:.]?\s*", s, re.I)]
+    out = []
+    for c in cands:
+        c = re.sub(r"^\\\(|\\\)$|^\$|\$$", "", c.strip().rstrip(".").strip()).strip()   # \( 5 \) -> 5
+        if c and c not in out:
+            out.append(c)
+    return out
+
+
+def vs_r1(rows, out_json):
+    """The model's answer vs R1's answer on the SAME prompt (docs/14 §4.6). Report only, never a
+    filter: R1's boxed answer is the dataset's solution, not ground truth, and the symbolic grader
+    rejects some equivalent forms (~3-4% of Phase 2 mismatches). Last \\boxed{} in each KEPT row's
+    post-think answer against the last \\boxed{} in the OpenThoughts row's own R1 solution, graded
+    in the main thread (math_verify uses SIGALRM). A collapse here is the first sign of a template
+    or split error, hours rather than days into a run."""
+    from pathlib import Path as _P
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from eval_baseline import extract_boxed, grade
+    kept = [r for r in rows if not r["capped"]]
+    r1 = r1_answers([r["idx"] for r in kept])
+    # Two extraction paths, reported separately: the last \boxed{} (Phase 0's grader) and, only
+    # when there is none, the bolded spans at the end (extract_bold; agree if ANY grades equal —
+    # lenient, so it stays its own bucket). A victim queried without a boxing instruction bolds
+    # its answer on the short rows, so the boxed bucket alone under-counts them.
+    buckets = {"agree": [], "disagree": [], "agree (bold)": [], "disagree (bold)": [],
+               "no box/bold in y": [], "no box in R1": []}
+    per_row = {}
+    for r in kept:
+        y = r["answer"] if "answer" in r else r.get("y", "")     # traces or D2 schema
+        yb = extract_boxed(y)
+        cands, how = ([yb], "boxed") if yb is not None else (extract_bold(y), "bold")
+        gb = r1.get(r["idx"])
+        if not cands:
+            b, how = "no box/bold in y", None
+        elif gb is None:
+            b = "no box in R1"
+        else:
+            ok = any(grade(c, gb, "MATH") for c in cands)
+            b = ("agree" if ok else "disagree") + ("" if how == "boxed" else " (bold)")
+        buckets[b].append(r["idx"])
+        per_row[r["idx"]] = {"y_answer": cands[-1] if cands else None, "y_candidates": cands, "how": how,
+                             "r1_boxed": gb, "bucket": b,
+                             "agree": b.startswith("agree") if b.startswith(("agree", "disagree")) else None,
+                             "domain": r.get("domain")}
+    nb = len(buckets["agree"]) + len(buckets["disagree"])
+    nf = len(buckets["agree (bold)"]) + len(buckets["disagree (bold)"])
+    ab, af = len(buckets["agree"]), len(buckets["agree (bold)"])
+    rate = 100 * (ab + af) / max(nb + nf, 1)
+    print(f"\n=== y vs R1's answer, same prompt — KEPT rows only (n={len(kept)} of {len(rows)}), "
+          f"report only (docs/14 §4.6) ===")
+    print("  " + "  ".join(f"{k} {len(v)}" for k, v in buckets.items()))
+    print(f"  agreement on gradable: boxed {ab}/{nb} ({100*ab/max(nb,1):.1f}%)   "
+          f"bold fallback {af}/{nf} ({100*af/max(nf,1):.1f}%)   combined {ab+af}/{nb+nf} ({rate:.1f}%)")
+    # "no box/bold in y" is mostly domain, not failure: code rows never box. Every bucket per domain.
+    by = {}
+    for k in per_row.values():
+        by.setdefault(k["domain"], []).append(k["bucket"])
+    print(f"  {'domain':12s}{'kept':>6s}{'box+':>6s}{'box-':>6s}{'bold+':>6s}{'bold-':>6s}"
+          f"{'noneY':>7s}{'noR1':>6s}{'agree%':>8s}")
+    for d, v in sorted(by.items(), key=lambda kv: -len(kv[1])):
+        a, dis = v.count("agree"), v.count("disagree")
+        a2, dis2 = v.count("agree (bold)"), v.count("disagree (bold)")
+        g = a + dis + a2 + dis2
+        print(f"  {d:12s}{len(v):6d}{a:6d}{dis:6d}{a2:6d}{dis2:6d}{v.count('no box/bold in y'):7d}"
+              f"{v.count('no box in R1'):6d}{(100*(a+a2)/g) if g else float('nan'):8.1f}")
+    for k in ("disagree", "disagree (bold)"):
+        if buckets[k]:
+            print(f"  {k} idx: {buckets[k][:30]}  (read three: two models differ, or a grader miss "
+                  f"on an equivalent form)")
+    if nb + nf and rate < 75:
+        print("  ** under 75% on gradable rows — STOP AND ASK (docs/14 §6); reported, not gated **")
+    from pathlib import Path as _P
+    _P(out_json).parent.mkdir(parents=True, exist_ok=True)
+    json.dump(per_row, open(out_json, "w"), indent=1)
+    print(f"  per-row (y_answer, how, r1_boxed, bucket) -> {out_json}")
+
+
 def inverted(rows, tk, cap, holdout=None, n_expected=None, tag="", out_json=None, r1=None):
     """Paired t_hat vs t_true lengths on the SAME rows — the inverter's acceptance evidence
     (docs/13 §4.7, §7). Token counts use the inverter's tokenizer (Qwen3.5-4B); phase1.md
@@ -480,6 +578,11 @@ def main():
     ap.add_argument("--paired", action="store_true",
                     help="also compare against R1's ground-truth trace for the SAME "
                          "prompts (traces mode only) — removes prompt-difficulty variance")
+    ap.add_argument("--vs-r1", action="store_true",
+                    help="traces mode, REPORT ONLY: grade each kept row's boxed answer against "
+                         "the OpenThoughts row's own R1 answer (docs/14 §4.6). No filtering follows.")
+    ap.add_argument("--vs-r1-out", default="",
+                    help="per-row json for --vs-r1 (default <file>-vs-r1.json)")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.file)]
@@ -503,6 +606,8 @@ def main():
             fails += paired_reference(rows, tk, args.cap, gap_tol=args.paired_gap_tol)
         else:
             print("\n  (paired cap-hit gate NOT run — pass --paired)")
+        if args.vs_r1:
+            vs_r1(rows, args.vs_r1_out or args.file.replace(".jsonl", "") + "-vs-r1.json")
         print(f"\n=== gates ===")
         for f in fails:
             print(f"  FAIL  {f}")

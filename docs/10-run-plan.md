@@ -166,9 +166,17 @@ that no API victim can.
 > **This is a Phase 3 decision and cannot be deferred to Phase 4**: by then the file layout is
 > fixed. Raise it before 3.1 runs.
 
-Est. **~10-15 h** — revised down from 23 h. The victim's measured median is only 3,484 tokens
-(JEEBench) / 593 (MATH500), not the ~5k assumed. Its p95 is 17,795, so per-slot context can drop
-below 32k to buy more slots. **Sweep first at 16k/slot.**
+**✅ COMPLETE 2026-09-02 — measured 66.32 h of generation** at 123.6 gen t/s on 12 slots × 16,384,
+`--reasoning-effort medium` + the boxed-answer instruction; 5,045 kept of 6,022 rows, cap-hit 16.2 %,
+**0 request errors**. Full record: `docs/results/phase3.md`. Whole-phase GPU time ≈ **79 h**
+(sweep 0.3 + three 200-row effort probes 9.0 + generation 66.3 + regime re-benchmark 2.7 +
+compression 0.9).
+
+*The pre-run estimate below was wrong and is kept for the record.* Est. ~10-15 h — revised down from
+23 h. The victim's measured median is only 3,484 tokens (JEEBench) / 593 (MATH500), not the ~5k
+assumed. Its p95 is 17,795, so per-slot context can drop below 32k to buy more slots. **Sweep first
+at 16k/slot.** — **It divided ~15 M tokens by 303 t/s, a sweep point at the wrong context
+(`docs/11` §5: a sweep ranks, it never budgets). The real run generated 29.5 M tokens at 123.6 t/s.**
 
 ## Phase 4 — Invert *(paper Stage 2 cont.)*
 
@@ -242,14 +250,17 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | 0 Baselines | ~30 h *(actual, incl. re-runs)* |
 | 1 Surrogate data (**2 surrogates**) | **~29-31 h** *(measured mid-run; see `12` §7)* |
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
-| 3 **Victim queries** | **~10-15 h** |
+| 3 **Victim queries** | **~79 h** *(actual: 66.3 h generation + probes, sweep, re-benchmark, compression)* |
 | 4 Inversion | ~4 h |
 | 5 Student training | ~20 h |
 | 6 Evaluation | ~8 h |
-| **Total** | **~135-150 h** (~6 days of GPU time) |
+| **Total** | **~199-215 h** (~8-9 days of GPU time) |
 
-Every individual stage fits an overnight run. **Phase 2 now dominates** (~28 h), with Phase 5 next;
-Phase 3 dropped to ~10-15 h once the victim's real trace lengths were measured. If generation needs
+**Phase 3 now dominates the project at ~79 h**, and it is the one phase that does *not* fit an
+overnight run — its generation alone ran 66.3 h unattended across three days. Every other stage
+still does. Phase 2 (~28 h) is second, Phase 5 (~20 h) third;
+Phase 3 **measured 66.3 h of generation** (~79 h including its probes, sweep, re-benchmark and
+compression) — the pre-run ~10-15 h came from a sweep point at the wrong context. If generation needs
 cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
 2k would halve it again at some cost to the result.
 

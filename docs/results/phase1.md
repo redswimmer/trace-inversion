@@ -92,9 +92,15 @@ crossing rate is comparable, not tail shape.**
 | R1 only — we complete these | 411 |
 
 38% of what `D₂` loses is specific to this surrogate, not to prompt difficulty. Phase 4 serves split
-B essentially unfiltered (the victim truncated 0.0–0.4% in Phase 0), so **our own drop policy
-introduces a train/serve shift over ~13.2% of the prompt space.** Measured, not assumed; recorded as
-`docs/09` row 7.10.
+B, so **our own drop policy introduces a train/serve shift over ~13.2% of the prompt space.**
+Measured, not assumed; recorded as `docs/09` row 7.10.
+
+> **Updated 2026-09-02 by Phase 3.** This paragraph originally read "Phase 4 serves split B
+> essentially unfiltered (the victim truncated 0.0–0.4% in Phase 0)". That is now **wrong**: the
+> victim capped **16.2%** of split B (977 of 6,022) at the 14,336 cap Phase 3 chose. Phase 0's
+> 0.0–0.4% was measured on MATH500/JEEBench at a 32,768 cap — a different prompt set *and* a
+> different cap, so it never described split B. Split B is therefore filtered on **both** sides:
+> ~34.6% by the 7B surrogate here, 16.2% by the victim there. `results/phase3.md` §4.
 
 ### The drop set is partly a coin flip — the noise floor
 

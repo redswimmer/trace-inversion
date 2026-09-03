@@ -1,0 +1,30 @@
+/goal Phase 3 of the trace-inversion reproduction is complete: docs/results/phase3.md is committed and split B has been queried through the victim — bench/results/phase3/victimB-attack.jsonl holds ≥5,000 rows of (x, y, b*); victimB-ORACLE.jsonl holds the same rows plus the real trace t, which nothing on the attack path opens.
+
+Read docs/14-phase3-handoff.md first. Its §0 lists what exists — use it, do not rebuild it. Branch phase3-build. The GPU is free.
+
+FIXED SETTINGS. Decided; use them:
+  victim Qwen3.8-27B IQ4_XS, llama-server -fa on -ctk q8_0 -ctv q8_0 --jinja · 16,384 ctx per slot · slot count from the sweep
+  NO system prompt (--no-system) · temperature 0.7 · top_p 0.9 · repetition_penalty 1.05 · top_k -1 · max_new_tokens 14336 · --timeout 3600 · --max-prompt-chars 5000 · --target-kept 5040
+  capped rows (finish_reason length, or no post-think answer) are DROPPED
+  compressor: bench/phase1_compress.py unchanged, PI_SYSTEM frozen · seed 1234 · max-tokens 2048 · --max-len 20480 · one --fix --seed 1235 pass, then --drop-bad
+Budget: ~30–50 h of generation at an UNMEASURED 140–170 t/s (docs/14 §3; docs/10's 10–15 h is wrong). The probe replaces it.
+
+PROBE BEFORE ANY RUN LONGER THAN AN HOUR. Sweep first: NTG=4096 bench/sweep_concurrency.sh Qwen3.8-27B-IQ4_XS.gguf 16384 8 12 16. Then generate the first 200 rows of the real run (--max-rows 200) and report the docs/14 §6 probe list (cap-hit at 14,336, no-answer count, reasoning_content on every kept row, token quantiles, errors, realized t/s, y-vs-R1 agreement, projected wall clock). Relaunch without --max-rows (it resumes); after 30 min with a full queue report realized t/s again.
+
+REPORT, DO NOT REDESIGN. If a fixed setting looks wrong, report the measurement and keep running. Do not stop a run, change a setting, restart a job, or touch π unless the user tells you to. A surprising number is a finding, not a reason to act. Every time estimate states the t/s and slot count it assumes.
+
+WORK
+0. phase1_split.py --only-b → bench/results/phase3/promptsB.jsonl (9,000 rows, permutation order; splits.json and promptsA.jsonl untouched). bench/run_phase3_gen.sh from run_phase1_gen.sh. phase1_stats.py --mode traces gains --vs-r1 (report only, main thread). Commit.
+1. Sweep, probe, full run to 5,040 kept → bench/results/phase3/victim-traces-ORACLE.jsonl.
+2. Gate: phase1_stats.py --mode traces --cap 14336 --cap-hit-band 0 15 --trace-tokenizer Qwen/Qwen3.5-4B --paired --paired-gap-tol 100 --vs-r1.
+3. Compress → victimB-ORACLE.jsonl; --fix once; --drop-bad. phase1_stats.py --mode summaries --target 5000: integrity lines gate; Table 1 is a report beside Phase 1's.
+4. bench/phase3_split.py → victimB-attack.jsonl = ORACLE rows minus t; assert keys, equal idx sets, no attack row contains the oracle trace. Commit.
+5. docs/results/phase3.md per docs/14 §6; docs/09 rows per §7; docs/10 Phase 3 closed with measured hours. Commit.
+
+REPORTING. After each numbered step, and whenever you stop or are blocked, print
+  CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+with the actual numbers. If a session named big-boss exists, SendMessage it the same line and give it one turn to object before any long run; if absent or silent, proceed and say so.
+
+CONVENTIONS. docs/11 §5, docs/13 §8 and docs/14 §8 in full. Hardest: never edit a running script; a sweep ranks, never budgets; save raw text; the engine's finish_reason and token counts; state the tokenizer; explicit paths on git add; nothing on the attack path opens a file named ORACLE.
+
+STOP AND ASK IF: no slot count loads at 16,384/slot; probe cap-hit over 15 % or no-answer rows over 2 %; a kept row with an empty trace; y agrees with R1 on under 75 % of gradable probe rows; the projection passes 72 h; request errors over 1 %; over 2 % of summaries still bad after one --fix; b* median tokens outside 450–700 or headers/first-person under 90 %; the attack-file self-check fails; any gate fails twice; a step exceeds its estimate by 2×.

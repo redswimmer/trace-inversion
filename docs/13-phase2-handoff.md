@@ -223,7 +223,7 @@ Qwen3.5-4B thinks by default. The generation prompt ends `<|im_start|>assistant\
 ### 4.3 A shared 200-row holdout, paired across arms
 
 The paper trains on all 10 k rows and measures nothing before inverting the victim. We measure once,
-cheaply, before spending Phase 3's ~10–15 h and Phase 4 on an inverter nobody has looked at.
+cheaply, before spending Phase 3's ~66 h (measured) and Phase 4 on an inverter nobody has looked at.
 
 - **200 `idx`, seed 20260828, drawn from the 3,681 prompts both arms kept**, so the 7B and 1.5B
   inverters are scored on identical inputs. Persisted to `bench/phase2/holdout.json`, committed.
@@ -475,8 +475,8 @@ holdout row — with a one-line note each on whether the trace reaches the given
 | Whether Phase 4 inverts with the 1.5B-arm inverters at all | 4 | **Decided 2026-08-30: yes, all four** — the surrogate-strength and summary/no-summary comparisons need all four synthetic-trace sets |
 | What Phase 4 does with capped forgeries (`finish_reason == "length"` at 8,192: 3–17 % of held-out rows depending on arm and epoch) | 4 | **Decided 2026-08-30: regenerate at a new seed, up to three draws; drop what still caps; report the count** — same policy on every arm and setting; keep the first-draw outputs and report their cap-hit as the inverter's property. A severed `t̂` in `[t̂; y]` teaches non-termination (`12` §2); dropping alone would shrink the 1.5B-arm student's data more than the 7B's and confound the surrogate-strength comparison; capping is mostly a property of the draw (`results/phase2.md` §5.4). `09` row 7.14 |
 | Answer-inconsistent forgeries (~3 % of gradable held-out rows argue away from the conditioned answer) | 4 → 5 | **Decided 2026-08-30: no filtering in the main condition**, matching the paper; report the rate per arm. A consistency-filtered student condition is a separate Phase 5 proposal with its own `10` four-questions justification. `09` row 7.15 |
-| **Make victim-trace withholding structural before 3.1 runs** | 3 | `docs/10` Phase 3 — write `t` to a separate file from the `(y, b*)` the attack consumes; a wrong join leaks the oracle silently |
-| Sweep the victim at 16k/slot | 3 | p95 17,795; more slots than the 6 Phase 0 used |
+| ~~**Make victim-trace withholding structural before 3.1 runs**~~ | 3 | **DONE 2026-09-02.** `bench/phase3_split.py` derives `victimB-attack.jsonl` from `victimB-ORACLE.jsonl` and exits 1 on any of: wrong keys or a `t`/`trace`/`raw` field, unequal idx sequences, a row that is not its oracle row minus `t`, or an oracle trace appearing anywhere in an attack row. `--selftest` covers six mis-join shapes. `results/phase3.md` §8 |
+| ~~Sweep the victim at 16k/slot~~ | 3 | **DONE 2026-08-30.** 8 → 140.6, **12 → 164.9 (chosen)**, 16 OOMs at load. Realized 123.6 t/s over 66.32 h at 12 × 16,384 — the sweep overstated by 1.34× |
 | 2B looping / eval protocol | 6 | unchanged |
 | OpenAI API victim track | optional | unchanged |
 

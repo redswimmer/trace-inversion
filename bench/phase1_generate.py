@@ -47,7 +47,7 @@ def messages_for(prompt, use_system=True):
 
 
 def one(row, url, args):
-    body = {"messages": messages_for(row["prompt"], not args.no_system),
+    body = {"messages": messages_for(row["prompt"] + args.append_instr, not args.no_system),
             "max_tokens": args.max_new_tokens, "temperature": args.temperature,
             "top_p": args.top_p, "top_k": args.top_k,
             "repetition_penalty": args.repetition_penalty, "stream": False}
@@ -73,10 +73,13 @@ def one(row, url, args):
     # Either way it has no answer, and as an inverter target it teaches the
     # inverter never to conclude (docs/12 §2).
     capped = fin == "length" or not answer.strip()
-    return {"idx": row["idx"], "domain": row["domain"], "source": row["source"],
-            "prompt": row["prompt"], "raw": raw, "trace": trace, "answer": answer,
-            "gen_tokens": ntok, "finish_reason": fin, "capped": capped,
-            "secs": round(time.time() - t0, 1)}
+    rec = {"idx": row["idx"], "domain": row["domain"], "source": row["source"],
+           "prompt": row["prompt"], "raw": raw, "trace": trace, "answer": answer,
+           "gen_tokens": ntok, "finish_reason": fin, "capped": capped,
+           "secs": round(time.time() - t0, 1)}
+    if args.append_instr:
+        rec["instr"] = args.append_instr      # the query was prompt + instr; prompt stays bare x
+    return rec
 
 
 def main():
@@ -99,6 +102,12 @@ def main():
     ap.add_argument("--timeout", type=int, default=1800)
     ap.add_argument("--no-system", action="store_true",
                     help="omit the pinned system prompt (control runs only)")
+    ap.add_argument("--append-instr", default="",
+                    help="text appended to the user turn as sent (e.g. Phase 0's boxed-answer "
+                         "instruction). The stored `prompt` stays the bare x; the row records "
+                         "the suffix under `instr` so the query format is on the record.")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the rendered row-0 prompt and exit without generating")
     args = ap.parse_args()
 
     try:
@@ -112,13 +121,15 @@ def main():
     # is where a dropped system prompt or a doubled <think> tag hides (docs/06 §4.4).
     try:
         r = requests.post(f"{args.url}/apply-template",
-                          json={"messages": messages_for(rows[0]["prompt"],
+                          json={"messages": messages_for(rows[0]["prompt"] + args.append_instr,
                                                          not args.no_system)}, timeout=30)
         print("=== rendered prompt, row 0 " + "=" * 40)
         print(r.json().get("prompt", r.text))
         print("=" * 66, flush=True)
     except Exception as e:
         print(f"(could not render template: {e})", flush=True)
+    if args.dry_run:
+        return
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
 
