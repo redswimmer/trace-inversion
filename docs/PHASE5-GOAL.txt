@@ -1,0 +1,30 @@
+/goal Phase 5 of the trace-inversion reproduction is complete: the core seven students — answer-only, summary-answer, oracle, synth-{7b,1.5b}-{sum,nosum} — are trained 3 epochs each on the 3,616-row intersection and saved weights-only under bench/results/phase5/students/; the conditional cells (surr-1.5b, surr-7b, synth-7b-sum-lora) are each trained or their skip adjudicated on the record; docs/results/phase5.md, docs/09 7.23/7.24, docs/10 and README updated and committed.
+
+You are the executor (session g-claude). Read docs/16-phase5-handoff.md first; its §0 lists what exists — do not rebuild it. PRECONDITION: docs/results/phase4.md exists on your branch (phase4-build merged); missing -> STOP and report. Branch phase5-build. In a worktree, §0.1 is mandatory.
+
+SUPERVISION. Session big-boss planned this phase and audits it. After each numbered step, each probe, and whenever you stop or are blocked, print and SendMessage it:
+  CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+One turn to object before any run over an hour; absent or silent -> proceed and say so. During any run over 3 h, send a status line (step | loss | ETA) every ~2 h. big-boss writes nothing to the tree.
+
+FIXED SETTINGS. Decided 2026-09-04 (docs/16 §4); use them:
+  rows: the SAME 3,616 idx for every split-B condition (§4.2, assert 3,616); surr-* n-matched by seed-1234 sample of 3,616 from d2-{arm}.jsonl
+  one construction, only c varies (§4.3): prompt = user x + INSTR (pinned, every condition); completion = assistant "<think>\n c \n</think>\n\n y"; c = "" | b* | t' | t_hat | t; default thinking render; §4.3's self-tests mandatory, truncation-at-16384 count 0
+  training (phase5_train.py from phase2_train.py; full list §4.4): Qwen3.5-2B bf16 FFT, lr 1e-5, adamw_8bit, cosine, warmup 0.1, 3 epochs, max_length 16384, no eval split; save final weights-only, delete checkpoint dirs. LoRA twin: + r64/a128 phase2 target_modules, lr 1e-4
+  ORACLE: victimB-ORACLE.jsonl is opened by the oracle dataset builder and NOTHING else; grep code and logs
+  order: answer-only -> summary-answer -> oracle -> the four synth; then surr-1.5b -> surr-7b -> lora, each behind the gate: run only if the phase projection stays <= 50 h, CHECKPOINT either way; a skip is reported, never silent
+  no benchmarking (Phase 6), no length control (deferred on the record), no consistency filtering, no new conditions without docs/10's four questions in a CHECKPOINT
+
+PROBE BEFORE EVERY FULL RUN. Per condition: --max-steps 30 -> peak VRAM (expect ~15.8 GiB), realized train tok/s, loss step 0 -> 30, projection stating the assumed rate. CHECKPOINT, one turn, then the 3-epoch run.
+
+REPORT, DO NOT REDESIGN. A surprising number is a finding, not a reason to act. Do not touch the forged files, pi, or any Phase 1-4 artifact. Expected tokens/epoch per condition: docs/16 §3 — a shift is a finding.
+
+WORK
+0. Disk eviction (user-authorized): delete the victim GGUF and both R1-Distill repos from the HF cache; report df; >= 50 GB free or STOP.
+1. phase5_format.py + self-tests -> datasets + format-stats.json; phase5_train.py; run_phase5_train.sh. Commit, explicit paths. CHECKPOINT with token histograms.
+2. Core 7: probe -> run -> CHECKPOINT, in order.
+3. Conditional cells behind the gate.
+4. docs/results/phase5.md per docs/16 §6; docs/09 7.23/7.24; docs/10 closed with measured hours; README. Commit.
+
+CONVENTIONS. docs/11 §5, 13 §8, 14 §8, 15 §8, 16 §8 in full. Hardest: one formatter, c varies; round-trip before any run; the final epoch is the artifact; state the tokenizer; never edit a running script; explicit git add.
+
+STOP AND ASK IF: a dataset gate fails twice; truncation > 0; the oracle-leak check fails; VRAM > 21 GiB; loss NaN or not lower at epoch 1's end; a run passes 2x its probe projection; the phase projection passes 55 h; disk < 8 GB; a saved student fails to load; anything outside the oracle builder wants a file named ORACLE; loss collapsing near zero (leakage smell).
