@@ -1,5 +1,15 @@
 # Phase 4 Handoff — Invert Split B
 
+> **Superseded where measurement disagreed — `docs/results/phase4.md` is authoritative.** Phase 4 ran
+> 2026-09-02 → 09-04 (≈ 28 h GPU, not 13–17 h). Its method, conventions and file layout held; its
+> numbers did not: draw-1 cap-hits were **23.3 / 21.4 / 37.9 / 35.5 %** (§1 expected 3 / 7 / 17 /
+> 14.5 %), re-cap rates rose to 75–76 % by the third draw (§4.4's "capping is mostly a property of
+> the draw" did not transfer to victim-conditioned inputs), and the ≤ 3-draw policy dropped
+> **9.5–19.4 %** of rows — the 2 % line in §6 was crossed on the first inverter, the user accepted the
+> drops (2026-09-03) and replaced the hard cutoff with usability floors (`phase4.md` §3.1). The §4.6
+> table came out at **`t̂` = 2.2–2.6× the victim's `t`, `[t̂; y]` = 1.8–1.9× `[t; y]`**. The four
+> final files hold 4,490 / 4,565 / 4,068 / 4,135 rows, 3,616 in common.
+
 You are picking up a reproduction of **"How to Steal Reasoning Without Reasoning Traces"**
 (Zhang, Morris, Shmatikov — arXiv 2603.07267v2). Phases 0–3 are complete; Phase 4 is yours: run the
 four trained inverters over the victim's split-B outputs to synthesize the forged traces `t̂` that

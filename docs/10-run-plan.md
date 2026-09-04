@@ -184,10 +184,21 @@ at 16k/slot.** — **It divided ~15 M tokens by 303 t/s, a sweep point at the wr
 |---|---|---|---|
 | 4.1 | Inverter — the **epoch-2 adapter** of each of the four, merged | vLLM (`bench/invert.py`) | synthetic traces `t̂` from `(x, y, b*)` (summary setting) and from `(x, y)` (no-summary), on split B, once per inverter |
 
-Est. ~4 h per inverter — size it from a probe, as every phase has. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
+**✅ COMPLETE 2026-09-04 — measured ≈ 28 h of GPU time** (27.7 h generation over 158 M tokens at
+~1,600 tok/s, plus merges and smokes), against the ~4 h per inverter below and `docs/15`'s 13–17 h.
+Four forged files: **4,490 / 4,565 / 4,068 / 4,135 rows** (7b-sum / 7b-nosum / 1.5b-sum / 1.5b-nosum),
+every row terminated; 3,616 idx in common. Draw-1 cap-hits 23.3 / 21.4 / 37.9 / 35.5 % (expected
+3–17 %) and the redraw policy dropped 9.5–19.4 % because re-cap rates rose to 75 % — capping on
+victim inputs is prompt-level, not draw-level (`09` 7.14). **The headline: forged traces run
+2.2–2.6× the victim's own trace on the same problems, and the forged student target `[t̂; y]` is
+1.8–1.9× the oracle's** — `phase3.md` §5's two-pushes question resolved up on every inverter.
+Full record: `docs/results/phase4.md`.
+
+*The pre-run estimate below is kept for the record.* Est. ~4 h per inverter — size it from a probe, as every phase has. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
 looks sane against the victim's, then run the rest. **No new tooling.** If you want the length as a
 number, point `bench/phase1_stats.py`'s existing length reporting at the output file — a flag on code
-we already have.
+we already have. *(Measured: the length report needed a paired `--oracle` flag and the redraw policy
+needed `phase4_draws.py`; "no new tooling" held for the engine, not for the bookkeeping.)*
 
 ### Decided 2026-08-30, from the Phase 2 results — read before 4.1 runs
 
