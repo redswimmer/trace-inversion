@@ -1,0 +1,11 @@
+{
+ "model.layers.0.linear_attn.in_proj_qkv.weight": {
+  "max_abs_delta": 0.0028076171875,
+  "frac_changed": 0.879071056842804
+ },
+ "model.layers.3.self_attn.q_proj.weight": {
+  "max_abs_delta": 0.0030517578125,
+  "frac_changed": 0.8410547375679016
+ },
+ "adapter": "/home/asavala/Development/papers/trace-inversion/bench/results/phase2/inverter-7b-nosum/checkpoint-402"
+}

@@ -1,0 +1,11 @@
+{
+ "model.layers.0.linear_attn.in_proj_qkv.weight": {
+  "max_abs_delta": 0.0028076171875,
+  "frac_changed": 0.8768619894981384
+ },
+ "model.layers.3.self_attn.q_proj.weight": {
+  "max_abs_delta": 0.0035400390625,
+  "frac_changed": 0.8307210803031921
+ },
+ "adapter": "/home/asavala/Development/papers/trace-inversion/bench/results/phase2/inverter-1.5b-sum/checkpoint-404"
+}

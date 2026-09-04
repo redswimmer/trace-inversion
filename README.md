@@ -55,8 +55,8 @@ Phase 1   split A → surrogate → (problem, trace, answer)
           = D₂: (problem, answer, summary, trace) × ~5,000 rows, once per surrogate arm     done
 Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    done
 Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked   done
-Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000                       ← next
-Phase 5   train the student five ways on split B:
+Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000                       done
+Phase 5   train the student five ways on split B:                                          ← next
             answer-only | summary+answer | surrogate's own traces | forged traces | real victim traces
 Phase 6   MATH500 + JEEBench on all five students                                          ← the result
 ```
@@ -103,8 +103,8 @@ only test is whether the traces it writes make the student better.
 | 1 — surrogate data | done | `D₂` built for both arms (5,006 / 5,028 rows). Summaries pass all four of the paper's style targets. ~21 h of generation per arm. |
 | 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
 | 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
-| 4 — invert | next | ~4 h |
-| 5 — train students | | five conditions, ~20 h |
+| 4 — invert | done | Four forged-trace sets (4,068–4,565 rows each, 3,616 in common) in **≈ 28 h**. **The forgeries run 2.2–2.6× the victim's real traces on the same problems**, so the synthesized student target is 1.8–1.9× the oracle's — the length confound Phase 3 predicted, now measured. The inverters cap 21–38 % of first draws on victim inputs (3–17 % on surrogate data) and 9.5–19 % of rows never terminate in three draws. Record: `docs/results/phase4.md`. |
+| 5 — train students | next | five conditions → 7–10 trainings once the four forged sets and the length control are scoped; ~35–50 h working estimate, re-budgeted at the handoff (`docs/results/phase4.md` §10) |
 | 6 — evaluate | | the result |
 
 ## What we've found so far
@@ -121,8 +121,14 @@ Findings the paper didn't report, from Phases 0–3 (full detail in `docs/result
 - **A stronger model writes shorter traces — short enough to invert the paper's ordering.** The
   victim's real traces run a median 1,400 tokens against R1's 3,664 on the *same* prompts, and
   shorter than the forgeries built to imitate them (~2,100 on the held-out estimate). The paper's
-  `Len` metric assumes forgeries approach the truth from below; ours look likely to overshoot it from
-  above, which puts supervision length into the oracle-vs-forgery comparison. Phase 4 measures it.
+  `Len` metric assumes forgeries approach the truth from below; ours overshoot it from above —
+  **measured in Phase 4 at 2.2–2.6× on the same problems** (all four inverters, with and without the
+  summary), which puts a ~1.8–1.9× supervision-length gap into the oracle-vs-forgery comparison.
+- **The inverters cannot finish what the victim starts.** Trained on surrogate traces they capped
+  3–17 % of the time; on the victim's fully-worked answers they cap 21–38 % of first draws, and
+  re-drawing rescues only a quarter of the residual each time — capping is a property of the prompt,
+  not the sample, once the conditioning answer is long. 9.5–19 % of split B never terminates in three
+  draws, twice as often on code as on math.
 - **The answer's format is a property of the prompt, not the model.** Asking for a boxed answer took
   the share of victim responses carrying one from 56 % to ~100 % — the same model, the same effort,
   a one-sentence instruction. Every downstream grader depends on it.

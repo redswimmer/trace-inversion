@@ -184,10 +184,21 @@ at 16k/slot.** — **It divided ~15 M tokens by 303 t/s, a sweep point at the wr
 |---|---|---|---|
 | 4.1 | Inverter — the **epoch-2 adapter** of each of the four, merged | vLLM (`bench/invert.py`) | synthetic traces `t̂` from `(x, y, b*)` (summary setting) and from `(x, y)` (no-summary), on split B, once per inverter |
 
-Est. ~4 h per inverter — size it from a probe, as every phase has. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
+**✅ COMPLETE 2026-09-04 — measured ≈ 28 h of GPU time** (27.7 h generation over 158 M tokens at
+~1,600 tok/s, plus merges and smokes), against the ~4 h per inverter below and `docs/15`'s 13–17 h.
+Four forged files: **4,490 / 4,565 / 4,068 / 4,135 rows** (7b-sum / 7b-nosum / 1.5b-sum / 1.5b-nosum),
+every row terminated; 3,616 idx in common. Draw-1 cap-hits 23.3 / 21.4 / 37.9 / 35.5 % (expected
+3–17 %) and the redraw policy dropped 9.5–19.4 % because re-cap rates rose to 75 % — capping on
+victim inputs is prompt-level, not draw-level (`09` 7.14). **The headline: forged traces run
+2.2–2.6× the victim's own trace on the same problems, and the forged student target `[t̂; y]` is
+1.8–1.9× the oracle's** — `phase3.md` §5's two-pushes question resolved up on every inverter.
+Full record: `docs/results/phase4.md`.
+
+*The pre-run estimate below is kept for the record.* Est. ~4 h per inverter — size it from a probe, as every phase has. **Smoke-test ~30 rows first**, read a few of the resulting traces, check their length
 looks sane against the victim's, then run the rest. **No new tooling.** If you want the length as a
 number, point `bench/phase1_stats.py`'s existing length reporting at the output file — a flag on code
-we already have.
+we already have. *(Measured: the length report needed a paired `--oracle` flag and the redraw policy
+needed `phase4_draws.py`; "no new tooling" held for the engine, not for the bookkeeping.)*
 
 ### Decided 2026-08-30, from the Phase 2 results — read before 4.1 runs
 
@@ -234,7 +245,13 @@ Five conditions, matching the paper exactly:
 | Victim-Trace (oracle) | `t`, `y` — withheld ground truth |
 
 Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to measure what LoRA costs.
-Est. ~20 h.
+
+**Working estimate ~35–50 h, to be re-budgeted with probes at the Phase 5 handoff.** "Five
+conditions" resolves to **7–10 student trainings** once the four forged sets (2 arms × 2 settings,
+`results/phase4.md` §10), the two conditional grid cells (FFT vs LoRA on the 2B; the per-arm
+Surrogate-Trace row) and the supervision-length control proposal (`results/phase4.md` §4) are
+scoped. *The pre-Phase-4 estimate, kept for the record:* Est. ~20 h — it counted five trainings
+before the forged sets existed.
 
 ## Phase 6 — Evaluate
 
@@ -251,14 +268,15 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | 1 Surrogate data (**2 surrogates**) | **~29-31 h** *(measured mid-run; see `12` §7)* |
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
 | 3 **Victim queries** | **~79 h** *(actual: 66.3 h generation + probes, sweep, re-benchmark, compression)* |
-| 4 Inversion | ~4 h |
-| 5 Student training | ~20 h |
+| 4 Inversion | **~28 h** *(actual: 27.7 h generation over four inverters + merges/smokes; `results/phase4.md` §8)* |
+| 5 Student training | **~35–50 h** *(working estimate, 7–10 trainings; re-budget at the Phase 5 handoff — `results/phase4.md` §10)* |
 | 6 Evaluation | ~8 h |
-| **Total** | **~199-215 h** (~8-9 days of GPU time) |
+| **Total** | **~237-254 h** (~10-11 days of GPU time) |
 
-**Phase 3 now dominates the project at ~79 h**, and it is the one phase that does *not* fit an
-overnight run — its generation alone ran 66.3 h unattended across three days. Every other stage
-still does. Phase 2 (~28 h) is second, Phase 5 (~20 h) third;
+**Phase 3 still dominates the project at ~79 h**, and it is the one phase that did *not* fit an
+overnight run — its generation alone ran 66.3 h unattended across three days. Phase 5 (~35–50 h,
+7–10 trainings) is now second and will not fit one either; Phase 2 (~28 h) and Phase 4 (~28 h,
+measured against a ~4 h plan) follow;
 Phase 3 **measured 66.3 h of generation** (~79 h including its probes, sweep, re-benchmark and
 compression) — the pre-run ~10-15 h came from a sweep point at the wrong context. If generation needs
 cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
