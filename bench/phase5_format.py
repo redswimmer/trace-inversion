@@ -12,7 +12,10 @@ Per condition, TRL conversational prompt-completion JSONL under <data-root>/phas
 
 Rows: the SAME 3,616-idx intersection for every split-B condition, recomputed from
 forged-*-draws.json and asserted (docs/16 §4.2); surr-* n-matched by a seed-1234 sample of
-3,616 rows from the full d2 file, idx recorded. Default thinking render — no chat_template_kwargs.
+3,616 rows from the full d2 file, idx recorded. Thinking-mode render, enable_thinking=True PINNED
+at tokenization (phase5_train.pretokenize): the 2B's shipped template defaults to thinking OFF,
+the inverse of the 4B docs/16 §4.3 assumed — the datasets carry no chat_template_kwargs column;
+the render decision lives in the trainer and in Phase 6's serving.
 
 Self-tests (docs/16 §4.3, §6 — this script exits non-zero if any fails):
   row counts == 3,616 · split-B idx lists identical & unique · round-trip render of row 0 per
@@ -206,6 +209,17 @@ def main():
     print(f"cross-condition byte test on idx {probe_idx}: outside-think bytes identical across "
           f"{len(SPLIT_B)} split-B conditions: {not any('OUTSIDE' in f for f in fails)}")
 
+    # rendered-PROMPT identity on ALL rows (big-boss, CHECKPOINT 1 audit): the 7 split-B
+    # conditions must serve byte-identical prompts row for row, not just on the 5-idx sample
+    prompt_ident = sum(
+        len({tok.apply_chat_template(datasets[n][k]["prompt"], add_generation_prompt=True, tokenize=False,
+                                     enable_thinking=True)
+             for n in SPLIT_B}) == 1
+        for k in range(N))
+    if prompt_ident != N:
+        fails.append(f"rendered-prompt identity: only {prompt_ident} of {N} rows identical across split-B")
+    print(f"rendered-prompt identity across {len(SPLIT_B)} split-B conditions: {prompt_ident}/{N} rows")
+
     # oracle-leak check: for the 5 idx, the oracle's t text appears in no other condition's file
     leak_t = {i: think_split(datasets["oracle"][pos[i]]["completion"][0]["content"])[1] for i in probe_idx}
 
@@ -214,14 +228,19 @@ def main():
         return sorted(v)[min(int(p * (len(v) - 1) + 0.5), len(v) - 1)]
 
     stats = {"tokenizer": TOKENIZER, "rows": N, "seed": SEED, "instr": INSTR,
-             "domains": dom, "surr_idx": surr_idx, "conditions": {}}
+             "domains": dom, "prompt_identity_rows": prompt_ident, "surr_idx": surr_idx, "conditions": {}}
     trunc_total = 0
     for name, rows in datasets.items():
         pl, tl = [], []
         for row in rows:
-            p_ids = ids(tok.apply_chat_template(row["prompt"], add_generation_prompt=True, tokenize=True))
-            f_ids = ids(tok.apply_chat_template(row["prompt"] + row["completion"], tokenize=True))
-            pl.append(len(p_ids)), tl.append(len(f_ids))
+            # the trainer's own two-segment tokenization: thinking-mode prompt (enable_thinking=True
+            # pinned — the 2B template's default is thinking OFF, phase5_train.pretokenize) + the
+            # continuation after the opening <think>\n
+            p_ids = ids(tok.apply_chat_template(row["prompt"], add_generation_prompt=True, tokenize=True,
+                                                enable_thinking=True))
+            cont = row["completion"][0]["content"].removeprefix("<think>\n") + "<|im_end|>\n"
+            c_ids = tok(cont, add_special_tokens=False)["input_ids"]
+            pl.append(len(p_ids)), tl.append(len(p_ids) + len(c_ids))
         cl = [t - p for p, t in zip(pl, tl)]
         over = sum(t >= MAX_LENGTH for t in tl)
         trunc_total += over

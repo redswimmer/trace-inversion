@@ -34,6 +34,31 @@ def data_name(condition):
     return condition[:-5] if condition.endswith("-lora") else condition
 
 
+def pretokenize(ds, tok):
+    """Two-segment tokenization — docs/13 §4.2's sanctioned fallback, forced here by measurement
+    (2026-09-04): TRL's template path tokenizes prompt and prompt+completion separately and masks a
+    fixed len(prompt_ids) tokens, but at the '<think>\\n' boundary the newline merges into the
+    completion's first token ('\\nThe'), so 2-3 completion tokens land in the mask and the trained
+    continuation is tokenized differently from what the generation prompt serves. Tokenizing the two
+    segments separately trains p(continuation | the exact generation-prompt token state), and TRL
+    builds labels from the completion_mask column (completion_only_loss=True).
+
+    enable_thinking=True is PINNED (measured 2026-09-04): Qwen3.5-2B's shipped template defaults to
+    thinking OFF (generation prompt ends '<think>\\n\\n</think>\\n\\n'), the inverse of the 4B that
+    docs/06/docs/16 describe. The construction docs/16 §4.3 fixes — the trained continuation after
+    the template's opening '<think>\\n' — requires the thinking-mode prompt; without the kwarg the
+    serve-time prompt would close the think block before the student's supervised continuation.
+    Phase 6 must serve with enable_thinking=True to match."""
+    def f(ex):
+        p = tok.apply_chat_template(ex["prompt"], add_generation_prompt=True, tokenize=True,
+                                    enable_thinking=True)
+        p = list(p["input_ids"] if hasattr(p, "keys") else p)
+        cont = ex["completion"][0]["content"].removeprefix("<think>\n") + "<|im_end|>\n"
+        c = tok(cont, add_special_tokens=False)["input_ids"]
+        return {"input_ids": p + c, "completion_mask": [0] * len(p) + [1] * len(c)}
+    return ds.map(f, remove_columns=ds.column_names, num_proc=2, desc="pretokenize (two-segment)")
+
+
 def load_model(attn):
     import torch
     from transformers import Qwen3_5ForCausalLM               # text-only; the VL class is the trap
@@ -114,6 +139,8 @@ def train(args):
     print(f"data  {len(ds)} rows  ({data_file})  condition {cond}  method {'LoRA' if lora else 'FFT'}")
 
     tok = AutoTokenizer.from_pretrained(MODEL)                # docs/06 §4.9 #1 — never AutoProcessor
+    raw = ds
+    ds = pretokenize(ds, tok)
     model = load_model(args.attn)
     describe(model)
 
@@ -150,10 +177,13 @@ def train(args):
     print(f"tokenized by TRL  rows {len(lens)}  tokens/epoch {sum(lens):,}  max {max(lens)}  "
           f"median {sorted(lens)[len(lens) // 2]}  rows at max_length (truncation tell) {n_cap}")
     row0 = td[0]
-    ids, labels = row0["input_ids"], row0["labels"]
-    comp = [i for i, l in zip(ids, labels) if l != -100]
+    ids = row0["input_ids"]
+    if "labels" in row0:                                      # TRL builds labels from completion_mask
+        comp = [i for i, l in zip(ids, row0["labels"]) if l != -100]
+    else:
+        comp = [i for i, m in zip(ids, row0["completion_mask"]) if m]
     text = tok.decode(ids)
-    content = ds[0]["completion"][0]["content"]               # "<think>\n" + c + "\n</think>\n\n" + y
+    content = raw[0]["completion"][0]["content"]              # "<think>\n" + c + "\n</think>\n\n" + y
     expect = content.removeprefix("<think>\n") + "<|im_end|>\n"
     print(f"row 0 as the trainer tokenizes it: {len(ids)} tokens, {len(comp)} in the loss mask, "
           f"'<think>' x{text.count('<think>')}, '</think>' x{text.count('</think>')}, "
@@ -161,6 +191,8 @@ def train(args):
     (out / "row0.txt").write_text(text)
     assert text.count("<think>") == 1 and text.count("</think>") == 1, "think tags must appear exactly once"
     assert tok.decode(comp) == expect, "loss mask does not cover exactly the think-continuation + y + EOS"
+    assert tok.decode(ids[:len(ids) - len(comp)]).endswith("<|im_start|>assistant\n<think>\n"), \
+        "the masked prefix must end at the generation prompt's opening <think>\\n (train == serve)"
     assert n_cap == 0, f"{n_cap} rows at max_length — the formatter's truncation gate said 0 (STOP)"
     trainable = sum(p.numel() for p in trainer.model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in trainer.model.parameters())
