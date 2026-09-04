@@ -289,7 +289,7 @@ Add a new row only if the run itself deviates somewhere new.
 | **Per-inverter dropped rows** | each forged file may lose a different handful of idx; whether Phase 5's conditions train on the intersection or per-condition sets is **Phase 5's decision** — hand it the four final idx sets |
 | **Register mismatch** | oracle = victim's terse notes; forged = R1-Distill prose; any oracle-vs-forged gap carries style as well as content |
 | **Oracle length asymmetry** | oracle traces run to 14,336; forgeries cap at 8,192 (as in the paper) |
-| **Phase 5 budget risk** | `docs/10`'s "~20 h / five conditions" predates the four forged sets; ~9 trainings if Table 3 is matched per arm × setting — re-plan before running |
+| **Phase 5 budget risk** | `docs/10`'s "~20 h / five conditions" predated the four forged sets; now **7–10 trainings, ~35–50 h working estimate**, re-budgeted with probes at the Phase 5 handoff (`results/phase4.md` §10) |
 
 ---
 
