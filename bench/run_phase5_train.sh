@@ -7,7 +7,8 @@
 # Worktree layout (docs/16 §0.1): this runs the BRANCH's code with the MAIN checkout's .venv,
 # and writes data/logs under the main checkout's bench/. The 30-step probe runs before every
 # full run and its projection is CHECKPOINTed before the run starts. Never edit this while it runs.
-# Driver hygiene (docs/16 §6): no path handed to training may contain ORACLE — asserted below.
+# Driver hygiene (docs/16 §6): no path with ORACLE reaches training — structural, since
+# phase5_train.py derives its one data path from the condition name (data/<condition>.jsonl).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 MAIN=/home/asavala/Development/papers/trace-inversion
