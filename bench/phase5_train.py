@@ -201,6 +201,11 @@ def train(args):
     print(f"trainable params {trainable:,} of {total:,} ({100 * trainable / total:.1f}%)")
     if lora:
         assert not any("lm_head" in n for n, p in trainer.model.named_parameters() if p.requires_grad)
+        # big-boss (CHECKPOINT 15 audit): a silently ignored peft_config would train a second FFT
+        # student at lr 1e-4 and call it LoRA — nothing downstream would catch it. r=64 over the
+        # phase2 target list on the 2B should land ~2-3 % trainable; 100 % means peft was ignored.
+        frac = trainable / total
+        assert 0.005 <= frac <= 0.05, f"LoRA trainable fraction {frac:.4f} outside [0.5%, 5%] — adapter not applied?"
     else:
         assert trainable == total, "FFT must train every parameter"
 
