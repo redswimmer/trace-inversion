@@ -56,9 +56,9 @@ Phase 1   split A → surrogate → (problem, trace, answer)
 Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    done
 Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked   done
 Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000                       done
-Phase 5   train the student five ways on split B:                                          ← next
+Phase 5   train the student five ways on split B:                                          done
             answer-only | summary+answer | surrogate's own traces | forged traces | real victim traces
-Phase 6   MATH500 + JEEBench on all five students                                          ← the result
+Phase 6   MATH500 + JEEBench on all the students                                           ← the result
 ```
 
 The question the last row answers: does the student trained on **forged** traces beat the students
@@ -104,13 +104,19 @@ only test is whether the traces it writes make the student better.
 | 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
 | 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
 | 4 — invert | done | Four forged-trace sets (4,068–4,565 rows each, 3,616 in common) in **≈ 28 h**. **The forgeries run 2.2–2.6× the victim's real traces on the same problems**, so the synthesized student target is 1.8–1.9× the oracle's — the length confound Phase 3 predicted, now measured. The inverters cap 21–38 % of first draws on victim inputs (3–17 % on surrogate data) and 9.5–19 % of rows never terminate in three draws. Record: `docs/results/phase4.md`. |
-| 5 — train students | next | five conditions → 7–10 trainings once the four forged sets and the length control are scoped; ~35–50 h working estimate, re-budgeted at the handoff (`docs/results/phase4.md` §10) |
-| 6 — evaluate | | the result |
+| 5 — train students | done | **All 10 cells trained in ≈ 27.3 h** (7 core + both Surrogate-Trace arms + the FFT-vs-LoRA twin), each on the same 3,616-row intersection; the 2B FFT ran ~3,220–3,520 tok/s — half the estimate. Two catches en route: TRL mis-tokenizes the completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's chat template defaults to thinking OFF** — so Phase 6 must serve with `enable_thinking=True` *and re-measure the 2B baseline*, whose Phase 0 numbers are a no-think render. Record: `docs/results/phase5.md`. |
+| 6 — evaluate | next | the result — students vs the re-measured baseline, MATH500 + JEEBench |
 
 ## What we've found so far
 
-Findings the paper didn't report, from Phases 0–3 (full detail in `docs/results/`):
+Findings the paper didn't report, from Phases 0–5 (full detail in `docs/results/`):
 
+- **The same model family ships opposite thinking defaults — and it nearly trained the wrong
+  thing.** Qwen3.5-4B's chat template thinks by default; Qwen3.5-2B's renders a *closed* empty
+  think block unless `enable_thinking=True` is passed. Phase 5 caught it in a round-trip gate
+  before any GPU hour; the consequence runs backwards too — Phase 0's 2B "student baseline"
+  (79.0 MATH500) was measured in the no-think render, so Phase 6 must re-baseline before any
+  before/after claim. A reminder that a chat template is part of the experiment, not plumbing.
 - **The victim was never asked for its best reasoning — and nobody had noticed.** The GGUF's chat
   template silently injects a reasoning-effort system turn when the request sends none, so every
   "no system prompt" query — Phase 0's benchmarks included — actually ran at `xhigh`. Setting

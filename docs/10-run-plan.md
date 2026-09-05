@@ -246,12 +246,23 @@ Five conditions, matching the paper exactly:
 
 Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to measure what LoRA costs.
 
-**Working estimate ~35–50 h, to be re-budgeted with probes at the Phase 5 handoff.** "Five
-conditions" resolves to **7–10 student trainings** once the four forged sets (2 arms × 2 settings,
-`results/phase4.md` §10), the two conditional grid cells (FFT vs LoRA on the 2B; the per-arm
-Surrogate-Trace row) and the supervision-length control proposal (`results/phase4.md` §4) are
-scoped. *The pre-Phase-4 estimate, kept for the record:* Est. ~20 h — it counted five trainings
-before the forged sets existed.
+**✅ COMPLETE 2026-09-05 — measured ≈ 27.3 h of GPU time, all 10 cells trained, none skipped**
+(7 core + surr-1.5b + surr-7b + the FFT-vs-LoRA twin), each on the same 3,616-row intersection
+(surr n-matched at seed 1234), probe-gated, weights-only artifacts under
+`bench/results/phase5/students/`. The 2B FFT realized **~3,220–3,520 train tok/s** — roughly half
+the working estimate below, which was scaled from Phase 2's 4B-LoRA rate. Two findings en route,
+both supervisor-adjudicated (`results/phase5.md` §2): TRL's template path mis-tokenizes the
+completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's template defaults to
+thinking OFF** — `enable_thinking=True` is pinned at training and REQUIRED at Phase 6 serving, and
+the Phase 0 2B baseline (79.0/47.8) is a no-think render that must be re-measured before any
+before/after comparison. Full record: `docs/results/phase5.md`.
+
+*The pre-run estimates, kept for the record:* **Working estimate ~35–50 h, to be re-budgeted with
+probes at the Phase 5 handoff.** "Five conditions" resolves to **7–10 student trainings** once the
+four forged sets (2 arms × 2 settings, `results/phase4.md` §10), the two conditional grid cells
+(FFT vs LoRA on the 2B; the per-arm Surrogate-Trace row) and the supervision-length control
+proposal (`results/phase4.md` §4) are scoped. *The pre-Phase-4 estimate:* Est. ~20 h — it counted
+five trainings before the forged sets existed.
 
 ## Phase 6 — Evaluate
 
@@ -269,9 +280,9 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
 | 3 **Victim queries** | **~79 h** *(actual: 66.3 h generation + probes, sweep, re-benchmark, compression)* |
 | 4 Inversion | **~28 h** *(actual: 27.7 h generation over four inverters + merges/smokes; `results/phase4.md` §8)* |
-| 5 Student training | **~35–50 h** *(working estimate, 7–10 trainings; re-budget at the Phase 5 handoff — `results/phase4.md` §10)* |
+| 5 Student training | **~27.3 h** *(actual: 10 trainings — 25.3 h full runs + probes/pre-flight; `results/phase5.md` §4)* |
 | 6 Evaluation | ~8 h |
-| **Total** | **~237-254 h** (~10-11 days of GPU time) |
+| **Total** | **~229-231 h** (~9.5-10 days of GPU time; was ~237-254 h while Phase 5 was an estimate) |
 
 **Phase 3 still dominates the project at ~79 h**, and it is the one phase that did *not* fit an
 overnight run — its generation alone ran 66.3 h unattended across three days. Phase 5 (~35–50 h,
