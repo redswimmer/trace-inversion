@@ -249,8 +249,9 @@ Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to m
 **✅ COMPLETE 2026-09-05 — measured ≈ 27.3 h of GPU time, all 10 cells trained, none skipped**
 (7 core + surr-1.5b + surr-7b + the FFT-vs-LoRA twin), each on the same 3,616-row intersection
 (surr n-matched at seed 1234), probe-gated, weights-only artifacts under
-`bench/results/phase5/students/`. The 2B FFT realized **~3,220–3,520 train tok/s** — roughly half
-the working estimate below, which was scaled from Phase 2's 4B-LoRA rate. Two findings en route,
+`bench/results/phase5/students/`. The 2B FFT realized **~3,220–3,520 train tok/s** — 1.65× the
+Phase 2 4B-LoRA rate the working estimate below was scaled from, so the phase took roughly **half
+the estimated hours**. Two findings en route,
 both supervisor-adjudicated (`results/phase5.md` §2): TRL's template path mis-tokenizes the
 completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's template defaults to
 thinking OFF** — `enable_thinking=True` is pinned at training and REQUIRED at Phase 6 serving, and
@@ -285,9 +286,9 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | **Total** | **~229-231 h** (~9.5-10 days of GPU time; was ~237-254 h while Phase 5 was an estimate) |
 
 **Phase 3 still dominates the project at ~79 h**, and it is the one phase that did *not* fit an
-overnight run — its generation alone ran 66.3 h unattended across three days. Phase 5 (~35–50 h,
-7–10 trainings) is now second and will not fit one either; Phase 2 (~28 h) and Phase 4 (~28 h,
-measured against a ~4 h plan) follow;
+overnight run — its generation alone ran 66.3 h unattended across three days. Phases 2, 4 and 5
+sit together at ~28 / ~28 / ~27.3 h (measured), and every phase but 3 ran as overnight-sized
+pieces — Phase 5's 10 trainings chained as ≤3.3 h runs over ~1.5 days;
 Phase 3 **measured 66.3 h of generation** (~79 h including its probes, sweep, re-benchmark and
 compression) — the pre-run ~10-15 h came from a sweep point at the wrong context. If generation needs
 cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
