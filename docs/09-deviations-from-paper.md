@@ -97,8 +97,9 @@ Two things the same measurement settled:
 
 ### 5.2 A student that already reasons (2.5)
 
-The paper's students are pre-reasoning-era models that do short CoT. Every Qwen3.5 Instruct model
-thinks by default.
+The paper's students are pre-reasoning-era models that do short CoT. Qwen3.5 Instruct models
+think natively — though the 2B's shipped template defaults thinking *off* (7.23), so the student is
+trained and served with `enable_thinking=True` pinned.
 
 **Why it matters:** it changes the claim from *"inversion instills reasoning"* to
 *"inversion improves reasoning."* Effect sizes will be smaller because the student starts higher.
@@ -108,12 +109,16 @@ thinks by default.
 student, inversion added value regardless of the starting point. And "can you still extract value
 when your student isn't naive?" is a live 2026 question the paper doesn't answer.
 
-**Mitigation:** Qwen3.5 supports `enable_thinking=False`, giving a non-reasoning baseline of the
-*same* model — so the instill-vs-improve distinction can be measured directly rather than assumed.
+**Mitigation:** Qwen3.5 supports both renders, giving a non-reasoning *and* a reasoning baseline of
+the *same* model — so the instill-vs-improve distinction can be measured directly rather than
+assumed. Status after Phase 5: the no-think baseline already exists by accident (Phase 0's 2B row,
+MATH500 79.0 / JEEBench 47.8, was the template's default = no-think render); the thinking-mode
+baseline is Phase 6's first REQUIRED measurement, before any student is compared to anything.
 
-**Secondary confound:** same-family victim/student (3.8-27B → 3.5-4B) shares tokenizer and
+**Secondary confound:** same-family victim/student (3.8-27B → 3.5-2B) shares tokenizer and
 pretraining lineage, which may ease transfer relative to the paper's cross-family setup. Keep one
-cross-family student as a check.
+cross-family student as a check — **deferred through Phase 5** (not trained; `16` §4.5); it stays a
+proposal for after the Phase 6 read.
 
 ## 6. Forced on us by the paper itself
 

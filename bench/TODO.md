@@ -1,5 +1,10 @@
 # Baseline TODO
 
+> **Frozen Phase 0 working list (August 2026).** Status marks here are not maintained: every
+> `DECIDE` item was settled on measurement in `docs/10-run-plan.md`, and the `phase1.md` notes were
+> handled in `docs/results/phase1.md`. Kept for the record; `docs/10` and `docs/results/` are
+> authoritative.
+
 Phase 0 of the reproduction. Nothing downstream starts until every row here is
 **DONE + audit-passed**.
 

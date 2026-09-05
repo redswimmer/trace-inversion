@@ -268,7 +268,18 @@ five trainings before the forged sets existed.
 ## Phase 6 — Evaluate
 
 All fine-tuned students on MATH500 + JEEBench (+ LiveCodeBench if time), vLLM, same protocol as
-Phase 0 so pre/post is directly comparable. Est. ~8 h.
+Phase 0 so pre/post is directly comparable. *Est. ~8 h — written for five students; re-budget at the
+Phase 6 handoff from Phase 0's measured 2B eval time.*
+
+**Inherited from Phase 5 (`results/phase5.md` §6) — fixed, not open:**
+
+| | |
+|---|---|
+| **Serve with `enable_thinking=True`** | every student, every request — the 2B template's default renders a closed think block and the students were trained to continue an open one (`09` 7.23). Verify by render-and-diff, not by assumption |
+| **Re-measure the 2B baseline first** | Phase 0's 79.0 / 47.8 is a no-think render; the thinking-mode baseline under the Phase 6 protocol is REQUIRED before any before/after number is read. Keep both baseline rows — together they measure `09` §5.2's instill-vs-improve distinction |
+| What gets evaluated | the 10 students of `results/phase5.md` §3 (text-only checkpoints, `Qwen3_5ForCausalLM` / vLLM's `Qwen3_5ForCausalLM` path) + the two baseline rows. The LoRA cell is a PEFT adapter: **merge it with the Phase 2 merge-check pattern** (`phase2_train.py --merge`) and serve the merged bf16 like the others, rather than trusting vLLM's LoRA path on a hybrid-DeltaNet architecture |
+| Protocol | Phase 0's harness (`eval_baseline.py`, the same INSTR the students trained with), paper sampling 0.7 / 0.9 / 1.05, seed 1234, 1,015 tasks; carry Phase 4's strict loop test into the audit |
+| Reading the result | oracle-vs-forged gaps carry a measured 1.8–2.0× supervision-length difference, a register difference and 4–9 % answer inconsistency (`results/phase4.md` §10, `results/phase5.md` §1, §8) — the caveat block travels with the table. **Trigger:** any forged student ≥ the oracle student anywhere → the length-matched control becomes a Phase 6.5 proposal through the four questions above |
 
 ---
 

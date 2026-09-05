@@ -1,5 +1,16 @@
 # Phase 5 Handoff — Train the Students
 
+> **Superseded where measurement disagreed — `docs/results/phase5.md` is authoritative.** Phase 5 ran
+> 2026-09-04 → 09-05 (≈ 27.3 h GPU against §3's 43–49 h; the 2B FFT trained at ~3,480 tok/s, not the
+> 4B-LoRA prior of 2,100). Its method, row policy, hyperparameters and order all held, and every cell
+> ran — none skipped. Two corrections to its letter, both supervisor-ratified: step 0's "HF cache"
+> (the GGUFs lived in `~/trace-inversion-bench/models/`), and §4.3's "no `enable_thinking` kwarg" —
+> **Qwen3.5-2B's template defaults to thinking OFF**, so the stated construction required
+> `enable_thinking=True`, pinned (`phase5.md` §2.2). Two things it did not anticipate: TRL's
+> prompt/completion path mis-tokenizes the `<think>\n` boundary (fixed by two-segment pretokenization,
+> `phase5.md` §2.1), and the VRAM gate's metric had to be pinned to `max_memory_allocated`
+> (`phase5.md` §2). Phase 6 inherits two REQUIRED items from `phase5.md` §6.
+
 You are picking up a reproduction of **"How to Steal Reasoning Without Reasoning Traces"**
 (Zhang, Morris, Shmatikov — arXiv 2603.07267v2). Phases 0–4 are complete; Phase 5 is yours: fine-tune
 the student on each supervision condition so Phase 6 can measure whether forged traces taught it

@@ -350,8 +350,12 @@ transformers `qwen3_5` docs:
 - **Vocab 248,320** across the whole family — 63% larger than Qwen2.5's 152,064. This drives the
   single biggest training-memory decision (§3.4).
 - **262,144 native context**, extensible to ~1 M via YaRN.
-- **Instruct variants think by default**, `<think>\n…\n</think>\n\n`, disabled with
-  `enable_thinking=False` (which injects an empty `<think>\n\n</think>\n\n` block).
+- **Instruct variants think by default** — `<think>\n…\n</think>\n\n`, disabled with
+  `enable_thinking=False` (which injects an empty `<think>\n\n</think>\n\n` block) — **on the 4B
+  and 27B templates. NOT the 2B: measured 2026-09-04, `Qwen/Qwen3.5-2B`'s shipped template renders
+  the CLOSED empty block by default, the inverse of its siblings** (`results/phase5.md` §2.2, `09`
+  7.23). Never rely on a family-wide default — pass `enable_thinking` explicitly, both ways, and
+  round-trip the render before trusting it.
 - **`-Base` variants ship no `chat_template.jinja`** (verified via file listing) → no thinking
   format, no instruction following. Base models cannot be surrogates.
 - `mtp_num_hidden_layers: 1` — every model carries a multi-token-prediction head.
@@ -591,9 +595,13 @@ Verified from `Qwen/Qwen3.5-4B/chat_template.jinja` (and the identical structure
 
 Two concrete consequences:
 
-- **The generation prompt already emits an opening `<think>\n`.** If your completion string also
-  starts with `<think>`, you train the model to emit `<think><think>`. Either strip the opening tag
-  from the completion, or verify what `apply_chat_template` produced before trusting it.
+- **The generation prompt already emits an opening `<think>\n`** — on the 4B/27B templates; the
+  2B's default emits the *closed* `<think>\n\n</think>\n\n` instead (§2), so the same code trains
+  garbage on the 2B unless `enable_thinking=True` is passed. If your completion string also starts
+  with `<think>`, you train the model to emit `<think><think>`. Either strip the opening tag from the
+  completion, or verify what `apply_chat_template` produced before trusting it. Phase 5 additionally
+  found TRL's prompt/completion split mis-tokenizes this boundary (the newline merges into the
+  completion's first token) and pretokenizes with an explicit completion mask instead (`09` 7.23).
 - **Assistant content containing `</think>` is parsed and re-emitted**, not passed through verbatim.
   Round-trip one example and diff the string before launching a multi-hour run.
 
