@@ -13,6 +13,8 @@ export PYTHONUNBUFFERED=1
 
 MAIN=/home/asavala/Development/papers/trace-inversion
 PY="$MAIN/.venv-vllm/bin/python"
+# activation-equivalent: vLLM's engine core subprocess needs the venv's ninja on PATH
+export PATH="$MAIN/.venv-vllm/bin:$PATH"
 BENCH="$(cd "$(dirname "$0")" && pwd)"
 OUT="$MAIN/bench/results/phase6"
 LOGS="$MAIN/bench/logs/phase6"
