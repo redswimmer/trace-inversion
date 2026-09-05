@@ -162,6 +162,8 @@ def train(args):
         optim="adamw_8bit", bf16=True,                        # the measured 15.79 GiB mode (docs/09 §5.1)
         logging_steps=1 if probe else 5,
         save_strategy="no" if probe else "epoch", save_total_limit=1,   # crash resume only; final save below
+        save_only_model=args.save_only_model,                 # big-boss disk pre-ruling: weights-only
+                                                              # checkpoints where rotation would dip <12 GB
         eval_strategy="no",                                   # no holdout — the final epoch is the artifact
         dataset_num_proc=2, dataloader_pin_memory=False, torch_empty_cache_steps=50,
         report_to="none", seed=42,
@@ -304,6 +306,9 @@ if __name__ == "__main__":
     ap.add_argument("--data-root", default="/home/asavala/Development/papers/trace-inversion/bench/results",
                     help="the main checkout's bench/results (docs/16 §0.1)")
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--save-only-model", action="store_true",
+                    help="weights-only epoch checkpoints (no optimizer state): halves the rotation "
+                         "spike at the cost of exact crash resume — adjudicated per cell on disk")
     ap.add_argument("--attn", default="sdpa",
                     help="attn_implementation; sdpa is the measured Phase 2 path (flash-attn2 hub "
                          "kernel's backward crashes under torch 2.13 — phase2_train.py --help)")

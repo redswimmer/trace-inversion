@@ -15,8 +15,10 @@ MAIN=/home/asavala/Development/papers/trace-inversion
 PY="$MAIN/.venv/bin/python"
 export PYTHONUNBUFFERED=1
 
-COND="${1:?usage: run_phase5_train.sh <condition> [probe]}"
+COND="${1:?usage: run_phase5_train.sh <condition> [probe|full] [save-only]}"
 MODE="${2:-full}"
+EXTRA=""
+if [[ "${3:-}" == save-only ]]; then EXTRA="--save-only-model"; fi
 SUFFIX=""
 if [[ "$MODE" == probe ]]; then SUFFIX="-probe"; fi
 LOG="$MAIN/bench/logs/phase5-${COND}${SUFFIX}.log"
@@ -31,9 +33,9 @@ if [[ "$MODE" != probe && $FREE_GB -lt 10 ]]; then
 fi
 
 if [[ "$MODE" == probe ]]; then
-  $PY bench/phase5_train.py --condition "$COND" --max-steps 30 --data-root "$MAIN/bench/results" >> "$LOG" 2>&1
+  $PY bench/phase5_train.py --condition "$COND" --max-steps 30 --data-root "$MAIN/bench/results" $EXTRA >> "$LOG" 2>&1
 else
-  $PY bench/phase5_train.py --condition "$COND" --data-root "$MAIN/bench/results" >> "$LOG" 2>&1
+  $PY bench/phase5_train.py --condition "$COND" --data-root "$MAIN/bench/results" $EXTRA >> "$LOG" 2>&1
 fi
 rc=$?
 note "${COND} ${MODE} done rc=${rc}  disk $(df --output=avail -B1G / | tail -1 | tr -d ' ')G free"
