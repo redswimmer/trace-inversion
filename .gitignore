@@ -19,3 +19,6 @@ __pycache__/
 # Phase 2 adapters and merged weights — the adapter is the record, merged weights are derived
 bench/results/phase2/inverter-*/
 bench/results/phase2/merged-*/
+
+# Phase 5 students — ~4.6 GB of weights each; format-stats.json stays committed
+bench/results/phase5/students/

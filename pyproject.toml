@@ -13,6 +13,7 @@ dependencies = [
     "datasets>=5.0.1",
     "kernels>=0.16.1",
     "flash-linear-attention>=0.5.2",
+    "bitsandbytes>=0.50.2",
 ]
 
 [dependency-groups]

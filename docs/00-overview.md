@@ -230,6 +230,9 @@ See `04-defenses-and-limitations.md` for the full treatment.
 | `10-run-plan.md` | **Authoritative** role assignments, per-phase plan and time budget |
 | `11-phase1-handoff.md` | Operational handoff for Phase 1 |
 | `12-phase1-readiness-review.md` | Pre-Phase-1 audit: measured training VRAM, the 8192-cap finding, four plan corrections |
+| `13-phase2-handoff.md` … `16-phase5-handoff.md` | Per-phase operational handoffs; each is superseded by its `results/phaseN.md` record where measurement disagreed |
+| `PHASE1`–`PHASE5-GOAL.txt` | The ≤ 4,000-character goal prompt each phase was run from |
+| `results/` | Committed measurements: `baselines.md`, `phase1.md` … `phase5.md`, sweeps, audits |
 
 **Read `07` before writing any code.** It recovers the decoding and training hyperparameters the
 paper omits, and documents three places where the released code disagrees with paper v2 — including
@@ -239,8 +242,10 @@ format mismatch between v2's own compression and inversion prompts.
 ## 8. Status
 
 - **Paper comprehension and documentation** (`00`–`09`) — complete.
-- **Phase 0, baselines** — complete. Every model role fixed on measurement; see
-  `docs/results/baselines.md` and `10-run-plan.md`.
-- **Pre-Phase-1 readiness review** (`12`) — complete. Training VRAM measured, four plan
-  corrections applied.
-- **Phase 1, surrogate data** — next. Operational handoff in `11-phase1-handoff.md`.
+- **Phases 0–5 — complete** (August → 2026-09-05). Baselines; surrogate data for both arms; four
+  inverters; the victim queried on split B with its real traces withheld to a separate file; four
+  forged-trace sets; ten students trained on the same 3,616-row intersection. Records:
+  `docs/results/baselines.md` and `phase1.md` … `phase5.md`; status table and headlines in the README.
+- **Phase 6, evaluation — next.** Every student plus a re-measured thinking-mode baseline on
+  MATH500 + JEEBench, vLLM, Phase 0's protocol with `enable_thinking=True` (`10` Phase 6;
+  `results/phase5.md` §6 lists the two REQUIRED items).

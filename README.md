@@ -28,7 +28,7 @@ each**, because the experiment is a grid, not a single pipeline.
 | **Surrogate** | `V'` | DeepSeek-R1-Distill-Qwen-**7B** and **-1.5B** | never | **2 arms** — each runs through the whole pipeline | A weaker reasoner we run ourselves, so its traces are visible. Exists only to manufacture the inverter's training data. |
 | **Compressor** | `C'` | Qwen3.5-4B, zero-shot with a fixed prompt | never | 1 | Writes a victim-style summary of each surrogate trace, so the training data has the "summary" column the victim will later provide. |
 | **Inverter** | `I` | Qwen3.5-4B + LoRA | **yes** | **4 adapters** — {7B arm, 1.5B arm} × {victim shows a summary, victim shows only the answer} | Learns *(problem, answer[, summary]) → trace* from one arm's surrogate data. Then pointed at the victim's outputs. |
-| **Student** | `S` | Qwen3.5-2B, full fine-tune | **yes** | **5 checkpoints** — one per training-data condition (below) | The model we are trying to improve. Benchmarked on MATH500 and JEEBench. |
+| **Student** | `S` | Qwen3.5-2B, full fine-tune | **yes** | **10 students** — the five conditions below, with forged traces ×4 (one per inverter) and the surrogate's own traces ×2 (one per arm), plus one LoRA twin of the 7B-arm forged student to price the method | The model we are trying to improve. Benchmarked on MATH500 and JEEBench. |
 
 Why the inverter is trained four times rather than once: the two *settings* are different input
 formats (an inverter trained with summaries can't be fed inputs without them, and the paper keeps
@@ -56,9 +56,10 @@ Phase 1   split A → surrogate → (problem, trace, answer)
 Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    done
 Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked   done
 Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000                       done
-Phase 5   train the student five ways on split B:                                          ← next
-            answer-only | summary+answer | surrogate's own traces | forged traces | real victim traces
-Phase 6   MATH500 + JEEBench on all five students                                          ← the result
+Phase 5   train the student five ways on split B:                                          done
+            answer-only | summary+answer | surrogate's own traces ×2 | forged traces ×4 | real victim traces
+            (+ one LoRA twin = 10 students, all on the same 3,616 rows)
+Phase 6   MATH500 + JEEBench on all the students                                           ← the result
 ```
 
 The question the last row answers: does the student trained on **forged** traces beat the students
@@ -104,13 +105,26 @@ only test is whether the traces it writes make the student better.
 | 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
 | 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
 | 4 — invert | done | Four forged-trace sets (4,068–4,565 rows each, 3,616 in common) in **≈ 28 h**. **The forgeries run 2.2–2.6× the victim's real traces on the same problems**, so the synthesized student target is 1.8–1.9× the oracle's — the length confound Phase 3 predicted, now measured. The inverters cap 21–38 % of first draws on victim inputs (3–17 % on surrogate data) and 9.5–19 % of rows never terminate in three draws. Record: `docs/results/phase4.md`. |
-| 5 — train students | next | five conditions → 7–10 trainings once the four forged sets and the length control are scoped; ~35–50 h working estimate, re-budgeted at the handoff (`docs/results/phase4.md` §10) |
-| 6 — evaluate | | the result |
+| 5 — train students | done | **All 10 cells trained in ≈ 27.3 h** (7 core + both Surrogate-Trace arms + the FFT-vs-LoRA twin), each on the same 3,616-row intersection; the 2B FFT ran ~3,220–3,520 tok/s, 1.65× the Phase 2 rate the estimate was scaled from, so the phase took about half the estimated hours. Two catches en route: TRL mis-tokenizes the completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's chat template defaults to thinking OFF** — so Phase 6 must serve with `enable_thinking=True` *and re-measure the 2B baseline*, whose Phase 0 numbers are a no-think render. Record: `docs/results/phase5.md`. |
+| 6 — evaluate | next | the result — students vs the re-measured baseline, MATH500 + JEEBench |
 
 ## What we've found so far
 
-Findings the paper didn't report, from Phases 0–3 (full detail in `docs/results/`):
+Findings the paper didn't report, from Phases 0–5 (full detail in `docs/results/`):
 
+- **The same model family ships opposite thinking defaults — and it nearly trained the wrong
+  thing.** Qwen3.5-4B's chat template thinks by default; Qwen3.5-2B's renders a *closed* empty
+  think block unless `enable_thinking=True` is passed. Phase 5 caught it in a round-trip gate
+  before any GPU hour; the consequence runs backwards too — Phase 0's 2B "student baseline"
+  (79.0 MATH500) was measured in the no-think render, so Phase 6 must re-baseline before any
+  before/after claim. A reminder that a chat template is part of the experiment, not plumbing.
+- **Real traces are harder to imitate than forged ones.** Over three epochs, every student trained
+  on victim-derived targets — the forged traces included — cut its loss by 17–35 %; both students
+  trained on a surrogate's *real* traces cut theirs by only 6–9 %. Recorded, not claimed: the two
+  groups also differ in answer source and row mix (the forged rows are the ones every inverter could
+  finish, i.e. the easier ones), so this is a pre-registered observation for Phase 6 to read against,
+  not a finding about traces (`docs/results/phase5.md` §8). Either way, training loss ranks nothing —
+  only Phase 6 accuracy does.
 - **The victim was never asked for its best reasoning — and nobody had noticed.** The GGUF's chat
   template silently injects a reasoning-effort system turn when the request sends none, so every
   "no system prompt" query — Phase 0's benchmarks included — actually ran at `xhigh`. Setting
@@ -155,8 +169,10 @@ Findings the paper didn't report, from Phases 0–3 (full detail in `docs/result
 - **A forged trace sometimes argues itself out of the answer it was handed.** About 3 % of gradable
   held-out traces conclude something other than the answer they were conditioned on — a spurious
   units "correction", 21 talked down to 20, a Yes turned into No. On the weak arm, most of those are
-  the inverter being *right* where its surrogate was wrong. The paper does no filtering; what to do
-  with such traces before student training is an open decision.
+  the inverter being *right* where its surrogate was wrong. On the victim's data the rate is ≈ 4–9 %
+  and the override never helps (the victim's answer agreed with R1 in every genuine case read). The
+  paper does no filtering and neither do we: the students trained on the forged files as-is, rate
+  reported (`docs/09` 7.15).
 - **The inverter needs almost nothing to acquire the format.** Loss drops in the first ~100 steps
   and is flat after; a 20-step adapter already wrote traces at the true length ending in the right
   boxed answer. Epochs 2–3 fit the training rows (held-out loss is best at epoch 2 on all four).
@@ -174,12 +190,12 @@ VRAM and 30 GB of RAM. The running log, with the reason and expected effect of e
 | Surrogate | R1-Distill-Qwen-1.5B (and R1) | same 1.5B, plus a 7B as primary | the 1.5B scores *below* our student on JEEBench; the 7B restores the paper's ordering and adds the midpoint |
 | Compressor / inverter base | Qwen2.5-7B-Instruct | Qwen3.5-4B | 7B full fine-tuning is ~58 GB; the 4B fits with LoRA at 18 GB |
 | Inverter training | full-parameter SFT | bf16 LoRA, r=64, lr 1e-4 | 4B full fine-tuning measured at 27.8 GB |
-| Student | Qwen2.5-7B-Instruct, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at the paper's 16,384 context | fits full fine-tuning, so the method matches. It is a model that already reasons, so the claim becomes "inversion *improves* reasoning," measured against the same four baselines |
+| Student | Qwen2.5-7B-Instruct, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at the paper's 16,384 context (+ one LoRA twin) | fits full fine-tuning, so the method matches. It is a model that already reasons, so the claim becomes "inversion *improves* reasoning," measured against the same four baselines — and against a re-measured thinking-mode baseline, since its template defaults thinking off (`docs/09` 7.23) |
 | Data | 2 × 10 k prompts | 2 × 5 k | the paper's own scaling curve shows 5 k delivers most of the MATH500 gain; generation is the dominant cost |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | translated, not copied — the two frameworks' defaults differ |
 | Trace-fidelity metrics | BLEU / TF1 / ROUGE against the victim's real traces | not run | across the paper's own results they track trace *length* at r ≈ 0.9; student accuracy carries the result |
 | Inverter input format | unspecified | the paper's own zero-shot prompt, format-matched to its compressor | the paper never says what the trained inverter was given; its v2 prompts also contradict each other on summary format |
-| Seeds / variance | none reported | 3 seeds on at least one condition | the paper's headline margins are 0.4–2.4 points on single runs |
+| Seeds / variance | none reported | one seed per condition so far (Phase 5); a multi-seed repeat of the headline cells is a Phase 6.5 proposal, gated by `docs/10`'s four questions | the paper's headline margins are 0.4–2.4 points on single runs, so a single-seed reproduction inherits the same caveat |
 
 </details>
 
@@ -195,9 +211,9 @@ docs/
   05–08                 this machine: feasibility, model selection and TRL, the released code, measured throughput
   09                    every deviation from the paper, with reasons — kept current
   10                    the run plan, phase by phase, and the four questions to ask before proposing an experiment
-  11–14                 per-phase handoffs and readiness reviews
+  11–16                 per-phase handoffs and readiness reviews (each superseded by its results/ record where they disagree)
   PHASE*-GOAL.txt       the prompt each phase is run from
-  results/              committed measurements: baselines, phase1, sweeps, audits
+  results/              committed measurements: baselines, phase1–phase5, sweeps, audits
 ```
 
 </details>

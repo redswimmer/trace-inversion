@@ -246,17 +246,40 @@ Five conditions, matching the paper exactly:
 
 Plus the `Synthesized-Trace` condition run **both FFT and LoRA** on the 2B, to measure what LoRA costs.
 
-**Working estimate ~35–50 h, to be re-budgeted with probes at the Phase 5 handoff.** "Five
-conditions" resolves to **7–10 student trainings** once the four forged sets (2 arms × 2 settings,
-`results/phase4.md` §10), the two conditional grid cells (FFT vs LoRA on the 2B; the per-arm
-Surrogate-Trace row) and the supervision-length control proposal (`results/phase4.md` §4) are
-scoped. *The pre-Phase-4 estimate, kept for the record:* Est. ~20 h — it counted five trainings
-before the forged sets existed.
+**✅ COMPLETE 2026-09-05 — measured ≈ 27.3 h of GPU time, all 10 cells trained, none skipped**
+(7 core + surr-1.5b + surr-7b + the FFT-vs-LoRA twin), each on the same 3,616-row intersection
+(surr n-matched at seed 1234), probe-gated, weights-only artifacts under
+`bench/results/phase5/students/`. The 2B FFT realized **~3,220–3,520 train tok/s** — 1.65× the
+Phase 2 4B-LoRA rate the working estimate below was scaled from, so the phase took roughly **half
+the estimated hours**. Two findings en route,
+both supervisor-adjudicated (`results/phase5.md` §2): TRL's template path mis-tokenizes the
+completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's template defaults to
+thinking OFF** — `enable_thinking=True` is pinned at training and REQUIRED at Phase 6 serving, and
+the Phase 0 2B baseline (79.0/47.8) is a no-think render that must be re-measured before any
+before/after comparison. Full record: `docs/results/phase5.md`.
+
+*The pre-run estimates, kept for the record:* **Working estimate ~35–50 h, to be re-budgeted with
+probes at the Phase 5 handoff.** "Five conditions" resolves to **7–10 student trainings** once the
+four forged sets (2 arms × 2 settings, `results/phase4.md` §10), the two conditional grid cells
+(FFT vs LoRA on the 2B; the per-arm Surrogate-Trace row) and the supervision-length control
+proposal (`results/phase4.md` §4) are scoped. *The pre-Phase-4 estimate:* Est. ~20 h — it counted
+five trainings before the forged sets existed.
 
 ## Phase 6 — Evaluate
 
 All fine-tuned students on MATH500 + JEEBench (+ LiveCodeBench if time), vLLM, same protocol as
-Phase 0 so pre/post is directly comparable. Est. ~8 h.
+Phase 0 so pre/post is directly comparable. *Est. ~8 h — written for five students; re-budget at the
+Phase 6 handoff from Phase 0's measured 2B eval time.*
+
+**Inherited from Phase 5 (`results/phase5.md` §6) — fixed, not open:**
+
+| | |
+|---|---|
+| **Serve with `enable_thinking=True`** | every student, every request — the 2B template's default renders a closed think block and the students were trained to continue an open one (`09` 7.23). Verify by render-and-diff, not by assumption |
+| **Re-measure the 2B baseline first** | Phase 0's 79.0 / 47.8 is a no-think render; the thinking-mode baseline under the Phase 6 protocol is REQUIRED before any before/after number is read. Keep both baseline rows — together they measure `09` §5.2's instill-vs-improve distinction |
+| What gets evaluated | the 10 students of `results/phase5.md` §3 (text-only checkpoints, `Qwen3_5ForCausalLM` / vLLM's `Qwen3_5ForCausalLM` path) + the two baseline rows. The LoRA cell is a PEFT adapter: **merge it with the Phase 2 merge-check pattern** (`phase2_train.py --merge`) and serve the merged bf16 like the others, rather than trusting vLLM's LoRA path on a hybrid-DeltaNet architecture |
+| Protocol | Phase 0's harness (`eval_baseline.py`, the same INSTR the students trained with), paper sampling 0.7 / 0.9 / 1.05, seed 1234, 1,015 tasks; carry Phase 4's strict loop test into the audit |
+| Reading the result | oracle-vs-forged gaps carry a measured 1.8–2.0× supervision-length difference, a register difference and 4–9 % answer inconsistency (`results/phase4.md` §10, `results/phase5.md` §1, §8) — the caveat block travels with the table. **Trigger:** any forged student ≥ the oracle student anywhere → the length-matched control becomes a Phase 6.5 proposal through the four questions above |
 
 ---
 
@@ -269,14 +292,14 @@ Phase 0 so pre/post is directly comparable. Est. ~8 h.
 | 2 Inverter training (**2 surrogates × 2 settings**) | ~28 h |
 | 3 **Victim queries** | **~79 h** *(actual: 66.3 h generation + probes, sweep, re-benchmark, compression)* |
 | 4 Inversion | **~28 h** *(actual: 27.7 h generation over four inverters + merges/smokes; `results/phase4.md` §8)* |
-| 5 Student training | **~35–50 h** *(working estimate, 7–10 trainings; re-budget at the Phase 5 handoff — `results/phase4.md` §10)* |
+| 5 Student training | **~27.3 h** *(actual: 10 trainings — 25.3 h full runs + probes/pre-flight; `results/phase5.md` §4)* |
 | 6 Evaluation | ~8 h |
-| **Total** | **~237-254 h** (~10-11 days of GPU time) |
+| **Total** | **~229-231 h** (~9.5-10 days of GPU time; was ~237-254 h while Phase 5 was an estimate) |
 
 **Phase 3 still dominates the project at ~79 h**, and it is the one phase that did *not* fit an
-overnight run — its generation alone ran 66.3 h unattended across three days. Phase 5 (~35–50 h,
-7–10 trainings) is now second and will not fit one either; Phase 2 (~28 h) and Phase 4 (~28 h,
-measured against a ~4 h plan) follow;
+overnight run — its generation alone ran 66.3 h unattended across three days. Phases 2, 4 and 5
+sit together at ~28 / ~28 / ~27.3 h (measured), and every phase but 3 ran as overnight-sized
+pieces — Phase 5's 10 trainings chained as ≤3.3 h runs over ~1.5 days;
 Phase 3 **measured 66.3 h of generation** (~79 h including its probes, sweep, re-benchmark and
 compression) — the pre-run ~10-15 h came from a sweep point at the wrong context. If generation needs
 cutting, the paper's own Figure 3 shows 5k queries already delivers most of the MATH500 benefit, and
