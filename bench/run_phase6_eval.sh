@@ -21,7 +21,20 @@ LOGS="$MAIN/bench/logs/phase6"
 SUMMARY="$BENCH/results/phase6/summary.json"
 mkdir -p "$OUT" "$LOGS"
 
-mode="${1:?probe|full}"; run="${2:?run name}"; model="${3:?model path}"; seed="${4:-1234}"
+mode="${1:?convert|probe|full|clean}"; run="${2:?run name}"; model="${3:-}"; seed="${4:-1234}"
+
+# FFT students need a serving copy (VL-style keys; see phase6_serve_copy.py)
+if [ "$mode" = "convert" ]; then
+  "$PY" "$BENCH/phase6_serve_copy.py" --student "${model:?student dir}" \
+    --out "$OUT/serve-$run" 2>&1 | tee "$LOGS/$run.convert.log"
+  exit 0
+fi
+if [ "$mode" = "clean" ]; then
+  rm -rf "$OUT/serve-$run"
+  echo "removed $OUT/serve-$run"
+  exit 0
+fi
+: "${model:?model path}"
 
 # baseline gets the once-only both-ways diff (docs/17 §4.2); every model gets the flagged assert
 diffboth=""
