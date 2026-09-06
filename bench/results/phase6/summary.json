@@ -1,0 +1,30 @@
+{
+  "baseline-think": {
+    "model": "Qwen/Qwen3.5-2B",
+    "seed": 1234,
+    "wall_s": 47931.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 33.8,
+        "acc_completed": 88.1,
+        "truncated": 338,
+        "no_answer": 299,
+        "median_gen_tokens": 32768,
+        "loops_strict": 166,
+        "loops_loose": 344
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 67.8,
+        "acc_completed": 99.4,
+        "truncated": 160,
+        "no_answer": 145,
+        "median_gen_tokens": 14927,
+        "loops_strict": 78,
+        "loops_loose": 218
+      }
+    }
+  }
+}
