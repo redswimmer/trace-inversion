@@ -2,187 +2,190 @@
 
 **Can you steal a model's reasoning from the parts it shows you?**
 
-Commercial reasoning models — OpenAI's o-series, Gemini, Claude with extended thinking — hide their
-chain of thought and return only the final answer plus, sometimes, a short summary of the thinking.
-The bet behind that design is that hiding the trace stops competitors from distilling the model's
-reasoning ability. [*How to Steal Reasoning Without Reasoning Traces*](https://arxiv.org/abs/2603.07267)
-(Zhang, Morris, Shmatikov — Cornell Tech, 2026) argues the bet is lost: train a model to run reasoning
-**backwards** — given a problem, its answer and the summary, write the full trace that would have
-produced them — and the traces it forges are good enough to train on. In the paper, a student
-fine-tuned on forged traces goes from 24.0 % to **36.3 %** on JEEBench, most of the way to the
-43.7 % it reaches when trained on the victim's *real* traces. Trained directly on what the victim
-shows — answers and summaries — the same student gets *worse*.
+Commercial reasoning models hide their chain of thought and return only the final answer plus,
+sometimes, a short summary of the thinking. The bet is that hiding the trace stops competitors from
+distilling the reasoning. [*How to Steal Reasoning Without Reasoning Traces*](https://arxiv.org/abs/2603.07267)
+(Zhang, Morris, Shmatikov — Cornell Tech, 2026) argues the bet is lost: train a model to run
+reasoning **backwards** — given a problem, its answer and the summary, write the trace that would
+have produced them — and the forged traces are good enough to train a student on. In the paper, a
+student fine-tuned on forgeries goes most of the way to one trained on the victim's *real* traces,
+and beats a student trained on a weaker model's real traces.
 
-This repository reproduces that pipeline end to end on **one RTX 4090**, with a **local victim**.
-The local victim buys something the paper's API victim never could: its real traces stay on disk,
-withheld from the attack, so we can measure exactly how close the forgeries get to the truth.
+This repository reproduces that pipeline end to end on **one RTX 4090** with a **local victim**, so
+the victim's real traces exist on disk — withheld from the attack, and used only to train the
+ceiling condition the paper could never run against its own black-box victim.
 
-## The cast
+## The result
 
-Five roles. Three are only ever run; two are trained — and those two are trained **more than once
-each**, because the experiment is a grid, not a single pipeline.
+**Forged traces lost to plain distillation.** Trained on the forgeries, the student scored below
+a student trained on the surrogate's own traces — the trivial alternative the attack is meant to
+beat — on both benchmarks and both surrogate sizes, and well below the student trained on the
+victim's real traces. And *no* trained student, oracle included, beat the untrained model with
+thinking switched off.
 
-| Role | Symbol | Here | Trained? | How many | Job |
-|---|---|---|---|---|---|
-| **Victim** | `V` | Qwen3.8-27B, 4-bit, llama.cpp | never | 1 | The strong model being stolen from. Answers problems, shows a summary, hides its trace. |
-| **Surrogate** | `V'` | DeepSeek-R1-Distill-Qwen-**7B** and **-1.5B** | never | **2 arms** — each runs through the whole pipeline | A weaker reasoner we run ourselves, so its traces are visible. Exists only to manufacture the inverter's training data. |
-| **Compressor** | `C'` | Qwen3.5-4B, zero-shot with a fixed prompt | never | 1 | Writes a victim-style summary of each surrogate trace, so the training data has the "summary" column the victim will later provide. |
-| **Inverter** | `I` | Qwen3.5-4B + LoRA | **yes** | **4 adapters** — {7B arm, 1.5B arm} × {victim shows a summary, victim shows only the answer} | Learns *(problem, answer[, summary]) → trace* from one arm's surrogate data. Then pointed at the victim's outputs. |
-| **Student** | `S` | Qwen3.5-2B, full fine-tune | **yes** | **10 students** — the five conditions below, with forged traces ×4 (one per inverter) and the surrogate's own traces ×2 (one per arm), plus one LoRA twin of the 7B-arm forged student to price the method | The model we are trying to improve. Benchmarked on MATH500 and JEEBench. |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/results-dark.svg">
+  <img alt="Bar chart of student accuracy on MATH500 and JEEBench by training condition. Forged-trace students score 61–68 MATH500 / 22–36 JEEBench; distilling the 7B surrogate scores 72.0 / 45.4; the oracle 73.4 / 45.6; the untrained model with thinking off 79.0 / 47.8." src="docs/assets/results-light.svg">
+</picture>
 
-Why the inverter is trained four times rather than once: the two *settings* are different input
-formats (an inverter trained with summaries can't be fed inputs without them, and the paper keeps
-them separate so each setting's number is that setting's alone), and the two *arms* are different
-training data (the point of the second arm is to change one thing — the surrogate — and watch what
-happens downstream, which needs one inverter per surrogate with everything else identical). The
-paper trains the same four.
+| Student trained on | MATH500 | JEEBench | JEEBench answers cut off at the cap |
+|---|---|---|---|
+| nothing — thinking **off** (the template's default) | **79.0** | **47.8** | — |
+| nothing — thinking **on** (how every student is served) | 67.8 | 33.8 | 65.6 % |
+| the victim's answers only | 54.2 | 22.9 | 0.6 % |
+| the victim's summaries + answers | 54.8 | 21.6 | 0.6 % |
+| **forged traces**, 7B surrogate arm (with / without summary) | 64.4 / 67.0 | 35.5 / 31.8 | 30.7 / 29.1 % |
+| **forged traces**, 1.5B surrogate arm (with / without summary) | 61.0 / 61.2 | 24.9 / 22.5 | 49.5 / 43.3 % |
+| the surrogate's own traces — 7B | **72.0** | **45.4** | 16.7 % |
+| the surrogate's own traces — 1.5B | 62.2 | 32.4 | 37.9 % |
+| the victim's real traces (oracle) | **73.4** | **45.6** | 8.0 % |
 
-Problems come from OpenThoughts-114k, in two disjoint splits — one the surrogate sees, one the victim sees.
+Three evaluation seeds on one forged cell put the noise band at **3.4 points on MATH500 and 5.3
+on JEEBench**; the gaps the claims below rest on are 1.4–2.6× that band, and the one gap inside
+it (distilling the 7B surrogate vs the oracle, 1.4 / 0.2 points) is called a tie.
 
-An analogy that holds up: a brilliant tutor gives you answers and a paragraph of "how I thought about
-it," but never the worked solution. Apprentices learn from worked solutions. So you hire a mediocre
-tutor you *can* watch (surrogate), record their worked solutions, have a clerk (compressor) summarise
-each in the brilliant tutor's style, and train a forger (inverter) to reconstruct a worked solution
-from *(problem, answer, summary)*. Then feed the forger the brilliant tutor's outputs and train your
-apprentice (student) on the forgeries.
+What the table says:
 
-## How it works
+1. **Inversion added nothing over distillation.** Per surrogate arm, the forged-trace student
+   trails the plain-distillation student by 5–8 MATH500 and 10–14 JEEBench points (7B arm), and
+   by 8–10 JEEBench points on the 1.5B arm (MATH500 a tie there). The paper's core claim runs
+   the other way.
+2. **Distilling a mid-strength surrogate matched the oracle.** The 7B surrogate scores 60.6 on
+   JEEBench itself; a student trained on its traces (45.4) tied the student trained on the
+   27B victim's real traces (45.6), at half the truncation rate.
+3. **Nothing taught the student to reason better than it already could.** Every trained row sits
+   below the no-think baseline; what training demonstrably taught is *termination* — how to close
+   a think block instead of looping to the 32k-token cap, which the untrained model does on two
+   thirds of JEEBench. The next two sections are why.
 
+## Against the paper
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/paper-vs-ours-dark.svg">
+  <img alt="Diverging bar chart of the change in JEEBench accuracy versus the untrained student, paper versus this reproduction. Paper: forged traces +8.0, oracle +15.4, everything else negative. Here: every condition negative; forged traces −12.3 sit below the surrogate's own traces −2.4 and the oracle −2.2." src="docs/assets/paper-vs-ours-light.svg">
+</picture>
+
+Same five conditions, same benchmark, opposite ordering. Three differences in the setup account
+for it, and all three are on the record rather than guessed:
+
+- **The student already reasons.** The paper's students (Qwen2.5-7B, Llama-3.1-8B) predate
+  reasoning models; ours (Qwen3.5-2B) thinks natively, and thinking mode alone costs it
+  11–14 points because it loops. The claim therefore shifts from "inversion *instills* reasoning"
+  to "inversion *improves* it" — and against a model that reasons, forgeries had nothing to add.
+- **The forgeries were the wrong length and the wrong voice.** The 27B victim writes terse
+  working notes (median 1,400 tokens); the inverters, trained on a talkative surrogate, wrote
+  forgeries **2.2–2.6× longer** than the real traces on the same problems, in R1-Distill's
+  "Okay, so…" monologue. The paper's forgeries approached the truth from *below* (81–89 % of its
+  length); ours overshot from above.
+- **The paper's margins are inside our noise.** Its headline gaps are 0.4–2.4 points on single
+  runs; our measured seed band is 3.4 / 5.3. A single-seed reproduction of those gaps could not
+  distinguish them from noise on this hardware either way.
+
+## Why the forgeries lost: they taught the student to ramble
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/termination-dark.svg">
+  <img alt="Scatter plot of JEEBench accuracy against the share of answers truncated at the cap. The untrained thinking model sits at 65.6% truncated, 33.8 accuracy. Oracle and distilled-7B students sit at 8–17% truncated and 45 accuracy. Forged-trace students sit at 29–50% truncated and 22–36 accuracy, ordered by surrogate arm." src="docs/assets/termination-light.svg">
+</picture>
+
+Accuracy tracks termination almost exactly. The untrained model loops to the cap on 65.6 % of
+JEEBench; every trained student loops less, in proportion to how short its training traces were:
+answer-only ≤ 1 %, oracle 8 %, forged traces from the 7B arm ~30 %, from the 1.5B arm 43–50 %.
+The forged-trace students were trained on completions **1.8–2.0× longer** than the oracle's on
+the same rows, and they learned the length. Surrogate strength then propagates through the whole
+pipeline into student *behaviour*, not just accuracy: the weaker arm's inverters capped twice as
+often, its forgeries were rescued from loopier draws, and its students loop ~1.7× more than the
+7B arm's.
+
+## How the attack works
+
+```mermaid
+flowchart LR
+  A["OpenThoughts split A<br/>5,000 problems"] --> S["<b>Surrogate</b> V′<br/>R1-Distill 7B · 1.5B<br/>(2 arms)"]
+  S --> T["problem · answer · trace"]
+  T --> C["<b>Compressor</b> C′<br/>Qwen3.5-4B, zero-shot"]
+  C --> D["+ summary"]
+  D --> I["<b>Inverter</b> I<br/>Qwen3.5-4B + LoRA<br/>learns (problem, answer, summary) → trace<br/>(4 adapters)"]
+  B["OpenThoughts split B<br/>5,000 problems"] --> V["<b>Victim</b> V<br/>Qwen3.8-27B"]
+  V --> O["answer + summary<br/><i>real trace locked away</i>"]
+  O --> I
+  I --> F["forged traces"]
+  F --> St["<b>Student</b> S<br/>Qwen3.5-2B<br/>(10 trainings, one per condition)"]
+  O -. oracle condition only .-> St
+  St --> E["MATH500 + JEEBench"]
 ```
-Phase 0   benchmark every candidate zero-shot → fix the roles above                        done
-Phase 1   split A → surrogate → (problem, trace, answer)
-                                   └→ compressor → summary
-          = D₂: (problem, answer, summary, trace) × ~5,000 rows, once per surrogate arm     done
-Phase 2   train the inverter on D₂:  (problem, answer, summary) → trace                    done
-Phase 3   split B → victim → (problem, answer, summary)    real trace → separate file, locked   done
-Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000                       done
-Phase 5   train the student five ways on split B:                                          done
-            answer-only | summary+answer | surrogate's own traces ×2 | forged traces ×4 | real victim traces
-            (+ one LoRA twin = 10 students, all on the same 3,616 rows)
-Phase 6   MATH500 + JEEBench on all the students                                           done
-```
 
-The question the last row answers: does the student trained on **forged** traces beat the students
-trained on what the victim actually shows, and on the surrogate's own traces — and how close does it
-get to the one trained on the victim's real, withheld traces? If yes and close, hiding the chain of
-thought protected nothing.
+| Role | Here | Trained? | How many | Job |
+|---|---|---|---|---|
+| **Victim** | Qwen3.8-27B, 4-bit, llama.cpp | never | 1 | The strong model being stolen from. Shows a summary, hides its trace. |
+| **Surrogate** | R1-Distill-Qwen-**7B** and **-1.5B** | never | **2 arms** | A weaker reasoner we can watch. Exists only to manufacture the inverter's training data. |
+| **Compressor** | Qwen3.5-4B, zero-shot | never | 1 | Writes a victim-style summary of each surrogate trace. |
+| **Inverter** | Qwen3.5-4B + LoRA | **yes** | **4** — {7B, 1.5B arm} × {summary, no summary} | Learns *(problem, answer[, summary]) → trace*, then is pointed at the victim's outputs. |
+| **Student** | Qwen3.5-2B, full fine-tune | **yes** | **10** — one per condition, every one on the same 3,616 problems | The model being improved. |
 
-The paper's own numbers for exactly that comparison — its Qwen2.5-7B student, the weak 1.5B
-surrogate, victim = DeepSeek-R1, accuracy in %:
+The inverter is never benchmarked and never asked to solve anything — it is handed the answer.
+Its only test is whether the traces it writes make the student better.
 
-| Student trained on | MATH500 | JEEBench |
-|---|---|---|
-| nothing (base model) | 71.2 | 28.3 |
-| the victim's answers only | 61.0 | 21.6 |
-| the victim's summaries + answers | 63.0 | 24.0 |
-| the surrogate's own traces | 63.2 | 19.7 |
-| **forged traces** | **71.8** | **36.3** |
-| the victim's real traces (oracle) | 72.2 | 43.7 |
+Two things the paper couldn't do: an **oracle row from the same victim that was attacked** (its
+black-box victim never exposed a trace), and a **midpoint on surrogate strength** — it compared a
+1.5B distill with 685B R1; we run the 1.5B (its exact model) and a 7B under identical settings.
 
-Everything the victim actually shows makes the student *worse* than doing nothing; forgeries built
-from those same outputs carry it most of the way to the oracle. That is the result being reproduced.
+## Findings along the way
 
-The inverter is never benchmarked and never asked to solve anything. It is handed the answer. Its
-only test is whether the traces it writes make the student better.
+Full detail in `docs/results/`. The ones that would bite anyone repeating this:
 
-## Two things the paper didn't do
+- **A chat template is part of the experiment.** Qwen3.5-4B thinks by default; Qwen3.5-2B ships
+  with thinking *off* and renders a closed think block unless asked. Caught in a round-trip gate
+  before training — and it ran backwards too: the original student baseline was a no-think
+  render, so the thinking-mode baseline had to be re-measured before any before/after claim.
+- **Checkpoints that load are not checkpoints that serve.** transformers 5.16 reverts its own
+  key renaming on save, so every full-fine-tune student loaded in transformers and was rejected
+  by vLLM; serving copies with the prefix stripped fixed it, tensors byte-identical.
+- **The victim was silently being asked for maximum effort.** With no system prompt, the GGUF's
+  template injects a "reasoning effort: xhigh" turn. `medium` — the only level that renders no
+  system turn — halved the cap-hit rate and cut a projected ~145 h victim run to 66 h.
+- **Capability shows up as brevity.** The 27B victim scores 86 on JEEBench in a median ~3,500
+  tokens; the 4B takes ~22,000 and scores 74; the 2B, thinking, hits the 32k cap.
+- **A weaker surrogate doesn't produce longer training data — it produces a bigger discard
+  pile.** Traces that hit the 8,192-token cap are dropped. The 1.5B caps 46 % of prompts to the
+  7B's 35 %, yet the *surviving* traces are the same length; all the extra verbosity is in the tail.
+- **The inverters cannot finish what the victim starts.** On surrogate data they cap 3–17 % of
+  the time; on the victim's fully-worked answers, 21–38 % — and 9.5–19 % of problems never
+  terminate in three draws, twice as often on code as on math.
+- **A forged trace sometimes argues itself out of the answer it was handed** — 4–9 % of graded
+  forgeries conclude something other than the answer they were conditioned on. Left unfiltered,
+  as in the paper.
 
-- **The oracle row exists.** The paper's black-box victim (GPT-5.4 mini) could never reveal its real
-  traces, so the ceiling in its results — a student trained on the victim's *real* traces — had to
-  come from a different, open-weight victim. Ours is one model: the victim that gets attacked is the
-  victim whose real traces set the ceiling.
-- **A midpoint on surrogate strength.** The paper's most useful claim — a *weak* surrogate is nearly
-  as good as a strong one — was tested at two points 450× apart (a 1.5B distill and 685B R1). We run
-  the 1.5B (the paper's exact model) and a 7B on identical prompts, settings and cap, so the
-  comparison varies surrogate strength and nothing else.
+## Cost
 
-## Where it stands
+| Phase | GPU hours |
+|---|---|
+| 0 — baselines | ~30 |
+| 1 — surrogate data, both arms | ~30 |
+| 2 — train 4 inverters | ~28 |
+| 3 — query the victim (5,045 traces) | **~79** |
+| 4 — forge 4 trace sets | ~28 |
+| 5 — train 10 students | ~27 |
+| 6 — evaluate 13 runs | ~36 |
+| **Total** | **~258 h** — about eleven days on one RTX 4090 |
 
-| Phase | Status | Headline |
-|---|---|---|
-| 0 — baselines | done | Harness calibrated: the paper's own surrogate scores 32.6 % JEEBench here vs 32.6 % in the paper. Roles fixed on measurement: student 47.8 < surrogate 60.6 < victim 86.2 on JEEBench — the regime the argument needs. *(86.2 is at the chat template's default `xhigh` effort; 82.0 at the `medium` Phase 3 actually queried. The ordering holds either way.)* |
-| 1 — surrogate data | done | `D₂` built for both arms (5,006 / 5,028 rows). Summaries pass all four of the paper's style targets. ~21 h of generation per arm. |
-| 2 — train inverters | done | Four LoRA inverters, 33.8 h of training at ~2,100 tokens/s. On held-out prompts the forged traces run 0.89–0.99× the surrogate's length and land on their given answer ~95–97 % of the time. Record: `docs/results/phase2.md`. |
-| 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
-| 4 — invert | done | Four forged-trace sets (4,068–4,565 rows each, 3,616 in common) in **≈ 28 h**. **The forgeries run 2.2–2.6× the victim's real traces on the same problems**, so the synthesized student target is 1.8–1.9× the oracle's — the length confound Phase 3 predicted, now measured. The inverters cap 21–38 % of first draws on victim inputs (3–17 % on surrogate data) and 9.5–19 % of rows never terminate in three draws. Record: `docs/results/phase4.md`. |
-| 5 — train students | done | **All 10 cells trained in ≈ 27.3 h** (7 core + both Surrogate-Trace arms + the FFT-vs-LoRA twin), each on the same 3,616-row intersection; the 2B FFT ran ~3,220–3,520 tok/s, 1.65× the Phase 2 rate the estimate was scaled from, so the phase took about half the estimated hours. Two catches en route: TRL mis-tokenizes the completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's chat template defaults to thinking OFF** — so Phase 6 must serve with `enable_thinking=True` *and re-measure the 2B baseline*, whose Phase 0 numbers are a no-think render. Record: `docs/results/phase5.md`. |
-| 6 — evaluate | done | **The result, in one line: inversion lost to plain distillation.** 13 runs in **≈ 36.1 h** under Phase 0's harness + one `--enable-thinking` flag. Thinking mode is a net cost to the untrained 2B (67.8/33.8 vs the no-think 79.0/47.8 — it loops to the 32k cap on 65.6 % of JEEBench); **no trained student clears the no-think bar**, so the phase measures termination, not instilled reasoning. The oracle student recovers most of the cost (73.4/45.6); **every synthesized-trace cell lands below oracle on every quotable number** (length-control trigger NOT fired), and **Surrogate-Trace ≥ Synthesized-Trace on both arms** — surr-7b ties oracle (72.0/45.4) at half its truncation. Seed band from 3 seeds: MATH 3.4 / JEE 5.3. Record: `docs/results/phase6.md`. |
+## Caveats
 
-## What we've found so far
-
-Findings the paper didn't report, from Phases 0–5 (full detail in `docs/results/`):
-
-- **The same model family ships opposite thinking defaults — and it nearly trained the wrong
-  thing.** Qwen3.5-4B's chat template thinks by default; Qwen3.5-2B's renders a *closed* empty
-  think block unless `enable_thinking=True` is passed. Phase 5 caught it in a round-trip gate
-  before any GPU hour; the consequence runs backwards too — Phase 0's 2B "student baseline"
-  (79.0 MATH500) was measured in the no-think render, so Phase 6 must re-baseline before any
-  before/after claim. A reminder that a chat template is part of the experiment, not plumbing.
-- **Real traces are harder to imitate than forged ones.** Over three epochs, every student trained
-  on victim-derived targets — the forged traces included — cut its loss by 17–35 %; both students
-  trained on a surrogate's *real* traces cut theirs by only 6–9 %. Recorded, not claimed: the two
-  groups also differ in answer source and row mix (the forged rows are the ones every inverter could
-  finish, i.e. the easier ones), so this is a pre-registered observation for Phase 6 to read against,
-  not a finding about traces (`docs/results/phase5.md` §8). Either way, training loss ranks nothing —
-  only Phase 6 accuracy does.
-- **The victim was never asked for its best reasoning — and nobody had noticed.** The GGUF's chat
-  template silently injects a reasoning-effort system turn when the request sends none, so every
-  "no system prompt" query — Phase 0's benchmarks included — actually ran at `xhigh`. Setting
-  `medium`, the only level that renders *no* system turn at all, halved the cap-hit rate (37 % → 16 %)
-  and cut the victim run from a projected ~145 h to 66 h, for a benchmark difference that is within
-  sampling noise (82.0 vs 86.2 JEEBench on a 250/bench subset — 1.5 SE, and confounded with a
-  prompt change made at the same time).
-- **A stronger model writes shorter traces — short enough to invert the paper's ordering.** The
-  victim's real traces run a median 1,400 tokens against R1's 3,664 on the *same* prompts, and
-  shorter than the forgeries built to imitate them (~2,100 on the held-out estimate). The paper's
-  `Len` metric assumes forgeries approach the truth from below; ours overshoot it from above —
-  **measured in Phase 4 at 2.2–2.6× on the same problems** (all four inverters, with and without the
-  summary), which puts a ~1.8–1.9× supervision-length gap into the oracle-vs-forgery comparison.
-- **The inverters cannot finish what the victim starts.** Trained on surrogate traces they capped
-  3–17 % of the time; on the victim's fully-worked answers they cap 21–38 % of first draws, and
-  re-drawing rescues only a quarter of the residual each time — capping is a property of the prompt,
-  not the sample, once the conditioning answer is long. 9.5–19 % of split B never terminates in three
-  draws, twice as often on code as on math.
-- **The answer's format is a property of the prompt, not the model.** Asking for a boxed answer took
-  the share of victim responses carrying one from 56 % to ~100 % — the same model, the same effort,
-  a one-sentence instruction. Every downstream grader depends on it.
-
-- **Capability shows up as brevity.** The 27B victim solves JEEBench in a median 4,295 tokens; the 4B
-  takes 21,859 and scores lower. Long generations were smaller models flailing.
-- **A weaker surrogate doesn't make longer training data — it makes a bigger discard pile.** Traces
-  are capped at 8,192 tokens and capped rows are dropped. The 7B hits the cap on 34.6 % of prompts,
-  the 1.5B on 45.9 %; yet the *surviving* traces are the same length (median ~2,800 vs ~2,500). All
-  the extra verbosity lives in the tail the cap removes.
-- **The drop is partly the surrogate's own doing.** Paired against R1's ground-truth trace on the same
-  prompt, 38 % of what the 7B drops (13 % of all prompts) are problems R1 finishes fine — a
-  train/serve shift the paper's identical drop policy carries unmeasured. For the 1.5B it's 23 % of
-  prompts.
-- **Whether a prompt hits the cap is substantially a coin flip.** Two draws of the same prompts at
-  temperature 0.7 disagree on 15 % of rows. That is the noise floor under every cap-hit number.
-- **The paper's "aim for 600–900 tokens" is a calibrated over-ask** that its compressor undershoots
-  by ~28 %; ours undershoots by ~17 %, so the exemplars had to be re-sized to land on the paper's
-  medians. Swap the compressor and you land somewhere else on the same instruction.
-- **The weak surrogate's habits reach the inverter through style, not through bad targets.** Every
-  trace the inverters trained on terminated under the cap, yet the inverters trained on the 1.5B's
-  traces run past 8,192 tokens on 10–17 % of held-out prompts, against 3–5 % for the 7B's — and they
-  loop where the 7B-arm inverters never do.
-- **A forged trace sometimes argues itself out of the answer it was handed.** About 3 % of gradable
-  held-out traces conclude something other than the answer they were conditioned on — a spurious
-  units "correction", 21 talked down to 20, a Yes turned into No. On the weak arm, most of those are
-  the inverter being *right* where its surrogate was wrong. On the victim's data the rate is ≈ 4–9 %
-  and the override never helps (the victim's answer agreed with R1 in every genuine case read). The
-  paper does no filtering and neither do we: the students trained on the forged files as-is, rate
-  reported (`docs/09` 7.15).
-- **The inverter needs almost nothing to acquire the format.** Loss drops in the first ~100 steps
-  and is flat after; a 20-step adapter already wrote traces at the true length ending in the right
-  boxed answer. Epochs 2–3 fit the training rows (held-out loss is best at epoch 2 on all four).
+- Different victim, student and surrogate sizes than the paper, so **absolute numbers are not
+  comparable to its tables**; the orderings are what's being compared.
+- **Oracle-vs-forged gaps carry three confounds** besides trace content: supervision length
+  (1.8–2.0×), register, and 4–9 % answer inconsistency. The plain-distillation cells differ from
+  the victim-trained cells in rows and answer source as well as trace source. "The pipeline as
+  built underperforms the trivial alternative" is settled; *why* is not fully separable.
+- One training seed per condition; the evaluation band was measured on one cell.
+- 5,000 victim queries per split against the paper's 10,000; its own scaling curve shows 5k
+  delivers most of the MATH500 gain.
 
 <details>
 <summary><strong>How this differs from the paper</strong></summary>
 
-The paper ran on 8× A100 80 GB with a 685 B victim. Everything below follows from having 24 GB of
-VRAM and 30 GB of RAM. The running log, with the reason and expected effect of each, is
-`docs/09-deviations-from-paper.md`.
+The paper ran on 8× A100 80 GB with a 685 B victim. Everything below follows from 24 GB of VRAM.
+The running log with the reason and expected effect of each is `docs/09-deviations-from-paper.md`.
 
 | | Paper | Here | Why |
 |---|---|---|---|
@@ -190,44 +193,56 @@ VRAM and 30 GB of RAM. The running log, with the reason and expected effect of e
 | Surrogate | R1-Distill-Qwen-1.5B (and R1) | same 1.5B, plus a 7B as primary | the 1.5B scores *below* our student on JEEBench; the 7B restores the paper's ordering and adds the midpoint |
 | Compressor / inverter base | Qwen2.5-7B-Instruct | Qwen3.5-4B | 7B full fine-tuning is ~58 GB; the 4B fits with LoRA at 18 GB |
 | Inverter training | full-parameter SFT | bf16 LoRA, r=64, lr 1e-4 | 4B full fine-tuning measured at 27.8 GB |
-| Student | Qwen2.5-7B-Instruct, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at the paper's 16,384 context (+ one LoRA twin) | fits full fine-tuning, so the method matches. It is a model that already reasons, so the claim becomes "inversion *improves* reasoning," measured against the same four baselines — and against a re-measured thinking-mode baseline, since its template defaults thinking off (`docs/09` 7.23) |
-| Data | 2 × 10 k prompts | 2 × 5 k | the paper's own scaling curve shows 5 k delivers most of the MATH500 gain; generation is the dominant cost |
+| Student | Qwen2.5-7B-Instruct, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at the paper's 16,384 context (+ one LoRA twin, which scored the same) | fits full fine-tuning, so the method matches; it already reasons, so the claim becomes "inversion *improves* reasoning" |
+| Data | 2 × 10 k prompts | 2 × 5 k | the paper's own scaling curve shows 5 k delivers most of the MATH500 gain |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | translated, not copied — the two frameworks' defaults differ |
+| Evaluation | benchmark defaults, unspecified sampling | one harness for every model: 32k cap, paper sampling, seed 1234, `enable_thinking=True` | comparability across the 13 runs and with the Phase 0 baseline |
 | Trace-fidelity metrics | BLEU / TF1 / ROUGE against the victim's real traces | not run | across the paper's own results they track trace *length* at r ≈ 0.9; student accuracy carries the result |
-| Inverter input format | unspecified | the paper's own zero-shot prompt, format-matched to its compressor | the paper never says what the trained inverter was given; its v2 prompts also contradict each other on summary format |
-| Seeds / variance | none reported | **measured**: 3 eval seeds on synth-7b-sum give a band of MATH 3.4 / JEEBench 5.3 points (`docs/09` 4.5, closed) | the paper's headline margins are 0.4–2.4 points on single runs — *inside* our measured band, so its single-seed gaps are not distinguishable from seed noise on this hardware |
+| Seeds / variance | none reported | 3 evaluation seeds on one cell: band 3.4 / 5.3 points | the paper's headline margins (0.4–2.4) sit inside that band |
 
 </details>
 
 <details>
-<summary><strong>Repository layout</strong></summary>
+<summary><strong>Phase-by-phase records</strong></summary>
+
+Each phase was run from a ≤4,000-character goal prompt (`docs/PHASE*-GOAL.txt`) against a
+numbered handoff document, with a supervising session auditing every checkpoint. The measured
+record of each phase supersedes its plan wherever they disagree.
+
+| Phase | Plan | Record |
+|---|---|---|
+| 0 — baselines | `docs/10-run-plan.md` | `docs/results/baselines.md` |
+| 1 — surrogate data | `docs/11-phase1-handoff.md` | `docs/results/phase1.md` |
+| 2 — train the inverters | `docs/13-phase2-handoff.md` | `docs/results/phase2.md` |
+| 3 — query the victim | `docs/14-phase3-handoff.md` | `docs/results/phase3.md` |
+| 4 — invert | `docs/15-phase4-handoff.md` | `docs/results/phase4.md` |
+| 5 — train the students | `docs/16-phase5-handoff.md` | `docs/results/phase5.md` |
+| 6 — evaluate | `docs/17-phase6-handoff.md` | `docs/results/phase6.md` |
+
+`docs/00`–`04` cover the paper itself (method, experiments, artifacts, defenses); `docs/05`–`08`
+this machine (feasibility, model selection, the released code, measured throughput); `docs/09` every
+deviation; `docs/10` the run plan and the four questions every proposed experiment must answer.
+
+</details>
+
+<details>
+<summary><strong>Repository layout and running it</strong></summary>
 
 ```
 bench/                  the harness — every script that generates, trains, measures or gates
   phase1/               pinned prompts (verbatim from the paper's repo, sha256-asserted) and the split manifest
-  results/              raw outputs (gitignored — 20–340 MB each, they embed full generated text)
+  results/              raw outputs (gitignored — they embed full generated text); committed: the small JSON records
 docs/
-  00–04                 the paper: method, experiments, artifacts, defenses and critique
-  05–08                 this machine: feasibility, model selection and TRL, the released code, measured throughput
-  09                    every deviation from the paper, with reasons — kept current
-  10                    the run plan, phase by phase, and the four questions to ask before proposing an experiment
-  11–16                 per-phase handoffs and readiness reviews (each superseded by its results/ record where they disagree)
-  PHASE*-GOAL.txt       the prompt each phase is run from
-  results/              committed measurements: baselines, phase1–phase5, sweeps, audits
+  assets/               the README charts and the script that draws them from bench/results/phase6/summary.json
+  results/              committed measurements: baselines, phase1–phase6, sweeps, audits
 ```
 
-</details>
-
-<details>
-<summary><strong>Running it</strong></summary>
-
 Three stacks, deliberately separate: `llama.cpp` (`llama-server`, GGUF) for the victim and
-surrogates; `.venv-vllm` for batched inference with vLLM; `.venv` for training with TRL. vLLM pins
-its own torch and never goes in the training venv.
+surrogates; `.venv-vllm` for batched inference and evaluation with vLLM; `.venv` for training with
+TRL. vLLM pins its own torch and never goes in the training venv.
 
-Every long run in this project is preceded by a probe — a concurrency sweep or a 20-step training
-run — whose projection is reported before the run starts, and every result file goes through a gate
-(`bench/phase1_stats.py`, `bench/audit_results.py`) before a number from it is believed. The
-conventions that came out of doing this the hard way are in `docs/11-phase1-handoff.md` §5.
+Every long run was preceded by a probe whose projection was reported before the run started, and
+every result file went through a gate before a number from it was believed. The conventions that
+came out of doing this the hard way are in `docs/11-phase1-handoff.md` §5.
 
 </details>
