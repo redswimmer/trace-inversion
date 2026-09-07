@@ -59,7 +59,7 @@ Phase 4   inverter(problem, answer, summary) → forged trace, × 5,000         
 Phase 5   train the student five ways on split B:                                          done
             answer-only | summary+answer | surrogate's own traces ×2 | forged traces ×4 | real victim traces
             (+ one LoRA twin = 10 students, all on the same 3,616 rows)
-Phase 6   MATH500 + JEEBench on all the students                                           ← the result
+Phase 6   MATH500 + JEEBench on all the students                                           done
 ```
 
 The question the last row answers: does the student trained on **forged** traces beat the students
@@ -106,7 +106,7 @@ only test is whether the traces it writes make the student better.
 | 3 — query the victim | done | **5,045** victim rows on split B in **66.3 h** at 123.6 t/s, 0 errors. The victim's own traces (median 1,400 tokens) turn out **shorter than the forgeries meant to imitate them** — the reverse of the paper's ordering, and a length confound Phase 5 has to carry. Record: `docs/results/phase3.md`. |
 | 4 — invert | done | Four forged-trace sets (4,068–4,565 rows each, 3,616 in common) in **≈ 28 h**. **The forgeries run 2.2–2.6× the victim's real traces on the same problems**, so the synthesized student target is 1.8–1.9× the oracle's — the length confound Phase 3 predicted, now measured. The inverters cap 21–38 % of first draws on victim inputs (3–17 % on surrogate data) and 9.5–19 % of rows never terminate in three draws. Record: `docs/results/phase4.md`. |
 | 5 — train students | done | **All 10 cells trained in ≈ 27.3 h** (7 core + both Surrogate-Trace arms + the FFT-vs-LoRA twin), each on the same 3,616-row intersection; the 2B FFT ran ~3,220–3,520 tok/s, 1.65× the Phase 2 rate the estimate was scaled from, so the phase took about half the estimated hours. Two catches en route: TRL mis-tokenizes the completion boundary (fixed by two-segment pretokenization), and **Qwen3.5-2B's chat template defaults to thinking OFF** — so Phase 6 must serve with `enable_thinking=True` *and re-measure the 2B baseline*, whose Phase 0 numbers are a no-think render. Record: `docs/results/phase5.md`. |
-| 6 — evaluate | next | the result — students vs the re-measured baseline, MATH500 + JEEBench |
+| 6 — evaluate | done | **The result, in one line: inversion lost to plain distillation.** 13 runs in **≈ 36.1 h** under Phase 0's harness + one `--enable-thinking` flag. Thinking mode is a net cost to the untrained 2B (67.8/33.8 vs the no-think 79.0/47.8 — it loops to the 32k cap on 65.6 % of JEEBench); **no trained student clears the no-think bar**, so the phase measures termination, not instilled reasoning. The oracle student recovers most of the cost (73.4/45.6); **every synthesized-trace cell lands below oracle on every quotable number** (length-control trigger NOT fired), and **Surrogate-Trace ≥ Synthesized-Trace on both arms** — surr-7b ties oracle (72.0/45.4) at half its truncation. Seed band from 3 seeds: MATH 3.4 / JEE 5.3. Record: `docs/results/phase6.md`. |
 
 ## What we've found so far
 
@@ -195,7 +195,7 @@ VRAM and 30 GB of RAM. The running log, with the reason and expected effect of e
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | translated, not copied — the two frameworks' defaults differ |
 | Trace-fidelity metrics | BLEU / TF1 / ROUGE against the victim's real traces | not run | across the paper's own results they track trace *length* at r ≈ 0.9; student accuracy carries the result |
 | Inverter input format | unspecified | the paper's own zero-shot prompt, format-matched to its compressor | the paper never says what the trained inverter was given; its v2 prompts also contradict each other on summary format |
-| Seeds / variance | none reported | one seed per condition so far (Phase 5); a multi-seed repeat of the headline cells is a Phase 6.5 proposal, gated by `docs/10`'s four questions | the paper's headline margins are 0.4–2.4 points on single runs, so a single-seed reproduction inherits the same caveat |
+| Seeds / variance | none reported | **measured**: 3 eval seeds on synth-7b-sum give a band of MATH 3.4 / JEEBench 5.3 points (`docs/09` 4.5, closed) | the paper's headline margins are 0.4–2.4 points on single runs — *inside* our measured band, so its single-seed gaps are not distinguishable from seed noise on this hardware |
 
 </details>
 
