@@ -192,7 +192,7 @@ VRAM. Full log with reasons: [`docs/09-deviations-from-paper.md`](docs/09-deviat
 | Data | 2 × 10k prompts | 2 × 5k queried; students train on 3,616 | cost. The paper's own curve (GPT-5.4 mini victim) falls from 77.6 to 67.0 on MATH500 at 5k, below its untrained 71.2 |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | single-GPU training |
 | Evaluation | unspecified sampling, single run | one harness for all 13 runs, 32k cap, 3 evaluation seeds on one cell | comparability |
-| Trace-similarity metrics | BLEU / token-F1 / ROUGE | not run | across the paper's own results they track trace length (r = 0.84–0.95, [`docs/10`](docs/10-run-plan.md)); student accuracy is the real test |
+| Trace-similarity metrics | BLEU / token-F1 / ROUGE | not run | across the paper's six Table 2 rows they track trace length (r = 0.84–0.95, n = 6, [`docs/10`](docs/10-run-plan.md)); student accuracy is the real test |
 
 </details>
 
