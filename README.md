@@ -129,8 +129,7 @@ surrogate's traces end at its own answer, while forgeries are written backwards 
 the inverter was handed, and 4–9 % of them argue their way to a different one. The two sets also
 cover different problems, so this is a candidate explanation, not a measured cause. Forgeries also
 overshoot the real traces they replace (median trace 2.2–2.6× longer), where the paper's came in
-*under* the real length (81–89 %). Both flaws were on record before any student trained, though
-this run can't show they caused the loss.
+*under* the real length (81–89 %). Both flaws were on record before any student trained.
 
 ## What it means
 
@@ -141,10 +140,10 @@ little room, and for a student that already reasons, fine-tuning mainly taught i
 reasoning. So credit a trace-stealing attack only if it beats both the untrained student, served
 the same way, and distillation from the best open model. The evidence, from both sides:
 
-**Both of the paper's Qwen margins were measured against a distillation baseline that scored below
-the untrained model** (63.2 vs 71.2 on MATH500, 19.7 vs 28.3 on JEEBench). On MATH500 that makes
-forging's +8.6 mostly recovered ground (71.8 vs 71.2 untrained); on JEEBench forging did clear the
-untrained model (36.3 vs 28.3).
+**The paper's side: much of its margin was recovered ground.** Its distillation baseline scored
+63.2 vs the untrained model's 71.2 on MATH500 and 19.7 vs 28.3 on JEEBench. Measured against the
+untrained model, forging's +8.6 on MATH500 shrinks to +0.6 (71.8 vs 71.2); on JEEBench forging did
+clear it (36.3 vs 28.3).
 
 **Here the forgeries failed both baselines.** They trailed distillation from an open 7B, and no
 forged-trace student beat the untrained student, served the same way, by more than the seed spread
