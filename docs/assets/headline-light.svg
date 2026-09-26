@@ -48,5 +48,5 @@
 <line x1="24.0" y1="150.0" x2="876.0" y2="150.0" stroke="#e7e6e1" stroke-width="1"/>
 <rect x="24.0" y="292.0" width="13.0" height="11.0" rx="2" fill="#ecebe6"/>
 <text x="44.0" y="302.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">shaded: within the evaluation-seed spread (3.4 MATH500, 5.3 JEEBench) · the paper reports single runs</text>
-<text x="24.0" y="322.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Paper: R1 victim, Qwen2.5-7B student · here: Qwen3.8-27B victim, Qwen3.5-2B student · compare signs, not sizes</text>
+<text x="24.0" y="322.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Paper: R1 victim, Qwen2.5-7B student · here: 27B victim, Qwen3.5-2B student that already reasons · compare signs, not sizes</text>
 </svg>

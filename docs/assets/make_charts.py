@@ -198,8 +198,8 @@ def chart_headline(mode):
     out.append(text(44, H - 32, f"shaded: within the evaluation-seed spread "
                     f"({seed_range('MATH500'):.1f} MATH500, {seed_range('JEEBench'):.1f} JEEBench) · "
                     "the paper reports single runs", t, 12.5, t["muted"]))
-    out.append(text(24, H - 12, "Paper: R1 victim, Qwen2.5-7B student · here: Qwen3.8-27B victim, "
-                    "Qwen3.5-2B student · compare signs, not sizes", t, 12.5, t["muted"]))
+    out.append(text(24, H - 12, "Paper: R1 victim, Qwen2.5-7B student · here: 27B victim, Qwen3.5-2B student "
+                    "that already reasons · compare signs, not sizes", t, 12.5, t["muted"]))
     return svg(W, H, "\n".join(out), t,
                "Forged traces minus plain distillation: paper positive, this reproduction negative")
 
@@ -326,7 +326,7 @@ def chart_results(mode):
     out = [text(24, 36, "Distilling an open 7B matched the victim's real traces; forgeries "
                 "trailed both", t, 18, t["ink"], weight="700"),
            text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per "
-                "condition · dashed: the same model untrained", t, 12.5,
+                "condition · dashed: untrained, as served (thinking on) and thinking off", t, 12.5,
                 t["muted"])]
     out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
                                   "attack)"), (t["distilled"], "surrogate's traces (plain "
@@ -344,11 +344,11 @@ def chart_results(mode):
         # untrained references: thinking on (how students are served) and thinking off
         gx = x0 + THINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["ink2"], 1.5, "4 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 36, f"untrained, as served · {THINK[bench]:.1f}",
+        out.append(text(gx - 4, TOP + PLOT_H + 36, f"as served · {THINK[bench]:.1f}",
                         t, 10.5, t["ink2"], anchor="end", weight="600", halo=True))
         gx = x0 + NOTHINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 40, t["muted"], 1.2, "2 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 52, f"untrained, thinking off · {NOTHINK[bench]:.1f}", t,
+        out.append(text(gx - 4, TOP + PLOT_H + 52, f"thinking off · {NOTHINK[bench]:.1f}", t,
                         10.5, t["muted"], anchor="end", weight="600", halo=True))
         for r, (_, run, role) in enumerate(RES_ROWS):  # bars drawn over the reference lines
             v = acc(run, bench)
@@ -465,6 +465,17 @@ def chart_termination(mode):
                    f'stroke="{t["page"]}" stroke-width="2"/>')
     out.append(text(max(fx) + 12, sum(fy) / 2 + 4, "answers / summaries only: stop at once, "
                     "but score low", t, 11.5, t["ink2"], halo=True))
+    # same-length training data, about half the cut-offs: surrogate 7B vs forged 7B
+    F = json.loads((ROOT / "bench" / "results" / "phase5" / "format-stats.json").read_text())
+    med = lambda k: F["conditions"][k]["completion"]["median"] / 1000
+    ax_, ay_ = sx(trunc("surr-7b", "JEEBench")), sy(acc("surr-7b", "JEEBench"))
+    bx_, by_ = sx(trunc("synth-7b-sum", "JEEBench")), sy(acc("synth-7b-sum", "JEEBench"))
+    out.append(line(ax_ + 9, ay_ + 5, bx_ - 7, by_ - 7, t["distilled"], 1.4, "3 3"))
+    out.append(text(sx(31.5), sy(43.0), f"similar-length training data (~{med('surr-7b'):.1f}k vs "
+                    f"~{med('synth-7b-sum'):.1f}k tokens),", t, 11.5, t["ink2"], italic=True,
+                    halo=True))
+    out.append(text(sx(31.5), sy(43.0) + 16, "about half the cut-offs", t, 11.5, t["ink2"],
+                    italic=True, halo=True))
     for run in VARIANTS:
         out.append(f'<circle cx="{sx(trunc(run, "JEEBench")):.1f}" '
                    f'cy="{sy(acc(run, "JEEBench")):.1f}" r="5" fill="{t["forged"]}" '
