@@ -11,14 +11,14 @@ distillation**, which fine-tunes the same student on the visible traces of the a
 weaker open model (the **surrogate**).
 
 This repo recreates the experiment end to end (surrogate, inverters, victim and ten students), adds
-a stronger 7B surrogate, and measures an evaluation-noise band. One change is deliberate: the
-student, Qwen3.5-2B, already reasons natively, which the paper's instruct-tuned students did not.
-Whether stolen traces still help such a student is a question the paper leaves open, and it changes
-what is tested. Untrained and in thinking mode, this student runs into the 32k-token generation cap
-on two thirds of JEEBench, so every student here is partly learning to *finish* its reasoning, not
-to reason from scratch. Students are scored on
-**MATH500** (competition math) and **JEEBench** (harder physics, chemistry and math from India's JEE
-Advanced exam).
+a stronger 7B surrogate, and measures an evaluation-noise band. Students are scored on **MATH500**
+(competition math) and **JEEBench** (harder physics, chemistry and math from India's JEE Advanced
+exam).
+
+One change is deliberate. The student, Qwen3.5-2B, already reasons natively; the paper's
+instruct-tuned students did not, and the paper leaves open whether stolen traces help such a
+student. Untrained and in thinking mode, it hits the 32k-token cap on two thirds of JEEBench, so
+every student here is partly learning to *finish* its reasoning.
 
 | Victim queries | Models trained | Student evaluations | Compute |
 |:-:|:-:|:-:|:-:|
@@ -33,9 +33,9 @@ Advanced exam).
 
 - **In this setting, the paper's core result reversed.** There, forged traces beat plain
   distillation by 8.6 and 16.6 points (+1.4 / +12.9 for its Llama student). Here they never won.
-  With the 7B surrogate they lost by 7.6 and 9.9 points, well outside noise. With the paper's 1.5B
-  they tied on MATH500 and lost by 7.5 on JEEBench, at the edge of noise for a two-run gap (the
-  no-summary variant lost by 9.9).
+  With the 7B surrogate they lost by 7.6 and 9.9, outside the noise band. With the paper's 1.5B
+  they tied on MATH500 and lost on JEEBench by 7.5 with the summary and 9.9 without, at and past
+  the band's edge.
 - **Plain distillation from an open 7B matched the victim's real traces.** A student distilled
   from the 7B surrogate (72.0 / 45.4) tied one trained on the victim's *real* hidden traces, the
   **oracle** (73.4 / 45.6), although the victim itself scores 21 points higher on JEEBench than that
@@ -127,7 +127,7 @@ scored lowest.
 
 **Length alone doesn't explain the gap to distillation.** Counting trace plus answer, the surrogate's own training
 examples are as long as the forged ones (median ~3.0–3.4k vs ~2.9–3.2k tokens), yet the
-7B-distilled student is cut off half as often. What differs is how they were made: the
+7B-distilled student is cut off half as often. One visible difference is how they were made: the
 surrogate's traces end at its own answer, while forgeries are written backwards toward an answer
 the inverter was handed, and 4–9 % of them argue their way to a different one. The two sets also
 cover different problems, so this is a candidate explanation, not a measured cause. Forgeries also
@@ -136,8 +136,11 @@ overshoot the real traces they replace (median trace 2.2–2.6× longer), where 
 
 ## What it means
 
-**The takeaway: credit a trace-stealing attack only after it beats the untrained student and
-distillation from the best open model, and read the forged traces before training on them.** Here
+**The takeaway: for a student that already reasons, the clearest thing trace fine-tuning changed
+was whether it finished (JEEBench cut-offs fell from 66 % to 8–50 %), and no student beat the
+untrained model with thinking off. So credit a trace-stealing attack only after it beats the
+untrained student and distillation from the best open model, and read the forged traces before
+training on them.** Here
 their flaws (2.2–2.6× overlong, 4–9 % arguing toward a different answer) were on record before any
 student trained, though this run can't show they caused the loss. The evidence, from both sides:
 
