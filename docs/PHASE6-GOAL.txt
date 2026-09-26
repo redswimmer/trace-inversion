@@ -1,0 +1,24 @@
+/goal Phase 6 of the trace-inversion reproduction is complete: the thinking-mode 2B baseline plus all 10 Phase 5 students (LoRA cell merged, checked) evaluated on MATH500+JEEBench under Phase 0's exact harness with --enable-thinking; variance cells run or their skip adjudicated; bench/results/phase6/summary.json committed; docs/results/phase6.md written (table + caveat block + reading in order + trigger verdict); docs/09 7.25 added, 4.5 closed; docs/10 + README updated; PR phase6-eval -> main opened.
+
+You are the executor (session phase-6-playa). Read docs/17-phase6-handoff.md FIRST and follow it; its §0 lists what exists — do not rebuild it. PRECONDITION: docs/results/phase5.md on your branch (PR #10 merged); missing -> STOP. Branch phase6-eval. In a worktree, docs/16 §0.1 is mandatory (main checkout's venv/data by absolute path; no loops/heredocs/&&-chains — control flow in a script).
+
+SUPERVISION. Session big-boss planned this phase and audits it; it writes nothing to the tree. After each step, each probe, and whenever blocked, print and SendMessage to big-boss:
+  CHECKPOINT <n> | <step> | done|blocked | <key numbers> | next: <what>
+One turn to object before any run over an hour; absent or silent -> proceed and say so in the log. Status line every ~2 h during any run over 3 h.
+
+FIXED (decided 2026-09-05, docs/17 §4; report, do not redesign):
+  protocol: eval_baseline.py + ONE additive flag --enable-thinking (default off = Phase 0 byte-for-byte; full diff in CHECKPOINT 1). Every run: --enable-thinking --max-tokens 32768 --max-len 40960 --gpu-frac 0.90, defaults 0.7/0.9/rep1.05/seed1234, 1015 tasks, vLLM bf16.
+  render gate per model BEFORE generating: prompt ends "<think>\n", contains no "</think>"; never try/except.
+  order: baseline-think (Qwen/Qwen3.5-2B, REQUIRED first — Phase 0's 79.0/47.8 is no-think; keep both baseline rows) -> answer-only -> summary-answer -> oracle -> synth-7b-sum -> synth-7b-nosum -> synth-1.5b-sum -> synth-1.5b-nosum -> surr-1.5b -> surr-7b -> synth-7b-sum-lora (merge first per phase2_train.py --merge pattern, assert tensors changed, serve merged) -> variance cells: synth-7b-sum at seeds 1235, 1236, gated (run if phase stays <= 30 h projected; CHECKPOINT either way; skips reported, never silent).
+  audit every run (phase6_audit.py): trunc / no_answer / median tokens / strict+loose loops (import phase4_draws.loops) / own-answer repeats -> summary.json. Numeric spot-check on baseline-think (5 correct + 5 wrong JEEBench Numeric rows, read and report).
+  NOT in this phase: LCB, length-matched control (trigger verdict only), consistency filtering, cross-family student, re-benchmarking victim/surrogates (GGUFs deleted — cite recorded numbers), any training, touching Phase 1–5 artifacts. Nothing opens or names victimB-ORACLE.jsonl; grep code+logs.
+
+PROBE BEFORE EVERY FULL RUN: --limit 25 -> render gate, acc sane, realized rate, projection stating assumed rate. CHECKPOINT, one turn, then full 1015.
+
+BUDGET: prior = Phase 0's 2B eval ~1.2 h no-think; baseline-think is the wild card (2–4 h, looping there is a finding). ~18–26 h working; 30 h projected / 35 h hard STOP.
+
+REPORT, DO NOT REDESIGN. Accuracy never quoted without truncation beside it. The deliverable table + caveat block (length 1.8–2.0x, register, 4–9% inconsistency, surr three-way confound) + docs/17 §6's reading order 1–6, including: any synth >= oracle anywhere -> state it and file the Phase 6.5 proposal line, do not run it.
+
+CONVENTIONS. docs/11 §5 and 13/14/15/16 §8 in full. Hardest here: one harness, one flag, never a second eval script; render-and-diff; never edit a running script; explicit git add; PYTHONUNBUFFERED.
+
+STOP AND ASK IF: render gate fails; a trained student <= 5% on either bench; baseline-think truncation > 60%; a run passes 2.5x its probe projection; phase projection passes 35 h; disk < 8 GB; vLLM refuses a student; any harness change beyond the one flag; anything wants the Phase 3 ORACLE file.

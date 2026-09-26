@@ -139,6 +139,11 @@ def main():
     # the paper's eval passes --seed 1234 (their eval is seeded, their training
     # is not); match it so runs are reproducible
     ap.add_argument("--seed", type=int, default=1234)
+    # Phase 6: students are trained to continue an OPEN <think>\n block, but the
+    # Qwen3.5-2B template default renders it closed (phase5.md §2.2). Off = the
+    # kwarg is not passed at all, so Phase 0 renders stay byte-for-byte.
+    ap.add_argument("--enable-thinking", action="store_true",
+                    help="pass enable_thinking=True to apply_chat_template")
     args = ap.parse_args()
 
     from vllm import LLM, SamplingParams
@@ -148,10 +153,11 @@ def main():
     print(f"{len(tasks)} tasks", flush=True)
 
     tok = AutoTokenizer.from_pretrained(args.model)
+    tmpl_kwargs = {"enable_thinking": True} if args.enable_thinking else {}
     prompts = [
         tok.apply_chat_template(
             [{"role": "user", "content": t["prompt"]}],
-            tokenize=False, add_generation_prompt=True,
+            tokenize=False, add_generation_prompt=True, **tmpl_kwargs,
         )
         for t in tasks
     ]

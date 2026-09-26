@@ -1,0 +1,366 @@
+{
+  "baseline-think": {
+    "model": "Qwen/Qwen3.5-2B",
+    "seed": 1234,
+    "wall_s": 47931.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 33.8,
+        "acc_completed": 88.1,
+        "truncated": 338,
+        "no_answer": 299,
+        "median_gen_tokens": 32768,
+        "loops_strict": 166,
+        "loops_loose": 344
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 67.8,
+        "acc_completed": 99.4,
+        "truncated": 160,
+        "no_answer": 145,
+        "median_gen_tokens": 14927,
+        "loops_strict": 78,
+        "loops_loose": 218
+      }
+    }
+  },
+  "answer-only": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-answer-only",
+    "seed": 1234,
+    "wall_s": 817.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 22.9,
+        "acc_completed": 23.0,
+        "truncated": 3,
+        "no_answer": 3,
+        "median_gen_tokens": 721,
+        "loops_strict": 2,
+        "loops_loose": 67
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 54.2,
+        "acc_completed": 54.6,
+        "truncated": 4,
+        "no_answer": 4,
+        "median_gen_tokens": 404,
+        "loops_strict": 3,
+        "loops_loose": 31
+      }
+    }
+  },
+  "summary-answer": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-summary-answer",
+    "seed": 1234,
+    "wall_s": 1102.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 21.6,
+        "acc_completed": 21.7,
+        "truncated": 3,
+        "no_answer": 2,
+        "median_gen_tokens": 1491,
+        "loops_strict": 1,
+        "loops_loose": 81
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 54.8,
+        "acc_completed": 55.4,
+        "truncated": 5,
+        "no_answer": 4,
+        "median_gen_tokens": 983,
+        "loops_strict": 2,
+        "loops_loose": 48
+      }
+    }
+  },
+  "oracle": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-oracle",
+    "seed": 1234,
+    "wall_s": 7162.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 45.6,
+        "acc_completed": 49.6,
+        "truncated": 41,
+        "no_answer": 40,
+        "median_gen_tokens": 3766,
+        "loops_strict": 16,
+        "loops_loose": 163
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 73.4,
+        "acc_completed": 80.6,
+        "truncated": 46,
+        "no_answer": 42,
+        "median_gen_tokens": 1005,
+        "loops_strict": 9,
+        "loops_loose": 87
+      }
+    }
+  },
+  "synth-7b-sum": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-7b-sum",
+    "seed": 1234,
+    "wall_s": 13552.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 35.5,
+        "acc_completed": 51.0,
+        "truncated": 158,
+        "no_answer": 154,
+        "median_gen_tokens": 5564,
+        "loops_strict": 36,
+        "loops_loose": 260
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 64.4,
+        "acc_completed": 75.2,
+        "truncated": 72,
+        "no_answer": 72,
+        "median_gen_tokens": 1162,
+        "loops_strict": 21,
+        "loops_loose": 121
+      }
+    }
+  },
+  "synth-7b-nosum": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-7b-nosum",
+    "seed": 1234,
+    "wall_s": 12529.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 31.8,
+        "acc_completed": 44.7,
+        "truncated": 150,
+        "no_answer": 149,
+        "median_gen_tokens": 5120,
+        "loops_strict": 40,
+        "loops_loose": 262
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 67.0,
+        "acc_completed": 76.0,
+        "truncated": 59,
+        "no_answer": 59,
+        "median_gen_tokens": 790,
+        "loops_strict": 20,
+        "loops_loose": 115
+      }
+    }
+  },
+  "synth-1.5b-sum": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-1.5b-sum",
+    "seed": 1234,
+    "wall_s": 7856.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 24.9,
+        "acc_completed": 48.8,
+        "truncated": 255,
+        "no_answer": 252,
+        "median_gen_tokens": 10549,
+        "loops_strict": 63,
+        "loops_loose": 345
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 61.0,
+        "acc_completed": 80.7,
+        "truncated": 122,
+        "no_answer": 123,
+        "median_gen_tokens": 2323,
+        "loops_strict": 33,
+        "loops_loose": 204
+      }
+    }
+  },
+  "synth-1.5b-nosum": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-1.5b-nosum",
+    "seed": 1234,
+    "wall_s": 6421.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 22.5,
+        "acc_completed": 39.4,
+        "truncated": 223,
+        "no_answer": 219,
+        "median_gen_tokens": 6040,
+        "loops_strict": 49,
+        "loops_loose": 324
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 61.2,
+        "acc_completed": 81.1,
+        "truncated": 124,
+        "no_answer": 123,
+        "median_gen_tokens": 2041,
+        "loops_strict": 39,
+        "loops_loose": 197
+      }
+    }
+  },
+  "surr-1.5b": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-surr-1.5b",
+    "seed": 1234,
+    "wall_s": 5481.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 32.4,
+        "acc_completed": 52.2,
+        "truncated": 195,
+        "no_answer": 199,
+        "median_gen_tokens": 6544,
+        "loops_strict": 54,
+        "loops_loose": 340
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 62.2,
+        "acc_completed": 76.0,
+        "truncated": 91,
+        "no_answer": 101,
+        "median_gen_tokens": 2067,
+        "loops_strict": 26,
+        "loops_loose": 231
+      }
+    }
+  },
+  "surr-7b": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-surr-7b",
+    "seed": 1234,
+    "wall_s": 3163.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 45.4,
+        "acc_completed": 54.5,
+        "truncated": 86,
+        "no_answer": 87,
+        "median_gen_tokens": 4212,
+        "loops_strict": 30,
+        "loops_loose": 277
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 72.0,
+        "acc_completed": 81.4,
+        "truncated": 58,
+        "no_answer": 59,
+        "median_gen_tokens": 1604,
+        "loops_strict": 19,
+        "loops_loose": 178
+      }
+    }
+  },
+  "synth-7b-sum-lora": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/merged-synth-7b-sum-lora",
+    "seed": 1234,
+    "wall_s": 3934.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 35.5,
+        "acc_completed": 49.9,
+        "truncated": 148,
+        "no_answer": 145,
+        "median_gen_tokens": 5751,
+        "loops_strict": 36,
+        "loops_loose": 273
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 68.0,
+        "acc_completed": 75.2,
+        "truncated": 48,
+        "no_answer": 48,
+        "median_gen_tokens": 1115,
+        "loops_strict": 12,
+        "loops_loose": 110
+      }
+    }
+  },
+  "synth-7b-sum-seed1235": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-7b-sum",
+    "seed": 1235,
+    "wall_s": 4458.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 37.9,
+        "acc_completed": 52.7,
+        "truncated": 145,
+        "no_answer": 140,
+        "median_gen_tokens": 5379,
+        "loops_strict": 46,
+        "loops_loose": 273
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 67.8,
+        "acc_completed": 81.9,
+        "truncated": 86,
+        "no_answer": 83,
+        "median_gen_tokens": 2174,
+        "loops_strict": 27,
+        "loops_loose": 164
+      }
+    }
+  },
+  "synth-7b-sum-seed1236": {
+    "model": "/home/asavala/Development/papers/trace-inversion/bench/results/phase6/serve-synth-7b-sum",
+    "seed": 1236,
+    "wall_s": 4895.0,
+    "n": 1015,
+    "bench": {
+      "JEEBench": {
+        "n": 515,
+        "acc": 32.6,
+        "acc_completed": 48.8,
+        "truncated": 173,
+        "no_answer": 169,
+        "median_gen_tokens": 5934,
+        "loops_strict": 40,
+        "loops_loose": 262
+      },
+      "MATH500": {
+        "n": 500,
+        "acc": 65.8,
+        "acc_completed": 78.1,
+        "truncated": 79,
+        "no_answer": 79,
+        "median_gen_tokens": 1287,
+        "loops_strict": 17,
+        "loops_loose": 134
+      }
+    }
+  }
+}

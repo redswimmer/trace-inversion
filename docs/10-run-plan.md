@@ -271,6 +271,16 @@ All fine-tuned students on MATH500 + JEEBench (+ LiveCodeBench if time), vLLM, s
 Phase 0 so pre/post is directly comparable. *Est. ~8 h — written for five students; re-budget at the
 Phase 6 handoff from Phase 0's measured 2B eval time.*
 
+> **CLOSED 2026-09-07 — ran 2026-09-05 → 09-07, ≈ 36.1 h GPU-active (13 runs: both baselines'
+> rows + 10 students + 2 variance seeds), against docs/17's 18–26 h estimate; the untrained
+> thinking-mode baseline alone took 13.31 h (it loops to the 32k cap on 65.6 % of JEEBench).
+> Headlines: thinking mode is a net cost to the untrained 2B (67.8/33.8 vs no-think 79.0/47.8);
+> no student clears the no-think bar; the oracle student recovers most of the cost (73.4/45.6);
+> every synthesized-trace cell lands below oracle everywhere (**length-control trigger NOT
+> fired**); and Surrogate-Trace ≥ Synthesized-Trace on both arms — surr-7b ties oracle
+> (72.0/45.4) at half its truncation. Seed band (3 seeds): MATH 3.4 / JEE 5.3. LCB was not run
+> (no harness; unchanged, proposal-gated). Full record: `results/phase6.md`.*
+
 **Inherited from Phase 5 (`results/phase5.md` §6) — fixed, not open:**
 
 | | |
@@ -293,8 +303,8 @@ Phase 6 handoff from Phase 0's measured 2B eval time.*
 | 3 **Victim queries** | **~79 h** *(actual: 66.3 h generation + probes, sweep, re-benchmark, compression)* |
 | 4 Inversion | **~28 h** *(actual: 27.7 h generation over four inverters + merges/smokes; `results/phase4.md` §8)* |
 | 5 Student training | **~27.3 h** *(actual: 10 trainings — 25.3 h full runs + probes/pre-flight; `results/phase5.md` §4)* |
-| 6 Evaluation | ~8 h |
-| **Total** | **~229-231 h** (~9.5-10 days of GPU time; was ~237-254 h while Phase 5 was an estimate) |
+| 6 Evaluation | **~36.1 h** *(actual: 13 runs incl. the 13.31 h thinking-mode baseline and 2 variance seeds; est. was ~8 h)* |
+| **Total** | **~257-259 h** (~10.5-11 days of GPU time; was ~229-231 h while Phase 6 was an estimate) |
 
 **Phase 3 still dominates the project at ~79 h**, and it is the one phase that did *not* fit an
 overnight run — its generation alone ran 66.3 h unattended across three days. Phases 2, 4 and 5

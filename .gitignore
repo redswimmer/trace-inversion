@@ -22,3 +22,8 @@ bench/results/phase2/merged-*/
 
 # Phase 5 students — ~4.6 GB of weights each; format-stats.json stays committed
 bench/results/phase5/students/
+
+# Phase 6 merged LoRA weights — derived from the committed adapter (docs/17 §4.3)
+bench/results/phase6/merged-*/
+# Phase 6 disposable serving copies — key-renamed FFT checkpoints (phase6_serve_copy.py)
+bench/results/phase6/serve-*/
