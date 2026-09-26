@@ -132,14 +132,15 @@ base model.
 
 1. **Trace vs the floors.** Every trace condition beats both no-trace floors on MATH500
    (61.0–73.4 vs 54.2/54.8, gaps ≥ 6.2, outside 2× band). On JEEBench every trace condition
-   beats the floors EXCEPT synth-1.5b-nosum, which lands **below** summary-answer (22.5 vs 22.9
-   — inside the band, i.e. indistinguishable from a floor). Traces teach something the answer
+   beats the floors EXCEPT synth-1.5b-nosum, which lands **below** answer-only (22.5 vs 22.9;
+   summary-answer is 21.6) — inside the band, i.e. indistinguishable from a floor. Traces teach something the answer
    alone does not — except at the weak arm's worst cell, where inversion washes out entirely.
 
 2. **Synth vs its arm's Surrogate-Trace — the paper's core claim, per arm.** It fails in both
    arms. 7B arm: surr-7b 72.0/45.4 beats synth-7b-{sum,nosum} by **+5.0–7.6 MATH / +9.9–13.6
-   JEE** (all outside 2× band). 1.5B arm: surr-1.5b 62.2/32.4 beats synth-1.5b-{sum,nosum} by
-   +1.0–1.2 MATH (inside band) and **+7.5–9.9 JEE** (outside). Inversion of the victim's hidden
+   JEE** (all outside 1× band; 7.6 MATH and 13.6 JEE also outside 2×, while 5.0 MATH and 9.9 JEE
+   sit inside 2×). 1.5B arm: surr-1.5b 62.2/32.4 beats synth-1.5b-{sum,nosum} by
+   +1.0–1.2 MATH (inside band) and **+7.5–9.9 JEE** (outside 1× band, inside 2×). Inversion of the victim's hidden
    traces added **no measurable value over plain distillation of the surrogate** on MATH and
    **clearly negative value on JEEBench, on both arms**. The §3 caveat applies in full: the
    Surrogate-Trace cells differ three ways (trace source, answer source, row set), so "surrogate
