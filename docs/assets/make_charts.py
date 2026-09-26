@@ -324,10 +324,11 @@ def chart_results(mode):
     px = PANEL_W / XMAX
     PLOT_H = len(RES_ROWS) * ROW
     H = TOP + PLOT_H + 90
-    out = [text(24, 36, "Within each surrogate, forged traces trailed plain distillation", t,
-                18, t["ink"], weight="700"),
+    out = [text(24, 36, "Distilling an open 7B matched the victim's real traces; forgeries "
+                "trailed both", t, 18, t["ink"], weight="700"),
            text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per "
-                "condition · dashed lines: the same model untrained", t, 12.5, t["muted"])]
+                "condition · dashed: the same model untrained, thinking on / off", t, 12.5,
+                t["muted"])]
     out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
                                   "attack)"), (t["distilled"], "surrogate's traces (plain "
                                   "distillation)"), (t["oracle"], "victim's real traces")], t)
@@ -344,7 +345,7 @@ def chart_results(mode):
         # untrained references: thinking on (how students are served) and thinking off
         gx = x0 + THINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["ink2"], 1.5, "4 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 36, f"untrained, thinking on · {THINK[bench]:.1f}",
+        out.append(text(gx - 4, TOP + PLOT_H + 36, f"thinking on · {THINK[bench]:.1f}",
                         t, 10.5, t["ink2"], anchor="end", weight="600", halo=True))
         gx = x0 + NOTHINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 40, t["muted"], 1.2, "2 3"))
@@ -353,6 +354,14 @@ def chart_results(mode):
         for r, (_, run, role) in enumerate(RES_ROWS):  # bars drawn over the reference lines
             v = acc(run, bench)
             out.append(hbar(x0, TOP + r * ROW + (ROW - BAR) / 2, v * px, BAR, t[role]))
+        # the 7B-distillation vs oracle tie: a bracket right of the two bars
+        r7, ro = RES_ROWS.index(("Surrogate's own traces · 7B", "surr-7b", "distilled")), \
+            len(RES_ROWS) - 1
+        bxk = x0 + max(acc("surr-7b", bench), acc("oracle", bench)) * px + 38
+        y1, y2 = TOP + r7 * ROW + ROW / 2, TOP + ro * ROW + ROW / 2
+        out.append(f'<path d="M{bxk - 5},{y1} H{bxk} V{y2} H{bxk - 5}" fill="none" '
+                   f'stroke="{t["ink2"]}" stroke-width="1.4"/>')
+        out.append(text(bxk + 6, (y1 + y2) / 2 + 4, "tie", t, 11.5, t["ink2"], weight="700"))
         for r, (_, run, role) in enumerate(RES_ROWS):
             v = acc(run, bench)
             ry = TOP + r * ROW + ROW / 2
@@ -369,8 +378,8 @@ def chart_results(mode):
 
 # --------------------------------------------------------------------------- 4. termination
 POINTS = [  # run, label, role, label dx, dy, anchor
-    ("baseline-think", "untrained (thinking on)", "ref", 0, -16, "middle"),
-    ("oracle", "victim's real traces", "oracle", 0, -15, "middle"),
+    ("baseline-think", "untrained, thinking on", "ref", 10, -14, "end"),
+    ("oracle", "victim's real traces", "oracle", 0, 24, "middle"),
     ("surr-7b", "surrogate's traces · 7B", "distilled", 12, 4, "start"),
     ("surr-1.5b", "surrogate's traces · 1.5B", "distilled", 12, 16, "start"),
     ("synth-7b-sum", "forged · 7B surrogate", "forged", 12, -8, "start"),
@@ -401,8 +410,8 @@ def chart_termination(mode):
     xs = [trunc(r, "JEEBench") for r in TRACE_RUNS]
     ys = [acc(r, "JEEBench") for r in TRACE_RUNS]
     a, b, r = fit(xs, ys)
-    out = [text(24, 36, "Students that learned to stop scored; students that got cut off did not", t,
-                18, t["ink"], weight="700"),
+    out = [text(24, 36, "Accuracy tracked how often a student finished its answer", t, 18,
+                t["ink"], weight="700"),
            text(24, 58, "JEEBench accuracy vs answers cut off at the 32k-token limit (which score "
                 f"zero) · r = −{-r:.2f} across the 7 trace-trained students", t, 12.5,
                 t["muted"])]
@@ -424,21 +433,26 @@ def chart_termination(mode):
     out.append(f'<text x="20" y="{TOP + ph / 2:.1f}" font-family=\'{FONT}\' font-size="11.5" '
                f'fill="{t["ink2"]}" text-anchor="middle" '
                f'transform="rotate(-90 20 {TOP + ph / 2:.1f})">JEEBench accuracy % →</text>')
-    # least-squares line through the trace-trained students
-    x1, x2 = 4.0, 54.0
+    # least-squares line through the trace-trained students, over their own x-range only
+    x1, x2 = min(xs), max(xs)
     out.append(line(sx(x1), sy(a + b * x1), sx(x2), sy(a + b * x2), t["axis"], 2, "6 4"))
     out.append(text(sx(x2) + 6, sy(a + b * x2) + 4, "fit, 7 trace-trained students", t, 10.5,
                     t["muted"], halo=True))
-    # the untrained model's cure: an arrow from it towards the trained cluster
+    # the untrained model with thinking off: the bar no student reached
+    ny = sy(NOTHINK["JEEBench"])
+    out.append(line(L, ny, L + pw, ny, t["ink2"], 1.4, "4 4"))
+    out.append(text(L + pw - 6, ny - 6, f"untrained, thinking off · {NOTHINK['JEEBench']:.1f}: "
+                    "no student reached it", t, 11.5, t["ink2"], anchor="end", weight="600",
+                    halo=True))
+    # the untrained thinking-on point sits above the fit: when it does finish, it is mostly right
     bx, by = sx(trunc("baseline-think", "JEEBench")), sy(acc("baseline-think", "JEEBench"))
-    out.append(arrow_defs(t))
-    out.append(f'<line x1="{bx - 14:.1f}" y1="{by - 6:.1f}" x2="{sx(20.5):.1f}" y2="{sy(43.6):.1f}" '
-               f'stroke="{t["ink2"]}" stroke-width="1.4" stroke-dasharray="2 4" '
-               f'marker-end="url(#ah-ink)"/>')
-    out.append(text(sx(44), sy(43.2), "fine-tuning mostly teaches", t, 11.5, t["ink2"],
-                    anchor="middle", italic=True, halo=True))
-    out.append(text(sx(44), sy(43.2) + 15, "the model when to stop", t, 11.5, t["ink2"],
-                    anchor="middle", italic=True, halo=True))
+    done = S["baseline-think"]["bench"]["JEEBench"]["acc_completed"]
+    out.append(text(bx + 10, by + 30, "cut off on 66 %, but", t, 11, t["ink2"], anchor="end",
+                    halo=True))
+    out.append(text(bx + 10, by + 45, f"{done:.0f} % of the answers it", t, 11, t["ink2"],
+                    anchor="end", halo=True))
+    out.append(text(bx + 10, by + 60, "finishes are right", t, 11, t["ink2"], anchor="end",
+                    halo=True))
     # no-trace floors: they stop, but never learned to reason
     fx = [sx(trunc(f, "JEEBench")) for f in FLOORS]
     fy = [sy(acc(f, "JEEBench")) for f in FLOORS]
