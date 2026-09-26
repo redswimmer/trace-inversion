@@ -12,7 +12,10 @@ weaker open model (the **surrogate**).
 
 This repo recreates the experiment end to end (surrogate, inverters, victim and ten students) and
 adds a stronger surrogate and a measured noise band. Unlike the paper's, the student here already
-reasons natively: untrained, with thinking switched off, it beat every fine-tuned student. So this
+reasons natively. That was deliberate: whether stolen traces still help a student that already
+reasons is a live question the paper leaves open, and a 2B fits full fine-tuning, matching the
+paper's method. It changed the test. In thinking mode the untrained student runs to the 32k-token
+cap on two thirds of JEEBench, and with thinking off it beat every fine-tuned student. So this
 recreation asks which stolen data best repairs a reasoning model's thinking mode, not which teaches
 reasoning from scratch. Students are scored on **MATH500** (competition math) and **JEEBench** (harder
 physics, chemistry and math from India's JEE Advanced exam).
@@ -38,7 +41,8 @@ physics, chemistry and math from India's JEE Advanced exam).
   subset, vs 60.6). For a 2B student, the teacher was not the limit.
 - **The losing students often never finished.** Forged-trace students were cut off at the
   32k-token limit on 29–50 % of JEEBench, against 8 % for the oracle, and across the seven
-  trace-trained students cut-off rate tracks accuracy (r = −0.94). A cut-off answer scores zero, so
+  trace-trained students cut-off rate tracks accuracy (r = −0.94). The oracle student finished
+  92 % of JEEBench, the 7B-distilled student 83 %, the forged-trace students 50–71 %. A cut-off answer scores zero, so
   part of that link is by construction; whether these students would be right if they finished
   can't be told from this data. [Details below](#where-the-gap-shows-up-students-that-dont-finish).
 
@@ -74,8 +78,13 @@ is in [`docs/results/`](docs/results/).
   <img alt="Student accuracy by training data, MATH500 / JEEBench: victim's answers only 54.2 / 22.9; summaries + answers 54.8 / 21.6; forged traces from the 1.5B surrogate 61.0 / 24.9; the 1.5B surrogate's own traces 62.2 / 32.4; forged traces from the 7B 64.4 / 35.5; the 7B surrogate's own traces 72.0 / 45.4; victim's real traces 73.4 / 45.6, a tie with the 7B surrogate's traces. Untrained with thinking on 67.8 / 33.8; with thinking off 79.0 / 47.8." src="docs/assets/results-light.svg">
 </picture>
 
-1. **Traces beat no traces.** Every trace-trained student clears the answers-only floor on MATH500
-   by at least 6 points.
+**No student beat the untrained model with thinking switched off (79.0 / 47.8), the oracle
+included.** Every student is served in thinking mode, where the untrained model scores 67.8 / 33.8;
+that is the fair "before", and the dashed lines show both.
+
+1. **The attack did beat what the attacker can see.** Every forged-trace student clears the
+   answers-only and summary floors on MATH500 by at least 6 points; on JEEBench only the
+   7B-surrogate forgeries do (31.8–35.5 vs 22.9).
 2. **On JEEBench, forgeries from the paper's own 1.5B surrogate did no better than no trace at
    all.** Those students scored 24.9 / 22.5 (with / without summary), against 22.9 for answers
    alone.
@@ -100,7 +109,7 @@ is in [`docs/results/`](docs/results/).
 | forged, 7B with summary: evaluation seeds 1234 / 1235 / 1236 | 64.4 / 67.8 / 65.8 | 35.5 / 37.9 / 32.6 | — |
 
 Giving the inverter the summary made no measurable difference; neither did LoRA vs full
-fine-tuning. Full record: [`docs/results/phase6.md`](docs/results/phase6.md).
+fine-tuning (identical on JEEBench; +3.6 on MATH500, at the edge of the 3.4 seed range). Full record: [`docs/results/phase6.md`](docs/results/phase6.md).
 
 </details>
 
@@ -111,16 +120,11 @@ fine-tuning. Full record: [`docs/results/phase6.md`](docs/results/phase6.md).
   <img alt="Scatter of JEEBench accuracy against the share of answers cut off at the 32k-token limit (cut-off answers score zero). Across the seven trace-trained students, accuracy falls as the cut-off rate rises, r = −0.94: oracle and 7B-distilled students are cut off on 8–17% and score about 45; forged-trace students are cut off on 29–50% and score 22–36. The untrained model with thinking on is cut off on 66% and scores 33.8. A dashed line at 47.8 marks the untrained model with thinking off, which no student reached." src="docs/assets/termination-light.svg">
 </picture>
 
-**No student beat the untrained model with thinking switched off (79.0 / 47.8), the oracle
-included.** Untrained, in thinking mode, the student runs to the 32k-token cap on two thirds of
-JEEBench (its median answer is exactly the cap), and a cut-off answer scores zero. Every student is
-served in thinking mode, and the clearest thing fine-tuning changed was how often it finished.
+Untrained, in thinking mode, the student runs to the 32k-token cap on two thirds of JEEBench (its
+median answer is exactly the cap), and a cut-off answer scores zero. The clearest thing fine-tuning
+changed was how often a student finished, and the students that finished least scored lowest.
 
-Among the seven trace-trained students, cut-off rate tracks accuracy at r = −0.94. Students trained
-on the victim's real traces finish 92 % of JEEBench, those distilled from the 7B surrogate 83 %, and
-those trained on forged traces only 50–71 %.
-
-**Length alone doesn't explain it.** Counting trace plus answer, the surrogate's own training
+**Length alone doesn't explain the gap to distillation.** Counting trace plus answer, the surrogate's own training
 examples are as long as the forged ones (median ~3.0–3.4k vs ~2.9–3.2k tokens), yet the
 7B-distilled student is cut off half as often. What differs is how they were made: the
 surrogate's traces end at its own answer, while forgeries are written backwards toward an answer
@@ -131,14 +135,20 @@ overshoot the real traces they replace (median trace 2.2–2.6× longer), where 
 
 ## What it means
 
-**The takeaway:** credit a trace-stealing attack only after it beats two baselines it can't beat
-by accident: the untrained student, and distillation from the best open model. The paper's Qwen
-student got *worse* from plain distillation (63.2 vs 71.2 untrained on MATH500; 19.7 vs 28.3 on
-JEEBench), so its +8.6 MATH500 margin mostly recovered lost ground (71.8 vs 71.2); its JEEBench
-margin did clear the untrained score (36.3 vs 28.3). Here, against an open 7B, even the real hidden
-traces added nothing, and the forgeries were worse. Their flaws, overlong and sometimes
-self-contradicting, were visible before any student was trained. **Check both baselines, and
-inspect forged traces before you train on them.**
+**One of the paper's two headline margins leaned on a baseline that fell below the untrained
+model.** Its Qwen student got *worse* from plain distillation (63.2 vs 71.2 untrained on MATH500),
+so forging's +8.6 there mostly recovered lost ground (71.8 vs 71.2). Its JEEBench margin did clear
+the untrained score (36.3 vs 28.3).
+
+**Here the forgeries failed both baselines.** They trailed distillation from an open 7B, and no
+forged-trace student beat the untrained student, served the same way, by more than the seed spread
+(at most +0.2 MATH500 and +1.7 JEEBench). The 1.5B-surrogate forgeries were clearly below it
+(61.0–61.2 vs 67.8; 22.5–24.9 vs 33.8).
+
+**The takeaway: credit a trace-stealing attack only after it beats the untrained student and
+distillation from the best open model, and read the forged traces before training on them.** Their
+flaws here, overlong and sometimes self-contradicting, were on record before any student was
+trained.
 
 **What's settled, and what isn't:**
 
@@ -172,7 +182,7 @@ VRAM. Full log with reasons: [`docs/09-deviations-from-paper.md`](docs/09-deviat
 | Victim | DeepSeek-R1 (685B) | Qwen3.8-27B, 4-bit GGUF, local | R1 can't run in 24 GB |
 | Surrogate | R1-Distill-Qwen-1.5B | same 1.5B, plus a 7B | adds a surrogate-strength midpoint |
 | Compressor / inverter | Qwen2.5-7B-Instruct, full SFT | Qwen3.5-4B, LoRA r=64 | 7B full fine-tuning needs ~58 GB |
-| Student | Qwen2.5-7B, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at 16k context | fits full fine-tuning, matching the paper's method |
+| Student | Qwen2.5-7B, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at 16k context | fits full fine-tuning; reasons natively, which changes the question (see top) |
 | Data | 2 × 10k prompts | 2 × 5k | the paper's scaling curve: 5k gives most of the gain |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | single-GPU training |
 | Evaluation | unspecified sampling, single run | one harness for all 13 runs, 32k cap, 3 evaluation seeds on one cell | comparability |

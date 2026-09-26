@@ -155,11 +155,11 @@ def chart_headline(mode):
     W, LABEL_W, PANEL_W, GAP, TOP, ROW, BAR = 900, 220, 300, 44, 104, 46, 22
     LO, HI = -15.0, 20.0
     px = PANEL_W / (HI - LO)
-    H = TOP + len(HEAD_ROWS) * ROW + 88
+    H = TOP + len(HEAD_ROWS) * ROW + 92
     out = [text(24, 36, "Forged traces lost to plain distillation: the paper's gap reversed", t,
                 18, t["ink"], weight="700"),
            text(24, 58, "Student accuracy trained on forged traces, minus accuracy trained on the "
-                "surrogate's own traces (percentage points)", t, 12.5, t["muted"])]
+                "surrogate's own traces (points) · with-summary inverter", t, 12.5, t["muted"])]
     for i, bench in enumerate(BENCHES):
         x0 = LABEL_W + i * (PANEL_W + GAP)
         zero = x0 + (0 - LO) * px
@@ -194,13 +194,12 @@ def chart_headline(mode):
         out.append(text(24, cy - 2, lab, t, 13, t["ink"], weight="600"))
         out.append(text(24, cy + 14, sub, t, 11.5, t["muted"]))
     out.append(line(24, TOP + ROW, W - 24, TOP + ROW, t["grid"], 1))  # paper | ours
-    out.append(rect(24, H - 40, 12, 10, t["band"], r=2))
-    out.append(text(42, H - 31, f"shaded: smaller than the evaluation-seed spread (3 seeds moved "
-                    f"one cell by {seed_range('MATH500'):.1f} on MATH500, "
-                    f"{seed_range('JEEBench'):.1f} on JEEBench); the paper reports single runs",
-                    t, 11, t["muted"]))
-    out.append(text(24, H - 13, "Paper: R1 victim, Qwen2.5-7B student · here: Qwen3.8-27B victim, "
-                    "Qwen3.5-2B student · compare signs, not sizes", t, 11, t["muted"]))
+    out.append(rect(24, H - 42, 13, 11, t["band"], r=2))
+    out.append(text(44, H - 32, f"shaded: within the evaluation-seed spread "
+                    f"({seed_range('MATH500'):.1f} MATH500, {seed_range('JEEBench'):.1f} JEEBench) · "
+                    "the paper reports single runs", t, 12.5, t["muted"]))
+    out.append(text(24, H - 12, "Paper: R1 victim, Qwen2.5-7B student · here: Qwen3.8-27B victim, "
+                    "Qwen3.5-2B student · compare signs, not sizes", t, 12.5, t["muted"]))
     return svg(W, H, "\n".join(out), t,
                "Forged traces minus plain distillation: paper positive, this reproduction negative")
 
@@ -327,7 +326,7 @@ def chart_results(mode):
     out = [text(24, 36, "Distilling an open 7B matched the victim's real traces; forgeries "
                 "trailed both", t, 18, t["ink"], weight="700"),
            text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per "
-                "condition · dashed: the same model untrained, thinking on / off", t, 12.5,
+                "condition · dashed: the same model untrained", t, 12.5,
                 t["muted"])]
     out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
                                   "attack)"), (t["distilled"], "surrogate's traces (plain "
@@ -345,11 +344,11 @@ def chart_results(mode):
         # untrained references: thinking on (how students are served) and thinking off
         gx = x0 + THINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["ink2"], 1.5, "4 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 36, f"thinking on · {THINK[bench]:.1f}",
+        out.append(text(gx - 4, TOP + PLOT_H + 36, f"untrained, as served · {THINK[bench]:.1f}",
                         t, 10.5, t["ink2"], anchor="end", weight="600", halo=True))
         gx = x0 + NOTHINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 40, t["muted"], 1.2, "2 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 52, f"thinking off · {NOTHINK[bench]:.1f}", t,
+        out.append(text(gx - 4, TOP + PLOT_H + 52, f"untrained, thinking off · {NOTHINK[bench]:.1f}", t,
                         10.5, t["muted"], anchor="end", weight="600", halo=True))
         for r, (_, run, role) in enumerate(RES_ROWS):  # bars drawn over the reference lines
             v = acc(run, bench)
