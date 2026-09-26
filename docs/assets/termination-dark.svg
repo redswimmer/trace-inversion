@@ -2,7 +2,7 @@
 <title>JEEBench accuracy vs truncation rate by student</title>
 <rect x="0.0" y="0.0" width="900.0" height="470.0" rx="10" fill="#0d1117"/>
 <text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Students that learned to stop scored; students that looped did not</text>
-<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="">JEEBench accuracy vs share of answers cut off at the 32k−token limit · r = −0.94 across the 7 trace-trained students</text>
+<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="">JEEBench accuracy vs answers cut off at the 32k-token limit (which score zero) · r = −0.94 across the 7 trace-trained students</text>
 <rect x="24.0" y="77.0" width="12.0" height="12.0" rx="3" fill="#3987e5"/>
 <text x="42.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forged traces</text>
 <rect x="154.5" y="77.0" width="12.0" height="12.0" rx="3" fill="#d95926"/>
@@ -11,6 +11,8 @@
 <text x="337.8" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">victim's real traces</text>
 <rect x="499.0" y="77.0" width="12.0" height="12.0" rx="3" fill="#6e6d68"/>
 <text x="517.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">untrained / no trace</text>
+<circle cx="674" cy="81" r="5" fill="#3987e5" opacity="0.75"/>
+<text x="684.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forged, no-summary variant</text>
 <line x1="72.0" y1="112.0" x2="72.0" y2="414.0" stroke="#45443f" stroke-width="1.0"/>
 <text x="72.0" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0%</text>
 <line x1="184.6" y1="112.0" x2="184.6" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
@@ -43,11 +45,12 @@
 <text x="64.0" y="159.1" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">45</text>
 <line x1="72.0" y1="112.0" x2="860.0" y2="112.0" stroke="#2a2a28" stroke-width="1.0"/>
 <text x="64.0" y="116.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">50</text>
-<text x="406.0" y="458.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="">JEEBench answers still unfinished at the 32k-token limit →</text>
+<text x="466.0" y="458.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="">JEEBench answers still unfinished at the 32k-token limit →</text>
 <text x="20" y="263.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" transform="rotate(-90 20 263.0)">JEEBench accuracy % →</text>
 <line x1="117.0" y1="115.2" x2="679.9" y2="367.2" stroke="#45443f" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="685.9" y="371.2" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">fit, 7 trace-trained students</text>
 <defs><marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#c3c2b7"/></marker><marker id="ah-forged" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#3987e5"/></marker><marker id="ah-oracle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#199e70"/></marker><marker id="ah-distilled" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#d95926"/></marker></defs>
-<line x1="796.8" y1="245.8" x2="364.7" y2="181.0" stroke="#c3c2b7" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#ah-ink)"/>
+<line x1="796.8" y1="245.8" x2="302.8" y2="167.2" stroke="#c3c2b7" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#ah-ink)"/>
 <text x="567.3" y="170.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="font-style: italic;" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">fine-tuning mostly teaches</text>
 <text x="567.3" y="185.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="font-style: italic;" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">the model when to stop</text>
 <circle cx="78.6" cy="345.8" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
@@ -55,9 +58,8 @@
 <text x="90.6" y="355.4" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">answers / summaries only — stop at once, never learned to reason</text>
 <circle cx="399.9" cy="269.0" r="5" fill="#3987e5" stroke="#0d1117" stroke-width="1.5" opacity="0.75"/>
 <circle cx="559.4" cy="349.3" r="5" fill="#3987e5" stroke="#0d1117" stroke-width="1.5" opacity="0.75"/>
-<text x="860.0" y="458.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="">small dots: forged, no-summary variant</text>
 <circle cx="810.8" cy="251.8" r="8" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
-<text x="810.8" y="235.8" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="middle" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">untrained, thinking on</text>
+<text x="810.8" y="235.8" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="middle" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">untrained (thinking on)</text>
 <circle cx="161.6" cy="150.0" r="8" fill="#199e70" stroke="#0d1117" stroke-width="2"/>
 <text x="161.6" y="135.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="middle" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">victim's real traces</text>
 <circle cx="260.0" cy="151.7" r="8" fill="#d95926" stroke="#0d1117" stroke-width="2"/>
