@@ -1,68 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="400" viewBox="0 0 760 400" role="img">
-<text x="16.0" y="24.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="600" style="">Accuracy tracks termination: JEEBench score vs share of answers cut off at the 32k-token cap</text>
-<text x="16.0" y="42.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="12" fill="#898781" text-anchor="start" font-weight="normal" style="">every trained student loops less than the untrained model — how much less depends on how long its training traces were</text>
-<line x1="64.0" y1="70" x2="64.0" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="64.0" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0%</text>
-<line x1="157.7" y1="70" x2="157.7" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="157.7" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">10%</text>
-<line x1="251.4" y1="70" x2="251.4" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="251.4" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">20%</text>
-<line x1="345.1" y1="70" x2="345.1" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="345.1" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">30%</text>
-<line x1="438.9" y1="70" x2="438.9" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="438.9" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">40%</text>
-<line x1="532.6" y1="70" x2="532.6" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="532.6" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">50%</text>
-<line x1="626.3" y1="70" x2="626.3" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="626.3" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">60%</text>
-<line x1="720.0" y1="70" x2="720.0" y2="352" stroke="#2c2c2a" stroke-width="1"/>
-<text x="720.0" y="368.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">70%</text>
-<line x1="64" y1="352.0" x2="720" y2="352.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="356.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">15</text>
-<line x1="64" y1="311.7" x2="720" y2="311.7" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="315.7" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">20</text>
-<line x1="64" y1="271.4" x2="720" y2="271.4" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="275.4" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">25</text>
-<line x1="64" y1="231.1" x2="720" y2="231.1" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="235.1" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">30</text>
-<line x1="64" y1="190.9" x2="720" y2="190.9" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="194.9" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">35</text>
-<line x1="64" y1="150.6" x2="720" y2="150.6" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="154.6" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">40</text>
-<line x1="64" y1="110.3" x2="720" y2="110.3" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="114.3" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">45</text>
-<line x1="64" y1="70.0" x2="720" y2="70.0" stroke="#2c2c2a" stroke-width="1"/>
-<text x="56.0" y="74.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">50</text>
-<text x="392.0" y="392.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="">JEEBench problems truncated at the cap</text>
-<text x="14" y="211.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#898781" text-anchor="middle" transform="rotate(-90 14 211.0)">JEEBench accuracy %</text>
-<circle cx="679.1" cy="200.5" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
-<text x="669.1" y="204.5" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="end" font-weight="normal" style="">untrained, thinking on</text>
-<circle cx="69.5" cy="288.3" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
-<text x="79.5" y="284.3" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">answers only</text>
-<circle cx="69.5" cy="298.8" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
-<text x="79.5" y="310.8" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">summaries + answers</text>
-<circle cx="138.6" cy="105.5" r="7" fill="#199e70" stroke="#0d1117" stroke-width="2"/>
-<text x="148.6" y="99.5" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">oracle (real traces)</text>
-<circle cx="220.5" cy="107.1" r="7" fill="#d95926" stroke="#0d1117" stroke-width="2"/>
-<text x="230.5" y="119.1" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">distilled 7B surrogate</text>
-<circle cx="418.8" cy="211.8" r="7" fill="#d95926" stroke="#0d1117" stroke-width="2"/>
-<text x="428.8" y="215.8" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">distilled 1.5B surrogate</text>
-<circle cx="351.5" cy="186.8" r="7" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
-<text x="361.5" y="180.8" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">forged, 7B arm (sum)</text>
-<circle cx="333.3" cy="186.8" r="7" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
-<text x="323.3" y="200.8" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="end" font-weight="normal" style="">forged, 7B arm (LoRA)</text>
-<circle cx="337.0" cy="216.6" r="7" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
-<text x="347.0" y="228.6" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">forged, 7B arm (no sum)</text>
-<circle cx="528.0" cy="272.2" r="7" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
-<text x="538.0" y="276.2" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">forged, 1.5B arm (sum)</text>
-<circle cx="469.8" cy="291.6" r="7" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
-<text x="479.8" y="303.6" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">forged, 1.5B arm (no sum)</text>
-<circle cx="70" cy="58" r="5" fill="#3987e5"/>
-<text x="80.0" y="62.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forged traces</text>
-<circle cx="203" cy="58" r="5" fill="#d95926"/>
-<text x="213.0" y="62.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">surrogate's own traces</text>
-<circle cx="399" cy="58" r="5" fill="#199e70"/>
-<text x="409.0" y="62.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">victim's real traces</text>
-<circle cx="581" cy="58" r="5" fill="#6e6d68"/>
-<text x="591.0" y="62.0" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">no trace / untrained</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="470" viewBox="0 0 900 470" role="img" aria-label="JEEBench accuracy vs truncation rate by student">
+<title>JEEBench accuracy vs truncation rate by student</title>
+<rect x="0.0" y="0.0" width="900.0" height="470.0" rx="10" fill="#0d1117"/>
+<text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Students that learned to stop scored; students that looped did not</text>
+<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="">JEEBench accuracy vs share of answers cut off at the 32k−token limit · r = −0.94 across the 7 trace-trained students</text>
+<rect x="24.0" y="77.0" width="12.0" height="12.0" rx="3" fill="#3987e5"/>
+<text x="42.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forged traces</text>
+<rect x="154.5" y="77.0" width="12.0" height="12.0" rx="3" fill="#d95926"/>
+<text x="172.5" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">surrogate's traces</text>
+<rect x="319.8" y="77.0" width="12.0" height="12.0" rx="3" fill="#199e70"/>
+<text x="337.8" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">victim's real traces</text>
+<rect x="499.0" y="77.0" width="12.0" height="12.0" rx="3" fill="#6e6d68"/>
+<text x="517.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">untrained / no trace</text>
+<line x1="72.0" y1="112.0" x2="72.0" y2="414.0" stroke="#45443f" stroke-width="1.0"/>
+<text x="72.0" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0%</text>
+<line x1="184.6" y1="112.0" x2="184.6" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="184.6" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">10%</text>
+<line x1="297.1" y1="112.0" x2="297.1" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="297.1" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">20%</text>
+<line x1="409.7" y1="112.0" x2="409.7" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="409.7" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">30%</text>
+<line x1="522.3" y1="112.0" x2="522.3" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="522.3" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">40%</text>
+<line x1="634.9" y1="112.0" x2="634.9" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="634.9" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">50%</text>
+<line x1="747.4" y1="112.0" x2="747.4" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="747.4" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">60%</text>
+<line x1="860.0" y1="112.0" x2="860.0" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="860.0" y="431.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">70%</text>
+<line x1="72.0" y1="414.0" x2="860.0" y2="414.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="418.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">15</text>
+<line x1="72.0" y1="370.9" x2="860.0" y2="370.9" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="374.9" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">20</text>
+<line x1="72.0" y1="327.7" x2="860.0" y2="327.7" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="331.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">25</text>
+<line x1="72.0" y1="284.6" x2="860.0" y2="284.6" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="288.6" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">30</text>
+<line x1="72.0" y1="241.4" x2="860.0" y2="241.4" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="245.4" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">35</text>
+<line x1="72.0" y1="198.3" x2="860.0" y2="198.3" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="202.3" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">40</text>
+<line x1="72.0" y1="155.1" x2="860.0" y2="155.1" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="159.1" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">45</text>
+<line x1="72.0" y1="112.0" x2="860.0" y2="112.0" stroke="#2a2a28" stroke-width="1.0"/>
+<text x="64.0" y="116.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">50</text>
+<text x="406.0" y="458.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="">JEEBench answers still unfinished at the 32k-token limit →</text>
+<text x="20" y="263.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" transform="rotate(-90 20 263.0)">JEEBench accuracy % →</text>
+<line x1="117.0" y1="115.2" x2="679.9" y2="367.2" stroke="#45443f" stroke-width="2" stroke-dasharray="6 4"/>
+<defs><marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#c3c2b7"/></marker><marker id="ah-forged" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#3987e5"/></marker><marker id="ah-oracle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#199e70"/></marker><marker id="ah-distilled" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#d95926"/></marker></defs>
+<line x1="796.8" y1="245.8" x2="364.7" y2="181.0" stroke="#c3c2b7" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#ah-ink)"/>
+<text x="567.3" y="170.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="font-style: italic;" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">fine-tuning mostly teaches</text>
+<text x="567.3" y="185.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="middle" font-weight="normal" style="font-style: italic;" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">the model when to stop</text>
+<circle cx="78.6" cy="345.8" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
+<circle cx="78.6" cy="357.1" r="7" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
+<text x="90.6" y="355.4" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">answers / summaries only — stop at once, never learned to reason</text>
+<circle cx="399.9" cy="269.0" r="5" fill="#3987e5" stroke="#0d1117" stroke-width="1.5" opacity="0.75"/>
+<circle cx="559.4" cy="349.3" r="5" fill="#3987e5" stroke="#0d1117" stroke-width="1.5" opacity="0.75"/>
+<text x="860.0" y="458.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="10.5" fill="#9a9992" text-anchor="end" font-weight="normal" style="">small dots: forged, no-summary variant</text>
+<circle cx="810.8" cy="251.8" r="8" fill="#6e6d68" stroke="#0d1117" stroke-width="2"/>
+<text x="810.8" y="235.8" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="middle" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">untrained, thinking on</text>
+<circle cx="161.6" cy="150.0" r="8" fill="#199e70" stroke="#0d1117" stroke-width="2"/>
+<text x="161.6" y="135.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="middle" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">victim's real traces</text>
+<circle cx="260.0" cy="151.7" r="8" fill="#d95926" stroke="#0d1117" stroke-width="2"/>
+<text x="272.0" y="155.7" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="start" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">surrogate's traces · 7B</text>
+<circle cx="498.2" cy="263.9" r="8" fill="#d95926" stroke="#0d1117" stroke-width="2"/>
+<text x="510.2" y="279.9" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="start" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">surrogate's traces · 1.5B</text>
+<circle cx="417.4" cy="237.1" r="8" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
+<text x="429.4" y="229.1" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="start" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">forged · 7B surrogate</text>
+<circle cx="629.4" cy="328.6" r="8" fill="#3987e5" stroke="#0d1117" stroke-width="2"/>
+<text x="641.4" y="332.6" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#f0f0ee" text-anchor="start" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">forged · 1.5B surrogate</text>
 </svg>
