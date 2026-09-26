@@ -365,13 +365,21 @@ def chart_results(mode):
         for r, (_, run, role) in enumerate(RES_ROWS):
             v = acc(run, bench)
             ry = TOP + r * ROW + ROW / 2
-            out.append(text(x0 + v * px + 6, ry + 4.5, f"{v:.1f}", t, 12, t["ink"],
+            end = v
+            if run == SEEDS[0]:  # range across 3 evaluation seeds, drawn where it was measured
+                vals = [acc(k, bench) for k in SEEDS]
+                lo, hi = x0 + min(vals) * px, x0 + max(vals) * px
+                out.append(line(lo, ry, hi, ry, t["ink"], 1.6))
+                out.append(line(lo, ry - 5, lo, ry + 5, t["ink"], 1.6))
+                out.append(line(hi, ry - 5, hi, ry + 5, t["ink"], 1.6))
+                end = max(vals)
+            out.append(text(x0 + end * px + 6, ry + 4.5, f"{v:.1f}", t, 12, t["ink"],
                             tabular=True, halo=True))
     for r, (label, run, role) in enumerate(RES_ROWS):
         out.append(text(24, TOP + r * ROW + ROW / 2 + 4.5, label, t, 12.5, t["ink"]))
-    out.append(text(24, H - 12, f"3 evaluation seeds moved one cell by {seed_range('MATH500'):.1f}"
-                    f" (MATH500) and {seed_range('JEEBench'):.1f} (JEEBench) points. Forged rows use "
-                    "the with-summary inverter.", t, 11,
+    out.append(text(24, H - 12, f"⊢⊣ range across 3 evaluation seeds on one cell: "
+                    f"{seed_range('MATH500'):.1f} (MATH500), {seed_range('JEEBench'):.1f} (JEEBench) "
+                    "points. Forged rows use the with-summary inverter.", t, 11,
                     t["muted"]))
     return svg(W, H, "\n".join(out), t, "Student accuracy by training condition")
 
@@ -412,8 +420,8 @@ def chart_termination(mode):
     a, b, r = fit(xs, ys)
     out = [text(24, 36, "Accuracy tracked how often a student finished its answer", t, 18,
                 t["ink"], weight="700"),
-           text(24, 58, "JEEBench accuracy vs answers cut off at the 32k-token limit (which score "
-                f"zero) · r = −{-r:.2f} across the 7 trace-trained students", t, 12.5,
+           text(24, 58, "JEEBench accuracy vs answers cut off at the 32k-token limit · cut-off "
+                "answers score zero, so the link is partly by construction", t, 12.5,
                 t["muted"])]
     out += swatch_legend(24, 86, [(t["forged"], "forged traces"), (t["distilled"],
                                   "surrogate's traces"), (t["oracle"], "victim's real traces"),
@@ -436,8 +444,8 @@ def chart_termination(mode):
     # least-squares line through the trace-trained students, over their own x-range only
     x1, x2 = min(xs), max(xs)
     out.append(line(sx(x1), sy(a + b * x1), sx(x2), sy(a + b * x2), t["axis"], 2, "6 4"))
-    out.append(text(sx(x2) + 6, sy(a + b * x2) + 4, "fit, 7 trace-trained students", t, 10.5,
-                    t["muted"], halo=True))
+    out.append(text(sx(x2) + 6, sy(a + b * x2) + 4, f"fit, 7 trace-trained students, "
+                    f"r = −{-r:.2f}", t, 10.5, t["muted"], halo=True))
     # the untrained model with thinking off: the bar no student reached
     ny = sy(NOTHINK["JEEBench"])
     out.append(line(L, ny, L + pw, ny, t["ink2"], 1.4, "4 4"))
@@ -446,12 +454,9 @@ def chart_termination(mode):
                     halo=True))
     # the untrained thinking-on point sits above the fit: when it does finish, it is mostly right
     bx, by = sx(trunc("baseline-think", "JEEBench")), sy(acc("baseline-think", "JEEBench"))
-    done = S["baseline-think"]["bench"]["JEEBench"]["acc_completed"]
-    out.append(text(bx + 10, by + 30, "cut off on 66 %, but", t, 11, t["ink2"], anchor="end",
-                    halo=True))
-    out.append(text(bx + 10, by + 45, f"{done:.0f} % of the answers it", t, 11, t["ink2"],
+    out.append(text(bx + 10, by - 50, "cut off on 66 %; its median", t, 11, t["ink2"],
                     anchor="end", halo=True))
-    out.append(text(bx + 10, by + 60, "finishes are right", t, 11, t["ink2"], anchor="end",
+    out.append(text(bx + 10, by - 35, "answer runs to the cap", t, 11, t["ink2"], anchor="end",
                     halo=True))
     # no-trace floors: they stop, but never learned to reason
     fx = [sx(trunc(f, "JEEBench")) for f in FLOORS]
@@ -459,8 +464,8 @@ def chart_termination(mode):
     for x, y in zip(fx, fy):
         out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{t["ref"]}" '
                    f'stroke="{t["page"]}" stroke-width="2"/>')
-    out.append(text(max(fx) + 12, sum(fy) / 2 + 4, "answers / summaries only — stop at once, "
-                    "never learned to reason", t, 11.5, t["ink2"], halo=True))
+    out.append(text(max(fx) + 12, sum(fy) / 2 + 4, "answers / summaries only: stop at once, "
+                    "but score low", t, 11.5, t["ink2"], halo=True))
     for run in VARIANTS:
         out.append(f'<circle cx="{sx(trunc(run, "JEEBench")):.1f}" '
                    f'cy="{sy(acc(run, "JEEBench")):.1f}" r="5" fill="{t["forged"]}" '

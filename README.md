@@ -12,7 +12,9 @@ weaker open model (the **surrogate**).
 
 This repo recreates the experiment end to end (surrogate, inverters, victim and ten students) and
 adds a stronger surrogate and a measured noise band. Unlike the paper's, the student here already
-reasons natively. Students are scored on **MATH500** (competition math) and **JEEBench** (harder
+reasons natively: untrained, with thinking switched off, it beat every fine-tuned student. So this
+recreation asks which stolen data best repairs a reasoning model's thinking mode, not which teaches
+reasoning from scratch. Students are scored on **MATH500** (competition math) and **JEEBench** (harder
 physics, chemistry and math from India's JEE Advanced exam).
 
 | Victim queries | Models trained | Student evaluations | Compute |
@@ -27,16 +29,18 @@ physics, chemistry and math from India's JEE Advanced exam).
 </picture>
 
 - **In this setting, the paper's core result reversed.** There, forged traces beat plain
-  distillation by 8.6 and 16.6 points (+1.4 / +12.9 for its Llama student). Here they lost on both
-  benchmarks, both with the paper's own 1.5B surrogate and with a stronger 7B one. Three of the four
-  gaps are larger than the evaluation-seed spread; the fourth (MATH500, 1.5B) is a tie.
-- **Plain distillation matched the ceiling.** A student distilled from the 7B surrogate
+  distillation by 8.6 and 16.6 points (+1.4 / +12.9 for its Llama student). Here they never won:
+  with the paper's own 1.5B surrogate and with a stronger 7B one, they lost by more than the
+  evaluation-seed spread in three of four comparisons and tied in the fourth (MATH500, 1.5B).
+- **Plain distillation from an open 7B matched the victim's real traces.** A student distilled from the 7B surrogate
   (72.0 / 45.4) tied one trained on the victim's *real* hidden traces (73.4 / 45.6), although the
   victim itself scores 21 points higher on JEEBench than that surrogate (82.0 on a 250-problem
   subset, vs 60.6). For a 2B student, the teacher was not the limit.
-- **The gap is about finishing, not reasoning.** Students trained on forged traces were cut off at
-  the 32k-token limit on 29–50 % of JEEBench, against 8 % for the oracle, and cut-off rate alone
-  tracks accuracy (r = −0.94). [Why below](#why-the-students-were-learning-to-stop-not-to-reason).
+- **The losing students often never finished.** Forged-trace students were cut off at the
+  32k-token limit on 29–50 % of JEEBench, against 8 % for the oracle, and across the seven
+  trace-trained students cut-off rate tracks accuracy (r = −0.94). A cut-off answer scores zero, so
+  part of that link is by construction; whether these students would be right if they finished
+  can't be told from this data. [Details below](#where-the-gap-shows-up-students-that-dont-finish).
 
 ## How the attack works
 
@@ -72,8 +76,8 @@ is in [`docs/results/`](docs/results/).
 
 1. **Traces beat no traces.** Every trace-trained student clears the answers-only floor on MATH500
    by at least 6 points.
-2. **With the paper's own 1.5B surrogate, forgeries did no better than no trace at all.** On
-   JEEBench those students scored 24.9 / 22.5 (with / without summary), against 22.9 for answers
+2. **On JEEBench, forgeries from the paper's own 1.5B surrogate did no better than no trace at
+   all.** Those students scored 24.9 / 22.5 (with / without summary), against 22.9 for answers
    alone.
 3. **A stronger surrogate helped at every stage.** With the 7B surrogate, the inverters finished
    more often, about half as many forgeries had to be discarded, and the students scored higher.
@@ -100,20 +104,17 @@ fine-tuning. Full record: [`docs/results/phase6.md`](docs/results/phase6.md).
 
 </details>
 
-## Why: the students were learning to stop, not to reason
+## Where the gap shows up: students that don't finish
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/termination-dark.svg">
-  <img alt="Scatter of JEEBench accuracy against the share of answers cut off at the 32k-token limit. Across the seven trace-trained students, accuracy falls as the cut-off rate rises, r = −0.94: oracle and 7B-distilled students are cut off on 8–17% and score about 45; forged-trace students are cut off on 29–50% and score 22–36. The untrained model with thinking on is cut off on 66% and scores 33.8. A dashed line at 47.8 marks the untrained model with thinking off, which no student reached." src="docs/assets/termination-light.svg">
+  <img alt="Scatter of JEEBench accuracy against the share of answers cut off at the 32k-token limit (cut-off answers score zero). Across the seven trace-trained students, accuracy falls as the cut-off rate rises, r = −0.94: oracle and 7B-distilled students are cut off on 8–17% and score about 45; forged-trace students are cut off on 29–50% and score 22–36. The untrained model with thinking on is cut off on 66% and scores 33.8. A dashed line at 47.8 marks the untrained model with thinking off, which no student reached." src="docs/assets/termination-light.svg">
 </picture>
 
 **No student beat the untrained model with thinking switched off (79.0 / 47.8), the oracle
-included.** Untrained, in thinking mode, the student keeps going until it is cut off at the
-32k-token limit on two thirds of JEEBench, and a cut-off answer scores zero; 88 % of the answers it
-does finish are right. Every student is served in thinking mode, so fine-tuning here mostly taught
-the model to stop. Comparisons *between* students stay valid, since all were measured the same way,
-but the question they answer is "which data best repairs a reasoning model?", not the paper's
-"which data teaches reasoning to a model that can't?"
+included.** Untrained, in thinking mode, the student runs to the 32k-token cap on two thirds of
+JEEBench (its median answer is exactly the cap), and a cut-off answer scores zero. Every student is
+served in thinking mode, and the clearest thing fine-tuning changed was how often it finished.
 
 Among the seven trace-trained students, cut-off rate tracks accuracy at r = −0.94. Students trained
 on the victim's real traces finish 92 % of JEEBench, those distilled from the 7B surrogate 83 %, and
@@ -121,34 +122,33 @@ those trained on forged traces only 50–71 %.
 
 **Length alone doesn't explain it.** Counting trace plus answer, the surrogate's own training
 examples are as long as the forged ones (median ~3.0–3.4k vs ~2.9–3.2k tokens), yet the
-7B-distilled student is cut off half as often. The difference is how forgeries are made: written
-backwards from an answer the inverter was handed, in the surrogate's voice rather than the
-victim's, and 4–9 % of them argue their way to a different answer from the one attached. They also
+7B-distilled student is cut off half as often. What differs is how they were made: the
+surrogate's traces end at its own answer, while forgeries are written backwards toward an answer
+the inverter was handed, and 4–9 % of them argue their way to a different one. The two sets also
+cover different problems, so this is a candidate explanation, not a measured cause. Forgeries also
 overshoot the real traces they replace (median trace 2.2–2.6× longer), where the paper's came in
 *under* the real length (81–89 %).
 
 ## What it means
 
-**The takeaway:** a distillation attack is only as convincing as its baseline. The paper's
-plain-distillation student scored *below* its own untrained student (63.2 vs 71.2 on MATH500, 19.7
-vs 28.3 on JEEBench), so beating it was a low bar: on MATH500 the forged-trace student only got back
-to the untrained level (71.8 vs 71.2), though on JEEBench it did clear it (36.3 vs 28.3). Here,
-against a strong baseline and a student that already reasons, the real hidden traces were worth no
-more than an open 7B model's, and the forgeries were worse still. Their flaws, overlong and
-sometimes self-contradicting, were measurable before a single student was trained. **Anchor a
-distillation attack to the best no-training baseline, and inspect forged traces before you train
-on them.**
+**The takeaway:** credit a trace-stealing attack only after it beats two baselines it can't beat
+by accident: the untrained student, and distillation from the best open model. The paper's Qwen
+student got *worse* from plain distillation (63.2 vs 71.2 untrained on MATH500; 19.7 vs 28.3 on
+JEEBench), so its +8.6 MATH500 margin mostly recovered lost ground (71.8 vs 71.2); its JEEBench
+margin did clear the untrained score (36.3 vs 28.3). Here, against an open 7B, even the real hidden
+traces added nothing, and the forgeries were worse. Their flaws, overlong and sometimes
+self-contradicting, were visible before any student was trained. **Check both baselines, and
+inspect forged traces before you train on them.**
 
 **What's settled, and what isn't:**
 
-- **Settled:** the attack as built lost to plain distillation, on both benchmarks and with both
-  surrogates.
+- **Settled:** the attack as built never beat plain distillation, with either surrogate.
 - **Not separable:** *why*. Forged and real traces differ in length, voice and answer consistency,
   the distillation students saw different problems and answers, and no length-matched control was
   run.
 - **Noise:** each condition was trained once, and the measured band (3.4 MATH500, 5.3 JEEBench) is
   evaluation-seed spread only. The paper reports single runs; its "forged beats the oracle" margins
-  (0.4–2.4 points on these benchmarks) sit inside that band.
+  (0.4–2.4 points on these benchmarks) would sit inside the band measured here.
 - **The 32k cap matters:** about half of the untrained model's JEEBench cut-offs were not strict
   loops and might finish with a larger budget.
 - **Scale:** the models are smaller and newer than the paper's, so compare signs, not sizes.
