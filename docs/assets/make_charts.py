@@ -232,7 +232,7 @@ def chart_pipeline(mode):
     # four columns shared by both lanes
     XS, WS = (28, 196, 426, 662), (128, 190, 188, 216)
     L1, LH = 16, 154
-    L2 = L1 + LH + 46
+    L2 = L1 + LH + 72
     for y, n, lab in ((L1, "1", "Learn to forge, on a surrogate whose reasoning is visible"),
                       (L2, "2", "Attack: the victim shows only its answer and a summary")):
         out.append(rect(16, y, W - 32, LH, t["panel"], r=12))
@@ -269,11 +269,21 @@ def chart_pipeline(mode):
                     weight="700"))
 
     # the trained adapters move from lane 1 to lane 2
-    ax, ix, my = XS[3] + WS[3] / 2, XS[2] + WS[2] - 44, (L1 + LH + L2) / 2
+    ax, ix, my = XS[3] + WS[3] / 2, XS[2] + WS[2] - 44, L1 + LH + 20
     out.append(f'<path d="M{ax},{BY1 + BH} V{my} H{ix} V{BY2 - 2}" fill="none" '
                f'stroke="{t["forged"]}" stroke-width="1.8" marker-end="url(#ah-forged)"/>')
     out.append(text((ax + ix) / 2, my - 7, "trained adapters", t, 12, t["forged"],
                     anchor="middle", weight="700", halo=True))
+
+    # plain distillation: the surrogate's own traces train a student directly (the winning
+    # baseline). It must cross the adapter link; a page-coloured underlay makes it a bridge.
+    dx0, dy, dx1 = XS[1] + WS[1] / 2, L1 + LH + 50, XS[3] + 58
+    dpath = f"M{dx0},{BY1 + BH} V{dy} H{dx1} V{BY2 - 2}"
+    out.append(f'<path d="{dpath}" fill="none" stroke="{t["page"]}" stroke-width="7"/>')
+    out.append(f'<path d="{dpath}" fill="none" stroke="{t["distilled"]}" stroke-width="1.8" '
+               f'stroke-dasharray="6 4" marker-end="url(#ah-distilled)"/>')
+    out.append(text(dx0 + 10, dy - 7, "own traces → distillation student", t, 12,
+                    t["distilled"], weight="700", halo=True))
 
     # oracle path: the victim's real trace, withheld from the attack
     vx, sx_ = XS[1] + WS[1] / 2, XS[3] + WS[3] / 2
@@ -288,9 +298,9 @@ def chart_pipeline(mode):
     for k, note in enumerate((
             "×4 = 2 surrogates × with / without the summary.",
             "* The victim has no summary API, so the compressor summarizes its hidden trace, as "
-            "the paper must have done for R1.",
-            "Baseline students: the victim's answers only · its summaries + answers · the "
-            "surrogate's own traces (plain distillation).")):
+            "the paper presumably did for R1.",
+            "Floor students, not drawn: trained on the victim's answers only, or its summaries + "
+            "answers.")):
         out.append(text(24, H - 52 + k * 20, note, t, 12, t["muted"]))
     return svg(W, H, "\n".join(out), t, "Pipeline: surrogate, compressor, inverter, victim, student")
 
@@ -313,11 +323,11 @@ def chart_results(mode):
     XMAX = 80.0
     px = PANEL_W / XMAX
     PLOT_H = len(RES_ROWS) * ROW
-    H = TOP + PLOT_H + 76
-    out = [text(24, 36, "Forged traces made the weakest trace-trained students", t, 18,
-                t["ink"], weight="700"),
+    H = TOP + PLOT_H + 90
+    out = [text(24, 36, "Within each surrogate, forged traces trailed plain distillation", t,
+                18, t["ink"], weight="700"),
            text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per "
-                "condition · dashed line: the same model untrained", t, 12.5, t["muted"])]
+                "condition · dashed lines: the same model untrained", t, 12.5, t["muted"])]
     out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
                                   "attack)"), (t["distilled"], "surrogate's traces (plain "
                                   "distillation)"), (t["oracle"], "victim's real traces")], t)
@@ -327,14 +337,19 @@ def chart_results(mode):
         for v in range(0, int(XMAX) + 1, 20):
             gx = x0 + v * px
             out.append(line(gx, TOP, gx, TOP + PLOT_H, t["axis"] if v == 0 else t["grid"]))
-            if abs(v - THINK[bench]) > 3:  # keep clear of the reference line
+            if min(abs(v - THINK[bench]), abs(v - NOTHINK[bench])) > 3:  # clear of refs
                 out.append(text(gx, TOP + PLOT_H + 15, str(v), t, 10.5, t["muted"],
                                 anchor="middle", tabular=True))
         # untrained reference lines, labelled beneath the axis so they never meet a value label
+        # untrained references: thinking on (how students are served) and thinking off
         gx = x0 + THINK[bench] * px
         out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["ink2"], 1.5, "4 3"))
-        out.append(text(gx + 4, TOP + PLOT_H + 36, f"untrained · {THINK[bench]:.1f}", t, 10.5,
-                        t["ink2"], weight="600", halo=True))
+        out.append(text(gx - 4, TOP + PLOT_H + 36, f"untrained, thinking on · {THINK[bench]:.1f}",
+                        t, 10.5, t["ink2"], anchor="end", weight="600", halo=True))
+        gx = x0 + NOTHINK[bench] * px
+        out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 40, t["muted"], 1.2, "2 3"))
+        out.append(text(gx - 4, TOP + PLOT_H + 52, f"thinking off · {NOTHINK[bench]:.1f}", t,
+                        10.5, t["muted"], anchor="end", weight="600", halo=True))
         for r, (_, run, role) in enumerate(RES_ROWS):  # bars drawn over the reference lines
             v = acc(run, bench)
             out.append(hbar(x0, TOP + r * ROW + (ROW - BAR) / 2, v * px, BAR, t[role]))
@@ -386,7 +401,7 @@ def chart_termination(mode):
     xs = [trunc(r, "JEEBench") for r in TRACE_RUNS]
     ys = [acc(r, "JEEBench") for r in TRACE_RUNS]
     a, b, r = fit(xs, ys)
-    out = [text(24, 36, "Students that learned to stop scored; students that looped did not", t,
+    out = [text(24, 36, "Students that learned to stop scored; students that got cut off did not", t,
                 18, t["ink"], weight="700"),
            text(24, 58, "JEEBench accuracy vs answers cut off at the 32k-token limit (which score "
                 f"zero) · r = −{-r:.2f} across the 7 trace-trained students", t, 12.5,
@@ -404,8 +419,8 @@ def chart_termination(mode):
         out.append(line(L, sy(v), L + pw, sy(v), t["grid"]))
         out.append(text(L - 8, sy(v) + 4, str(v), t, 10.5, t["muted"], anchor="end",
                         tabular=True))
-    out.append(text(L + pw / 2, H - 12, "JEEBench answers still unfinished at the 32k-token "
-                    "limit →", t, 11.5, t["ink2"], anchor="middle"))
+    out.append(text(L + pw / 2, H - 12, "JEEBench answers cut off at the 32k-token limit →", t,
+                    11.5, t["ink2"], anchor="middle"))
     out.append(f'<text x="20" y="{TOP + ph / 2:.1f}" font-family=\'{FONT}\' font-size="11.5" '
                f'fill="{t["ink2"]}" text-anchor="middle" '
                f'transform="rotate(-90 20 {TOP + ph / 2:.1f})">JEEBench accuracy % →</text>')

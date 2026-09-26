@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="498" viewBox="0 0 900 498" role="img" aria-label="Pipeline: surrogate, compressor, inverter, victim, student">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="524" viewBox="0 0 900 524" role="img" aria-label="Pipeline: surrogate, compressor, inverter, victim, student">
 <title>Pipeline: surrogate, compressor, inverter, victim, student</title>
-<rect x="0.0" y="0.0" width="900.0" height="498.0" rx="10" fill="#0d1117"/>
+<rect x="0.0" y="0.0" width="900.0" height="524.0" rx="10" fill="#0d1117"/>
 <defs><marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#c3c2b7"/></marker><marker id="ah-forged" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#3987e5"/></marker><marker id="ah-oracle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#199e70"/></marker><marker id="ah-distilled" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 Z" fill="#d95926"/></marker></defs>
 <rect x="16.0" y="16.0" width="868.0" height="154.0" rx="12" fill="#161b22"/>
 <circle cx="40" cy="38" r="11" fill="#f0f0ee"/>
 <text x="40.0" y="42.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0d1117" text-anchor="middle" font-weight="700" style="">1</text>
 <text x="60.0" y="43.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" fill="#f0f0ee" text-anchor="start" font-weight="600" style="">Learn to forge, on a surrogate whose reasoning is visible</text>
-<rect x="16.0" y="216.0" width="868.0" height="154.0" rx="12" fill="#161b22"/>
-<circle cx="40" cy="238" r="11" fill="#f0f0ee"/>
-<text x="40.0" y="242.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0d1117" text-anchor="middle" font-weight="700" style="">2</text>
-<text x="60.0" y="243.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" fill="#f0f0ee" text-anchor="start" font-weight="600" style="">Attack: the victim shows only its answer and a summary</text>
+<rect x="16.0" y="242.0" width="868.0" height="154.0" rx="12" fill="#161b22"/>
+<circle cx="40" cy="264" r="11" fill="#f0f0ee"/>
+<text x="40.0" y="268.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0d1117" text-anchor="middle" font-weight="700" style="">2</text>
+<text x="60.0" y="269.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="14" fill="#f0f0ee" text-anchor="start" font-weight="600" style="">Attack: the victim shows only its answer and a summary</text>
 <rect x="28.0" y="60.0" width="128.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
 <text x="42.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Problems A</text>
 <text x="42.0" y="110.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">OpenThoughts</text>
@@ -32,35 +32,38 @@
 <line x1="156.0" y1="109.0" x2="194.0" y2="109.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
 <line x1="386.0" y1="109.0" x2="424.0" y2="109.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
 <line x1="614.0" y1="109.0" x2="660.0" y2="109.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
-<rect x="28.0" y="260.0" width="128.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
-<text x="42.0" y="287.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Problems B</text>
-<text x="42.0" y="310.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">OpenThoughts</text>
-<text x="42.0" y="328.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">5,000 prompts</text>
-<rect x="196.0" y="260.0" width="190.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
-<text x="210.0" y="287.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Victim</text>
-<text x="210.0" y="310.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">Qwen3.8-27B, 4-bit</text>
-<text x="210.0" y="328.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">shows answer + summary*</text>
-<text x="210.0" y="346.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">hides its trace</text>
-<rect x="426.0" y="260.0" width="188.0" height="98.0" rx="10" fill="#0d1117" stroke="#3987e5" stroke-width="1.2"/>
-<path d="M427.0,270.0 a9,9 0 0 1 9,-9 H438.0 V357.0 H436.0 a9,9 0 0 1 -9,-9 Z" fill="#3987e5"/>
-<text x="448.0" y="287.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Inverter: apply</text>
-<text x="448.0" y="310.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">same 4 adapters</text>
-<text x="448.0" y="328.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forges the hidden trace</text>
-<rect x="662.0" y="260.0" width="216.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="2"/>
-<text x="676.0" y="287.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Student</text>
-<text x="676.0" y="310.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">Qwen3.5-2B, full fine-tune</text>
-<text x="676.0" y="328.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">one per training condition</text>
-<text x="676.0" y="346.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">scored: MATH500, JEEBench</text>
-<line x1="156.0" y1="309.0" x2="194.0" y2="309.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
-<line x1="386.0" y1="309.0" x2="424.0" y2="309.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
-<line x1="614.0" y1="309.0" x2="660.0" y2="309.0" stroke="#3987e5" stroke-width="2.6" marker-end="url(#ah-forged)"/>
-<text x="638.0" y="300.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="">forged</text>
-<text x="638.0" y="329.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="">traces</text>
-<path d="M770.0,158 V193.0 H570 V258" fill="none" stroke="#3987e5" stroke-width="1.8" marker-end="url(#ah-forged)"/>
-<text x="670.0" y="186.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">trained adapters</text>
-<path d="M291.0,358 V394 H770.0 V360" fill="none" stroke="#199e70" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-oracle)"/>
-<text x="530.5" y="414.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#199e70" text-anchor="middle" font-weight="700" style="">the victim's real traces: never shown to the attack, used only to train the oracle student</text>
-<text x="24.0" y="446.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">×4 = 2 surrogates × with / without the summary.</text>
-<text x="24.0" y="466.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">* The victim has no summary API, so the compressor summarizes its hidden trace, as the paper must have done for R1.</text>
-<text x="24.0" y="486.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">Baseline students: the victim's answers only · its summaries + answers · the surrogate's own traces (plain distillation).</text>
+<rect x="28.0" y="286.0" width="128.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
+<text x="42.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Problems B</text>
+<text x="42.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">OpenThoughts</text>
+<text x="42.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">5,000 prompts</text>
+<rect x="196.0" y="286.0" width="190.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
+<text x="210.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Victim</text>
+<text x="210.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">Qwen3.8-27B, 4-bit</text>
+<text x="210.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">shows answer + summary*</text>
+<text x="210.0" y="372.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">hides its trace</text>
+<rect x="426.0" y="286.0" width="188.0" height="98.0" rx="10" fill="#0d1117" stroke="#3987e5" stroke-width="1.2"/>
+<path d="M427.0,296.0 a9,9 0 0 1 9,-9 H438.0 V383.0 H436.0 a9,9 0 0 1 -9,-9 Z" fill="#3987e5"/>
+<text x="448.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Inverter: apply</text>
+<text x="448.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">same 4 adapters</text>
+<text x="448.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forges the hidden trace</text>
+<rect x="662.0" y="286.0" width="216.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="2"/>
+<text x="676.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Student</text>
+<text x="676.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">Qwen3.5-2B, full fine-tune</text>
+<text x="676.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">one per training condition</text>
+<text x="676.0" y="372.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">scored: MATH500, JEEBench</text>
+<line x1="156.0" y1="335.0" x2="194.0" y2="335.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
+<line x1="386.0" y1="335.0" x2="424.0" y2="335.0" stroke="#c3c2b7" stroke-width="1.8" marker-end="url(#ah-ink)"/>
+<line x1="614.0" y1="335.0" x2="660.0" y2="335.0" stroke="#3987e5" stroke-width="2.6" marker-end="url(#ah-forged)"/>
+<text x="638.0" y="326.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="">forged</text>
+<text x="638.0" y="355.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="">traces</text>
+<path d="M770.0,158 V190 H570 V284" fill="none" stroke="#3987e5" stroke-width="1.8" marker-end="url(#ah-forged)"/>
+<text x="670.0" y="183.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#3987e5" text-anchor="middle" font-weight="700" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">trained adapters</text>
+<path d="M291.0,158 V220 H720 V284" fill="none" stroke="#0d1117" stroke-width="7"/>
+<path d="M291.0,158 V220 H720 V284" fill="none" stroke="#d95926" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-distilled)"/>
+<text x="301.0" y="213.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#d95926" text-anchor="start" font-weight="700" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">own traces → distillation student</text>
+<path d="M291.0,384 V420 H770.0 V386" fill="none" stroke="#199e70" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-oracle)"/>
+<text x="530.5" y="440.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#199e70" text-anchor="middle" font-weight="700" style="">the victim's real traces: never shown to the attack, used only to train the oracle student</text>
+<text x="24.0" y="472.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">×4 = 2 surrogates × with / without the summary.</text>
+<text x="24.0" y="492.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">* The victim has no summary API, so the compressor summarizes its hidden trace, as the paper presumably did for R1.</text>
+<text x="24.0" y="512.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="start" font-weight="normal" style="">Floor students, not drawn: trained on the victim's answers only, or its summaries + answers.</text>
 </svg>
