@@ -10,12 +10,13 @@ trace that could have produced them. A student fine-tuned on these forged traces
 distillation**, which fine-tunes the same student on the visible traces of the attacker's own
 weaker open model (the **surrogate**).
 
-This repo recreates the experiment end to end (surrogate, inverters, victim and ten students) and
-adds a stronger surrogate and a measured noise band. One deliberate change: the student already
-reasons natively. Whether stolen traces still help such a student is a question the paper leaves
-open, and a 2B fits the paper's full fine-tuning. That changed what is tested: in thinking mode the
-untrained student runs into the 32k-token cap on two thirds of JEEBench, so every student here is
-learning to repair its own thinking mode, not to reason from scratch. Students are scored on
+This repo recreates the experiment end to end (surrogate, inverters, victim and ten students), adds
+a stronger 7B surrogate, and measures an evaluation-noise band. One change is deliberate: the
+student, Qwen3.5-2B, already reasons natively, which the paper's instruct-tuned students did not.
+Whether stolen traces still help such a student is a question the paper leaves open, and it changes
+what is tested. Untrained and in thinking mode, this student runs into the 32k-token generation cap
+on two thirds of JEEBench, so every student here is partly learning to *finish* its reasoning, not
+to reason from scratch. Students are scored on
 **MATH500** (competition math) and **JEEBench** (harder physics, chemistry and math from India's JEE
 Advanced exam).
 
@@ -31,9 +32,10 @@ Advanced exam).
 </picture>
 
 - **In this setting, the paper's core result reversed.** There, forged traces beat plain
-  distillation by 8.6 and 16.6 points (+1.4 / +12.9 for its Llama student). Here they never won:
-  with the paper's own 1.5B surrogate and with a stronger 7B one, they lost by more than the
-  evaluation-seed spread in three of four comparisons and tied in the fourth (MATH500, 1.5B).
+  distillation by 8.6 and 16.6 points (+1.4 / +12.9 for its Llama student). Here they never won.
+  With the 7B surrogate they lost by 7.6 and 9.9 points, well outside noise. With the paper's 1.5B
+  they tied on MATH500 and lost by 7.5 on JEEBench, at the edge of noise for a two-run gap (the
+  no-summary variant lost by 9.9).
 - **Plain distillation from an open 7B matched the victim's real traces.** A student distilled
   from the 7B surrogate (72.0 / 45.4) tied one trained on the victim's *real* hidden traces, the
   **oracle** (73.4 / 45.6), although the victim itself scores 21 points higher on JEEBench than that
@@ -119,9 +121,9 @@ fine-tuning (identical on JEEBench; +3.6 on MATH500, at the edge of the 3.4 seed
   <img alt="Scatter of JEEBench accuracy against the share of answers cut off at the 32k-token limit (cut-off answers score zero). Across the seven trace-trained students, accuracy falls as the cut-off rate rises, r = −0.94: oracle and 7B-distilled students are cut off on 8–17% and score about 45; forged-trace students are cut off on 29–50% and score 22–36. The untrained model with thinking on is cut off on 66% and scores 33.8. A dashed line at 47.8 marks the untrained model with thinking off, which no student reached." src="docs/assets/termination-light.svg">
 </picture>
 
-Untrained, in thinking mode, the student runs to the 32k-token cap on two thirds of JEEBench (its
-median answer is exactly the cap), and a cut-off answer scores zero. The clearest thing fine-tuning
-changed was how often a student finished, and the students that finished least scored lowest.
+Fine-tuning's clearest effect was on whether a student finished: JEEBench cut-offs fell from 66 %
+untrained (its median answer is exactly the cap) to 8–50 %, and the students that finished least
+scored lowest.
 
 **Length alone doesn't explain the gap to distillation.** Counting trace plus answer, the surrogate's own training
 examples are as long as the forged ones (median ~3.0–3.4k vs ~2.9–3.2k tokens), yet the
@@ -135,8 +137,9 @@ overshoot the real traces they replace (median trace 2.2–2.6× longer), where 
 ## What it means
 
 **The takeaway: credit a trace-stealing attack only after it beats the untrained student and
-distillation from the best open model, and read the forged traces before training on them.** The
-evidence, from both sides:
+distillation from the best open model, and read the forged traces before training on them.** Here
+their flaws (2.2–2.6× overlong, 4–9 % arguing toward a different answer) were on record before any
+student trained, though this run can't show they caused the loss. The evidence, from both sides:
 
 **Both of the paper's Qwen margins were measured against a distillation baseline that scored below
 the untrained model** (63.2 vs 71.2 on MATH500, 19.7 vs 28.3 on JEEBench). On MATH500 that makes
@@ -146,8 +149,7 @@ untrained model (36.3 vs 28.3).
 **Here the forgeries failed both baselines.** They trailed distillation from an open 7B, and no
 forged-trace student beat the untrained student, served the same way, by more than the seed spread
 (at most +0.2 MATH500 and +1.7 JEEBench). The 1.5B-surrogate forgeries were clearly below it
-(61.0–61.2 vs 67.8; 22.5–24.9 vs 33.8). Their flaws, overlong and sometimes self-contradicting,
-were on record before any student was trained.
+(61.0–61.2 vs 67.8; 22.5–24.9 vs 33.8).
 
 **What isn't settled:**
 
@@ -157,8 +159,12 @@ were on record before any student was trained.
 - **Noise:** each condition was trained once, and the measured band (3.4 MATH500, 5.3 JEEBench) is
   evaluation-seed spread only. The paper reports single runs; its "forged beats the oracle" margins
   (0.4–2.4 points on these benchmarks) would sit inside the band measured here. The headline gaps
-  are differences of two cells, so their noise is larger still; the tightest (1.5B surrogate,
-  JEEBench, −7.5) is about √2 times the band.
+  are differences of two runs, so their noise band is about √2 times wider (4.8 / 7.5), which is
+  what the headline figure shades. The tightest loss (1.5B, JEEBench, −7.5) sits at that edge.
+- **Data:** students train on 3,616 problems, about a third of the paper's 10k. The paper's own
+  scaling curve (a different victim, no distillation arm) puts its attack 10.6 points lower on
+  MATH500 at 5k than at 10k, so the forged-trace margin may depend on scale. Whether it would
+  change sign is untested.
 - **The 32k cap matters:** about half of the untrained model's JEEBench cut-offs were not strict
   loops and might finish with a larger budget.
 - **Scale:** the models are smaller and newer than the paper's, so compare signs, not sizes.
@@ -183,10 +189,10 @@ VRAM. Full log with reasons: [`docs/09-deviations-from-paper.md`](docs/09-deviat
 | Surrogate | R1-Distill-Qwen-1.5B | same 1.5B, plus a 7B | adds a surrogate-strength midpoint |
 | Compressor / inverter | Qwen2.5-7B-Instruct, full SFT | Qwen3.5-4B, LoRA r=64 | 7B full fine-tuning needs ~58 GB |
 | Student | Qwen2.5-7B, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at 16k context | fits full fine-tuning; reasons natively, which changes the question (see top) |
-| Data | 2 × 10k prompts | 2 × 5k | the paper's scaling curve: 5k gives most of the gain |
+| Data | 2 × 10k prompts | 2 × 5k queried; students train on 3,616 | cost. The paper's own curve (GPT-5.4 mini victim) falls from 77.6 to 67.0 on MATH500 at 5k, below its untrained 71.2 |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | single-GPU training |
 | Evaluation | unspecified sampling, single run | one harness for all 13 runs, 32k cap, 3 evaluation seeds on one cell | comparability |
-| Trace-similarity metrics | BLEU / token-F1 / ROUGE | not run | in the paper they track trace length (r ≈ 0.9); student accuracy is the real test |
+| Trace-similarity metrics | BLEU / token-F1 / ROUGE | not run | across the paper's own results they track trace length (r = 0.84–0.95, [`docs/10`](docs/10-run-plan.md)); student accuracy is the real test |
 
 </details>
 
