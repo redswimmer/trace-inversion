@@ -1,6 +1,6 @@
-# Stealing hidden reasoning, re-tested on one GPU
+# Can hidden reasoning be stolen? Recreating *Trace Inversion*
 
-**Can you steal a model's hidden chain of thought from the parts it does show you?**
+**A full recreation of the attack, and its central result reversed.**
 
 Commercial reasoning models hide their chain of thought and return only an answer, sometimes with a
 short summary of the thinking. [*How to Steal Reasoning Without Reasoning Traces*](https://arxiv.org/abs/2603.07267)
@@ -10,14 +10,14 @@ trace that could have produced them. A student fine-tuned on these forged traces
 distillation**, which fine-tunes the same student on the visible traces of the attacker's own
 weaker open model (the **surrogate**).
 
-This repo rebuilds the whole attack on a single consumer GPU. It adds a stronger surrogate, a
-measured noise band, and a student that already reasons natively. Students are scored on
-**MATH500** (competition math) and **JEEBench** (harder physics, chemistry and math from India's JEE
-Advanced exam).
+This repo recreates the experiment end to end: surrogate, inverters, victim and ten students. It
+extends it with a stronger surrogate, a measured noise band, and a student that already reasons
+natively. Students are scored on **MATH500** (competition math) and **JEEBench** (harder physics,
+chemistry and math from India's JEE Advanced exam).
 
-| Hardware | Compute | Victim queries | Trained | Evaluated |
-|:-:|:-:|:-:|:-:|:-:|
-| 1× RTX 4090 | ~258 GPU-h | 5,045 | 4 inverters, 10 students | 13 runs × 1,015 problems |
+| Victim queries | Models trained | Student evaluations | Compute |
+|:-:|:-:|:-:|:-:|
+| 5,045 | 4 inverters, 10 students | 13 runs × 1,015 problems | ~258 GPU-hours |
 
 ## Result: forged traces lost to plain distillation
 
@@ -141,7 +141,8 @@ at least against modern students.
 
 ## How it was run
 
-About 258 GPU-hours (≈ 11 days of continuous compute) over three weeks, in seven phases. The
+About 258 GPU-hours on a single RTX 4090 (≈ 11 days of continuous compute) over three weeks, in
+seven phases. The
 victim queries were the single biggest cost at ~79 h. Each long run started with a short probe that
 projected its cost, and every result file passed an automated gate before any number from it was
 used. The gates caught three silent problems before they could cost results or days of GPU time: a
