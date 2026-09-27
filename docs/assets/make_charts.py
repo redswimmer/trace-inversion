@@ -9,7 +9,7 @@ Table 3). No dependencies.
 
 Figures:
     headline     the paper's core claim (forged beats plain distillation), paper vs here
-    pipeline     how the attack is wired, and where the oracle comes from
+    pipeline     how the attack is wired, and where the victim's real traces go
     results      every condition's student accuracy on both benchmarks
     termination  why: accuracy vs the share of answers that never finished
 """
@@ -159,14 +159,14 @@ def chart_headline(mode):
     px = PANEL_W / XMAX
     GH = 3 * STEP
     PLOT_H = len(HEAD_GROUPS) * GH + (len(HEAD_GROUPS) - 1) * GROUP_GAP
-    H = TOP + PLOT_H + 84
+    H = TOP + PLOT_H + 104
     out = [text(24, 36, "Forged traces lost to plain distillation: the paper's gap reversed", t, 18,
                 t["ink"], weight="700"),
            text(24, 58, "Student accuracy (%) before and after training · (±) = change from the "
                 "untrained student", t, 12.5, t["muted"])]
     out += swatch_legend(24, 88, [(t["ref"], "untrained student"),
-                                  (t["distilled"], "plain distillation (surrogate's traces)"),
-                                  (t["forged"], "forged traces (the attack)")], t, 13)
+                                  (t["distilled"], "trained on the surrogate's traces"),
+                                  (t["forged"], "trained on forged traces (the attack)")], t, 13)
     for i, bench in enumerate(BENCHES):
         x0 = LABEL_W + i * (PANEL_W + GAP)
         out.append(text(x0, TOP - 12, bench, t, 13, t["ink"], weight="700"))
@@ -191,12 +191,14 @@ def chart_headline(mode):
         out.append(text(24, gy + GH / 2 + 14, sub, t, 11.5, t["muted"]))
         if g:
             out.append(line(24, gy - GROUP_GAP / 2, W - 24, gy - GROUP_GAP / 2, t["grid"]))
-    out.append(text(24, H - 32, f"Noise: 3 evaluation seeds moved one student's score by "
-                    f"{seed_range('MATH500'):.1f} (MATH500) and {seed_range('JEEBench'):.1f} "
-                    "(JEEBench) points; the paper reports single runs.", t, 12.5, t["muted"]))
-    out.append(text(24, H - 12, "Our untrained student is scored with thinking on, as every student "
-                    f"is; with thinking off it scores {NOTHINK['MATH500']} / {NOTHINK['JEEBench']}, "
-                    "above every trained student.", t, 12.5, t["muted"]))
+    for k, note in enumerate((
+            f"Noise: 3 evaluation seeds moved the score of the student trained on forged traces by "
+            f"{seed_range('MATH500'):.1f} (MATH500) and {seed_range('JEEBench'):.1f} (JEEBench) points.",
+            "The paper reports single runs. Our untrained student is scored with thinking on, as every "
+            "student is;",
+            f"with thinking off it scores {NOTHINK['MATH500']} / {NOTHINK['JEEBench']}, above every "
+            "trained student.")):
+        out.append(text(24, H - 52 + k * 20, note, t, 12.5, t["muted"]))
     return svg(W, H, "\n".join(out), t,
                "Untrained student vs plain distillation vs forged traces, paper and our recreation")
 
@@ -243,7 +245,7 @@ def chart_pipeline(mode):
                ("Compressor", ["Qwen3.5-4B, zero-shot", "summarizes each trace"], None, False),
                ("Inverter: train", ["Qwen3.5-4B + LoRA", "problem, answer, summary",
                                        "→ reasoning trace"], t["forged"], True)]),
-        (BY2, [("Problems B", ["OpenThoughts", "5,000 prompts"], None, False),
+        (BY2, [("Problems B", ["OpenThoughts", "5,045 answers kept"], None, False),
                ("Victim", ["Qwen3.8-27B, 4-bit", "shows answer + summary*", "hides its trace"],
                 None, False),
                ("Inverter: apply", ["the trained adapter", "forges the hidden trace"], t["forged"],
@@ -281,7 +283,7 @@ def chart_pipeline(mode):
     out.append(text(dx0 + 10, dy - 7, "its own traces → a student (plain distillation)", t, 12,
                     t["distilled"], weight="700", halo=True))
 
-    # oracle path: the victim's real trace, withheld from the attack
+    # the victim's real traces: withheld from the attack, used for one comparison student
     vx, sx_ = XS[1] + WS[1] / 2, XS[3] + WS[3] / 2
     oy = L2 + LH + 24
     out.append(f'<path d="M{vx},{BY2 + BH} V{oy} H{sx_} V{BY2 + BH + 2}" fill="none" '
@@ -314,7 +316,7 @@ LADDER = [  # label, key, colour role, share-of-the-way label?, is a reference (
     ("the victim's real traces", "oracle", "oracle", True, False),
     ("the surrogate's traces", "surr-7b", "distilled", True, False),
     ("forged traces", "synth-7b-sum", "forged", True, False),
-    ("nothing (untrained)", "baseline-think", "ref", False, False),
+    ("nothing (the untrained student)", "baseline-think", "ref", False, False),
     ("the victim's summaries + answers", "summary-answer", "ref", False, False),
     ("the victim's answers only", "answer-only", "ref", False, False),
 ]
@@ -340,7 +342,7 @@ def chart_results(mode):
     PLOT_H = len(LADDER) * ROW + SEP
     H = TOP + PLOT_H + 110
     ry = lambda r: TOP + r * ROW + (SEP if r >= 2 else 0)
-    out = [text(24, 36, "The victim's real traces got our student no closer to it than the 7B's did",
+    out = [text(24, 36, "The victim's real traces got our student no closer to it than the surrogate's did",
                 t, 18, t["ink"], weight="700"),
            text(24, 58, "Our recreation, 7B surrogate · accuracy (%) · outlined bars: the victim "
                 "and the surrogate themselves", t, 12.5, t["muted"]),
@@ -433,11 +435,10 @@ def chart_termination(mode):
            text(24, 58, "JEEBench accuracy vs answers cut off at the 32k-token limit · cut-off "
                 "answers score zero, so the link is partly by construction", t, 12.5,
                 t["muted"])]
-    out += swatch_legend(24, 86, [(t["oracle"], "trained on the victim's real traces"),
-                                  (t["distilled"], "on the surrogate's traces"),
-                                  (t["forged"], "on forged traces")], t, 13)
-    out.append(f'<circle cx="752" cy="81" r="5" fill="{t["forged"]}" opacity="0.75"/>')
-    out.append(text(762, 86, "forged, no summary", t, 13, t["ink2"]))
+    out.append(text(24, 91, "Student trained on:", t, 13, t["muted"], weight="600"))
+    out += swatch_legend(186, 90, [(t["oracle"], "the victim's real traces"),
+                                   (t["distilled"], "the surrogate's traces"),
+                                   (t["forged"], "forged traces")], t, 13)
     for v in range(0, 71, 10):
         out.append(line(sx(v), TOP, sx(v), TOP + ph, t["axis"] if v == 0 else t["grid"]))
         out.append(text(sx(v), TOP + ph + 17, f"{v}%", t, 12, t["muted"], anchor="middle",
@@ -473,8 +474,8 @@ def chart_termination(mode):
     for x, y in zip(fx, fy):
         out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{t["ref"]}" '
                    f'stroke="{t["page"]}" stroke-width="2"/>')
-    out.append(text(max(fx) + 12, sum(fy) / 2 + 4, "victim's answers / summaries only: stop at once, "
-                    "but score low", t, 13, t["ink2"], halo=True))
+    out.append(text(max(fx) + 12, sum(fy) / 2 + 4, "the victim's answers only / summaries + answers: "
+                    "stop at once, but score low", t, 13, t["ink2"], halo=True))
     # same-length training data, about half the cut-offs: surrogate 7B vs forged 7B
     F = json.loads((ROOT / "bench" / "results" / "phase5" / "format-stats.json").read_text())
     med = lambda k: F["conditions"][k]["completion"]["median"] / 1000
@@ -487,6 +488,8 @@ def chart_termination(mode):
     out.append(text(sx(31.5), sy(43.0) + 18, "about half the cut-offs", t, 13, t["ink2"],
                     italic=True, halo=True))
     for run in VARIANTS:
+        out.append(text(sx(trunc(run, "JEEBench")) - 10, sy(acc(run, "JEEBench")) + 4,
+                        "forged traces, without summary", t, 12, t["ink2"], anchor="end", halo=True))
         out.append(f'<circle cx="{sx(trunc(run, "JEEBench")):.1f}" '
                    f'cy="{sy(acc(run, "JEEBench")):.1f}" r="5" fill="{t["forged"]}" '
                    f'stroke="{t["page"]}" stroke-width="1.5" opacity="0.75"/>')
@@ -496,7 +499,7 @@ def chart_termination(mode):
                    f'stroke="{t["page"]}" stroke-width="2"/>')
         out.append(text(x + dx, y + dy, label, t, 13.5, t["ink"], anchor=anchor, weight="600",
                         halo=True))
-    return svg(W, H, "\n".join(out), t, "JEEBench accuracy vs truncation rate by student")
+    return svg(W, H, "\n".join(out), t, "JEEBench accuracy vs share of answers cut off, by student")
 
 
 if __name__ == "__main__":

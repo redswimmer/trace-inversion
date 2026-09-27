@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540" role="img" aria-label="Students, the victim and the surrogate on one scale, our recreation">
 <title>Students, the victim and the surrogate on one scale, our recreation</title>
 <rect x="0.0" y="0.0" width="900.0" height="540.0" rx="10" fill="#ffffff"/>
-<text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">The victim's real traces got our student no closer to it than the 7B's did</text>
+<text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">The victim's real traces got our student no closer to it than the surrogate's did</text>
 <text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Our recreation, 7B surrogate · accuracy (%) · outlined bars: the victim and the surrogate themselves</text>
 <text x="24.0" y="77.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">(%) = share of the way from the untrained student to the victim</text>
 <rect x="24.0" y="99.0" width="12.0" height="12.0" rx="3" fill="#1baf7a"/>
@@ -81,7 +81,7 @@
 <text x="24.0" y="269.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">the victim's real traces</text>
 <text x="24.0" y="299.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">the surrogate's traces</text>
 <text x="24.0" y="329.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">forged traces</text>
-<text x="24.0" y="359.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">nothing (untrained)</text>
+<text x="24.0" y="359.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">nothing (the untrained student)</text>
 <text x="24.0" y="389.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">the victim's summaries + answers</text>
 <text x="24.0" y="419.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="">the victim's answers only</text>
 <line x1="24.0" y1="224.0" x2="876.0" y2="224.0" stroke="#e7e6e1" stroke-width="1.0"/>
