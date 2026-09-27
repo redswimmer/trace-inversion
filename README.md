@@ -19,6 +19,16 @@ instruct-tuned students did not, and the paper leaves open whether stolen traces
 student. Untrained and in thinking mode, our student hits the 32k-token limit on two thirds of
 JEEBench, so every student in our recreation is partly learning to *finish* its reasoning.
 
+**Who's who in our recreation:**
+
+| Role | Model | What it does |
+|---|---|---|
+| **Victim** | Qwen3.8-27B | The strong model being stolen from. It shows only its answer and a short summary; its reasoning stays hidden. |
+| **Surrogate** | R1-Distill-Qwen-7B | An open, weaker model whose reasoning the attacker can see. |
+| **Compressor** | Qwen3.5-4B | Summarizes the surrogate's reasoning, so the inverter learns from summaries like the victim's. |
+| **Inverter** | Qwen3.5-4B + LoRA | Learns from the surrogate to write reasoning backwards from an answer and summary, then forges the victim's hidden reasoning. |
+| **Student** | Qwen3.5-2B | The small model being trained and scored. |
+
 | Victim answers kept | Students trained | Student evaluations | Compute |
 |:-:|:-:|:-:|:-:|
 | 5,045 | 10 | 13 runs × 1,015 problems | ~258 GPU-hours |
@@ -40,32 +50,26 @@ student worse off, so we use a 7B.
 - **In our recreation, plain distillation matched the oracle.** Our student distilled from the 7B
   surrogate (72.0 / 45.4) tied one trained on the victim's *real* hidden traces, the **oracle**
   (73.4 / 45.6), although the victim itself scores 21 points higher on JEEBench than the 7B
-  surrogate (82.0 on a 250-problem subset, vs 60.6). For our 2B student, the victim's stronger
-  reasoning bought nothing measurable over the 7B's.
+  surrogate (next chart). For our 2B student, the victim's stronger reasoning bought nothing
+  measurable over the 7B's.
 - **In our recreation, the forged-trace students often never finished.** On JEEBench they were cut
   off at the 32k-token limit on 29–31 % of problems, against 17 % for plain distillation and 8 %
   for the oracle. Across our four students trained on reasoning traces, cut-off rate tracks
   accuracy (r = −0.91). A cut-off answer scores zero, so part of that link is by construction.
   [Details below](#where-the-gap-shows-up-students-that-dont-finish).
 
-## How far each student moved toward its teacher
+## How far each student got toward the victim
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/results-dark.svg">
-  <img alt="Our recreation, 7B surrogate, accuracy MATH500 / JEEBench. Teacher models: victim 97.2 / 82.0; 7B surrogate 92.6 / 60.6. Students: oracle 73.4 / 45.6 (19 % / 24 % of the way to the victim); plain distillation 72.0 / 45.4 (17 % / 43 % of the way to the surrogate); forged traces 64.4 / 35.5 (fell back on MATH500; 4 % of the way to the victim on JEEBench); untrained student 67.8 / 33.8; victim's summaries + answers 54.8 / 21.6; victim's answers only 54.2 / 22.9. Untrained student with thinking off: 79.0 / 47.8." src="docs/assets/results-light.svg">
+  <img alt="Our recreation, 7B surrogate, accuracy MATH500 / JEEBench, with each student's share of the way from the untrained student to the victim. Victim 97.2 / 82.0; 7B surrogate 92.6 / 60.6. Oracle 73.4 / 45.6 (19 % / 24 %); plain distillation 72.0 / 45.4 (14 % / 24 %); forged traces 64.4 / 35.5 (−12 % / 4 %); untrained student 67.8 / 33.8; victim's summaries + answers 54.8 / 21.6; victim's answers only 54.2 / 22.9." src="docs/assets/results-light.svg">
 </picture>
 
-Distillation moves a student toward the model it learns from. In our recreation, plain distillation
-moved the student 43 % of the way to the 7B surrogate on JEEBench (17 % on MATH500). The oracle,
-trained on the victim's real traces, reached about the same scores, only a fifth to a
-quarter of the way to the victim. Forged traces barely moved the student toward the victim (4 % on
-JEEBench) and set it back on MATH500. No student came close to the victim: a 2B student trained on
-3,616 problems was never going to match a 27B model, so the question is which data moves it
-furthest.
-
-**Every student is scored with thinking on, where our untrained student scores 67.8 / 33.8. No
-student, the oracle included, reached our untrained student with thinking off (79.0 / 47.8).** The
-dotted line shows it.
+In our recreation, plain distillation and the oracle closed the same share of the gap between our
+untrained student and the victim on JEEBench (24 % each; 14 % vs 19 % on MATH500). The victim scores
+21 points above the 7B surrogate on JEEBench, yet its real traces moved our student no further than
+the surrogate's. Forged traces closed 4 % on JEEBench, inside the noise band, and fell below the
+untrained student on MATH500.
 
 Forged traces did beat what the attacker can see: the forged-trace student scored about 10 points
 above the students trained on the victim's answers or summaries on MATH500, and about 13 on
