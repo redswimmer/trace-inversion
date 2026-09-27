@@ -146,9 +146,7 @@ def swatch_legend(x, y, items, t, size=12):
 HEAD_GROUPS = [  # label, sublabel, {bench: (untrained, plain distillation, forged)}
     ("Paper", "R1-Distill-1.5B surrogate",
      {b: (PAPER[b]["base"], PAPER[b]["surr"], PAPER[b]["synth"]) for b in BENCHES}),
-    ("This reproduction", "same 1.5B surrogate",
-     {b: (THINK[b], acc("surr-1.5b", b), acc("synth-1.5b-sum", b)) for b in BENCHES}),
-    ("This reproduction", "7B surrogate",
+    ("Our recreation", "7B surrogate",
      {b: (THINK[b], acc("surr-7b", b), acc("synth-7b-sum", b)) for b in BENCHES}),
 ]
 
@@ -200,7 +198,7 @@ def chart_headline(mode):
                     f"is; with thinking off it scores {NOTHINK['MATH500']} / {NOTHINK['JEEBench']}, "
                     "above every trained student.", t, 12.5, t["muted"]))
     return svg(W, H, "\n".join(out), t,
-               "Untrained student vs plain distillation vs forged traces, paper and reproduction")
+               "Untrained student vs plain distillation vs forged traces, paper and our recreation")
 
 
 # --------------------------------------------------------------------------- 2. pipeline
@@ -240,15 +238,15 @@ def chart_pipeline(mode):
     BY1, BY2 = L1 + 44, L2 + 44
     lanes = (
         (BY1, [("Problems A", ["OpenThoughts", "5,000 prompts"], None, False),
-               ("Surrogate", ["R1-Distill 7B · 1.5B", "reasons in the open"], t["distilled"],
+               ("Surrogate", ["R1-Distill-Qwen-7B", "reasons in the open"], t["distilled"],
                 False),
                ("Compressor", ["Qwen3.5-4B, zero-shot", "summarizes each trace"], None, False),
-               ("Inverter: train ×4", ["Qwen3.5-4B + LoRA", "problem, answer, summary",
+               ("Inverter: train", ["Qwen3.5-4B + LoRA", "problem, answer, summary",
                                        "→ reasoning trace"], t["forged"], True)]),
         (BY2, [("Problems B", ["OpenThoughts", "5,000 prompts"], None, False),
                ("Victim", ["Qwen3.8-27B, 4-bit", "shows answer + summary*", "hides its trace"],
                 None, False),
-               ("Inverter: apply", ["same 4 adapters", "forges the hidden trace"], t["forged"],
+               ("Inverter: apply", ["the trained adapter", "forges the hidden trace"], t["forged"],
                 False),
                ("Student", ["Qwen3.5-2B, full fine-tune", "one per training condition",
                             "scored: MATH500, JEEBench"], None, True)]),
@@ -270,7 +268,7 @@ def chart_pipeline(mode):
     ax, ix, my = XS[3] + WS[3] / 2, XS[2] + WS[2] - 44, L1 + LH + 20
     out.append(f'<path d="M{ax},{BY1 + BH} V{my} H{ix} V{BY2 - 2}" fill="none" '
                f'stroke="{t["forged"]}" stroke-width="1.8" marker-end="url(#ah-forged)"/>')
-    out.append(text((ax + ix) / 2, my - 7, "trained adapters", t, 12, t["forged"],
+    out.append(text((ax + ix) / 2, my - 7, "trained adapter", t, 12, t["forged"],
                     anchor="middle", weight="700", halo=True))
 
     # plain distillation: the surrogate's own traces train a student directly (the winning
@@ -292,14 +290,13 @@ def chart_pipeline(mode):
     out.append(text((vx + sx_) / 2, oy + 20, "the victim's real traces: never shown to the "
                     "attack, used only to train the oracle student", t, 12.5, t["oracle"],
                     anchor="middle", weight="700"))
-    H = oy + 104
+    H = oy + 84
     for k, note in enumerate((
-            "×4 = 2 surrogates × with / without the summary.",
             "* The victim has no summary API, so the compressor summarizes its hidden trace, as "
             "the paper presumably did for R1.",
-            "Floor students, not drawn: trained on the victim's answers only, or its summaries + "
+            "Also trained, not drawn: students on the victim's answers only, or its summaries + "
             "answers.")):
-        out.append(text(24, H - 52 + k * 20, note, t, 12, t["muted"]))
+        out.append(text(24, H - 32 + k * 20, note, t, 12, t["muted"]))
     return svg(W, H, "\n".join(out), t, "Pipeline: surrogate, compressor, inverter, victim, student")
 
 
@@ -307,10 +304,8 @@ def chart_pipeline(mode):
 RES_ROWS = [  # label, run, colour role — forged sits directly above its own surrogate's row
     ("Victim's answers only", "answer-only", "ref"),
     ("Victim's summaries + answers", "summary-answer", "ref"),
-    ("Forged traces · 1.5B surrogate", "synth-1.5b-sum", "forged"),
-    ("Plain distillation · 1.5B surrogate", "surr-1.5b", "distilled"),
-    ("Forged traces · 7B surrogate", "synth-7b-sum", "forged"),
-    ("Plain distillation · 7B surrogate", "surr-7b", "distilled"),
+    ("Forged traces", "synth-7b-sum", "forged"),
+    ("Plain distillation", "surr-7b", "distilled"),
     ("Oracle (victim's real traces)", "oracle", "oracle"),
 ]
 
@@ -322,10 +317,9 @@ def chart_results(mode):
     px = PANEL_W / XMAX
     PLOT_H = len(RES_ROWS) * ROW
     H = TOP + PLOT_H + 90
-    out = [text(24, 36, "Plain distillation from the 7B matched the oracle; forged traces "
-                "trailed both", t, 18, t["ink"], weight="700"),
-           text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per "
-                "condition · dashed: the untrained student, thinking on and off", t, 12.5,
+    out = [text(24, 36, "Plain distillation matched the oracle; forged traces trailed both", t, 18, t["ink"], weight="700"),
+           text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems · 7B surrogate · "
+                "dashed: the untrained student, thinking on and off", t, 12.5,
                 t["muted"])]
     out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
                                   "attack)"), (t["distilled"], "plain distillation"),
@@ -353,7 +347,7 @@ def chart_results(mode):
             v = acc(run, bench)
             out.append(hbar(x0, TOP + r * ROW + (ROW - BAR) / 2, v * px, BAR, t[role]))
         # the 7B-distillation vs oracle tie: a bracket right of the two bars
-        r7, ro = RES_ROWS.index(("Plain distillation · 7B surrogate", "surr-7b", "distilled")), \
+        r7, ro = RES_ROWS.index(("Plain distillation", "surr-7b", "distilled")), \
             len(RES_ROWS) - 1
         bxk = x0 + max(acc("surr-7b", bench), acc("oracle", bench)) * px + 38
         y1, y2 = TOP + r7 * ROW + ROW / 2, TOP + ro * ROW + ROW / 2
@@ -375,10 +369,9 @@ def chart_results(mode):
                             tabular=True, halo=True))
     for r, (label, run, role) in enumerate(RES_ROWS):
         out.append(text(24, TOP + r * ROW + ROW / 2 + 4.5, label, t, 13.5, t["ink"]))
-    out.append(text(24, H - 12, f"⊢⊣ range across 3 evaluation seeds on one student: "
-                    f"{seed_range('MATH500'):.1f} (MATH500), {seed_range('JEEBench'):.1f} (JEEBench) "
-                    "points. Every student is scored with thinking on. Forged rows use the with-summary inverter.", t, 11,
-                    t["muted"]))
+    out.append(text(24, H - 12, f"⊢⊣ range across 3 evaluation seeds: {seed_range('MATH500'):.1f} (MATH500), "
+                    f"{seed_range('JEEBench'):.1f} (JEEBench) · every student is scored with thinking on",
+                    t, 12, t["muted"]))
     return svg(W, H, "\n".join(out), t, "Student accuracy by training condition")
 
 
@@ -386,13 +379,11 @@ def chart_results(mode):
 POINTS = [  # run, label, role, label dx, dy, anchor
     ("baseline-think", "untrained student", "ref", 10, -14, "end"),
     ("oracle", "oracle", "oracle", 0, 24, "middle"),
-    ("surr-7b", "plain distillation · 7B", "distilled", 12, 4, "start"),
-    ("surr-1.5b", "plain distillation · 1.5B", "distilled", 12, 16, "start"),
-    ("synth-7b-sum", "forged · 7B surrogate", "forged", 12, -8, "start"),
-    ("synth-1.5b-sum", "forged · 1.5B surrogate", "forged", 12, 4, "start"),
+    ("surr-7b", "plain distillation", "distilled", 12, 4, "start"),
+    ("synth-7b-sum", "forged traces", "forged", 12, -8, "start"),
 ]
 FLOORS = ("answer-only", "summary-answer")
-VARIANTS = ("synth-7b-nosum", "synth-1.5b-nosum")    # plotted small, unlabelled
+VARIANTS = ("synth-7b-nosum",)    # plotted small, unlabelled
 TRACE_RUNS = [p[0] for p in POINTS if p[0] != "baseline-think"] + list(VARIANTS)
 
 
@@ -499,6 +490,6 @@ if __name__ == "__main__":
     assert acc("oracle", "JEEBench") == 45.6 and acc("surr-7b", "JEEBench") == 45.4
     assert abs(trunc("baseline-think", "JEEBench") - 65.6) < 0.1
     gap = lambda b: [round(v[b][2] - v[b][1], 1) for _, _, v in HEAD_GROUPS]  # forged − distillation
-    assert gap("JEEBench") == [16.6, -7.5, -9.9] and gap("MATH500") == [8.6, -1.2, -7.6]
+    assert gap("JEEBench") == [16.6, -9.9] and gap("MATH500") == [8.6, -7.6]
     assert round(seed_range("MATH500"), 1) == 3.4 and round(seed_range("JEEBench"), 1) == 5.3
     print("self-check passed")
