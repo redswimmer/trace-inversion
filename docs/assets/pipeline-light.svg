@@ -49,7 +49,7 @@
 <rect x="662.0" y="286.0" width="216.0" height="98.0" rx="10" fill="#ffffff" stroke="#c3c2b7" stroke-width="2"/>
 <text x="676.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">Student</text>
 <text x="676.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#52514e" text-anchor="start" font-weight="normal" style="">Qwen3.5-2B, full fine-tune</text>
-<text x="676.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#52514e" text-anchor="start" font-weight="normal" style="">one per training condition</text>
+<text x="676.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#52514e" text-anchor="start" font-weight="normal" style="">one per kind of training data</text>
 <text x="676.0" y="372.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#52514e" text-anchor="start" font-weight="normal" style="">scored: MATH500, JEEBench</text>
 <line x1="156.0" y1="335.0" x2="194.0" y2="335.0" stroke="#52514e" stroke-width="1.8" marker-end="url(#ah-ink)"/>
 <line x1="386.0" y1="335.0" x2="424.0" y2="335.0" stroke="#52514e" stroke-width="1.8" marker-end="url(#ah-ink)"/>
@@ -60,9 +60,9 @@
 <text x="670.0" y="183.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#2a78d6" text-anchor="middle" font-weight="700" style="" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">trained adapter</text>
 <path d="M291.0,158 V220 H720 V284" fill="none" stroke="#ffffff" stroke-width="7"/>
 <path d="M291.0,158 V220 H720 V284" fill="none" stroke="#eb6834" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-distilled)"/>
-<text x="301.0" y="213.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#eb6834" text-anchor="start" font-weight="700" style="" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">own traces → plain-distillation student</text>
+<text x="301.0" y="213.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#eb6834" text-anchor="start" font-weight="700" style="" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">its own traces → a student (plain distillation)</text>
 <path d="M291.0,384 V420 H770.0 V386" fill="none" stroke="#1baf7a" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-oracle)"/>
-<text x="530.5" y="440.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#1baf7a" text-anchor="middle" font-weight="700" style="">the victim's real traces: never shown to the attack, used only to train the oracle student</text>
+<text x="530.5" y="440.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#1baf7a" text-anchor="middle" font-weight="700" style="">the victim's real traces: never shown to the attack, used only to train one comparison student</text>
 <text x="24.0" y="472.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">* The victim has no summary API, so the compressor summarizes its hidden trace, as the paper presumably did for R1.</text>
-<text x="24.0" y="492.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Also trained, not drawn: students on the victim's answers only, or its summaries + answers.</text>
+<text x="24.0" y="492.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Also trained, not drawn: students trained on the victim's answers only, or its summaries + answers.</text>
 </svg>
