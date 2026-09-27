@@ -166,7 +166,7 @@ def chart_headline(mode):
                 "untrained student", t, 12.5, t["muted"])]
     out += swatch_legend(24, 88, [(t["ref"], "untrained student"),
                                   (t["distilled"], "trained on the surrogate's traces (plain distillation)"),
-                                  (t["forged"], "trained on forged traces (the attack)")], t, 13)
+                                  (t["forged"], "trained on forged traces (the attack)")], t, 12.5)
     for i, bench in enumerate(BENCHES):
         x0 = LABEL_W + i * (PANEL_W + GAP)
         out.append(text(x0, TOP - 12, bench, t, 13, t["ink"], weight="700"))
