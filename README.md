@@ -23,7 +23,7 @@ JEEBench, so every student in our recreation is partly learning to *finish* its 
 
 | Role | Model | What it does |
 |---|---|---|
-| **Victim** | Qwen3.8-27B | The strong model being stolen from. It shows only its answer and a short summary; its reasoning stays hidden. |
+| **Victim** | Qwen3.8-27B | The strong model being stolen from. The attacker sees only its answer and a short summary (made by our compressor); its reasoning stays hidden. |
 | **Surrogate** | R1-Distill-Qwen-7B | An open, weaker model whose reasoning the attacker can see. |
 | **Compressor** | Qwen3.5-4B | Summarizes reasoning traces: the surrogate's, to train the inverter, and the victim's hidden ones, since our victim has no summary feature. |
 | **Inverter** | Qwen3.5-4B + LoRA | Learns from the surrogate to write reasoning backwards from an answer and summary, then forges the victim's hidden reasoning. |
@@ -66,10 +66,9 @@ student worse off, so we use a 7B.
 
 In our recreation, plain distillation and the oracle closed the same share of the gap between our
 untrained student and the victim on JEEBench (24 % each; on MATH500, 14 % vs 19 %, a 1.4-point gap
-inside the noise band). The victim scores
-21 points above the 7B surrogate on JEEBench, yet its real traces moved our student no further than
-the surrogate's. Forged traces closed 4 % on JEEBench, inside the noise band, and fell below the
-untrained student on MATH500.
+inside the noise band). The victim scores 21 points above the 7B surrogate on JEEBench, yet its real
+traces moved our student no further than the surrogate's. Forged traces closed 4 % on JEEBench,
+inside the noise band, and fell below the untrained student on MATH500.
 
 Forged traces did beat what the attacker can see: the forged-trace student scored about 10 points
 above the students trained on the victim's answers or summaries on MATH500, and about 13 on
