@@ -48,41 +48,24 @@ student worse off, so we use a 7B.
   accuracy (r = −0.91). A cut-off answer scores zero, so part of that link is by construction.
   [Details below](#where-the-gap-shows-up-students-that-dont-finish).
 
-## How the attack works
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/pipeline-dark.svg">
-  <img alt="Two-stage pipeline. Stage 1: the surrogate (R1-Distill-Qwen-7B) solves 5,000 problems with visible traces; a compressor summarizes each trace; the inverter learns to map problem, answer and summary back to the trace. The surrogate's own traces also train the plain-distillation student. Stage 2: the victim (Qwen3.8-27B) solves 5,000 other problems, showing only its answer and a summary; the inverter forges the hidden traces; a Qwen3.5-2B student is fine-tuned on them and scored on MATH500 and JEEBench. The victim's real traces are used only for the oracle student." src="docs/assets/pipeline-light.svg">
-</picture>
-
-The inverter is never asked to solve anything, since it is handed the answer. Its only test is
-whether the traces it writes make a student better. Every student in our recreation is the same
-Qwen3.5-2B, fine-tuned on one of five kinds of data:
-
-| Training data | Role |
-|---|---|
-| the victim's answers only | no reasoning trace: what the attacker sees |
-| the victim's summaries + answers | no reasoning trace: what the attacker sees |
-| **forged traces** from the inverter | **the attack** |
-| the surrogate's own traces | plain distillation, the alternative the attack must beat |
-| the victim's real traces | the oracle, an upper bound no real attacker has |
-
-The victim-side students train on the 3,616 problems where every inverter produced a finished
-trace; the plain-distillation student trains on 3,616 of the surrogate's own problems. Every result
-file passed an automated gate before any number from it was used, and the gates caught three silent
-failures, including a chat template that quietly disabled thinking. The full record of every phase
-is in [`docs/results/`](docs/results/).
-
-## Every student in our recreation
+## How far each student moved toward its teacher
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/results-dark.svg">
-  <img alt="Our recreation, 7B surrogate, student accuracy by training data, MATH500 / JEEBench: victim's answers only 54.2 / 22.9; summaries + answers 54.8 / 21.6; forged traces 64.4 / 35.5; plain distillation 72.0 / 45.4; oracle 73.4 / 45.6, a tie with plain distillation. Untrained student with thinking on 67.8 / 33.8; with thinking off 79.0 / 47.8." src="docs/assets/results-light.svg">
+  <img alt="Our recreation, 7B surrogate, accuracy MATH500 / JEEBench. Teacher models: victim 97.2 / 82.0; 7B surrogate 92.6 / 60.6. Students: oracle 73.4 / 45.6 (19 % / 24 % of the way to the victim); plain distillation 72.0 / 45.4 (17 % / 43 % of the way to the surrogate); forged traces 64.4 / 35.5 (fell back on MATH500; 4 % of the way to the victim on JEEBench); untrained student 67.8 / 33.8; victim's summaries + answers 54.8 / 21.6; victim's answers only 54.2 / 22.9. Untrained student with thinking off: 79.0 / 47.8." src="docs/assets/results-light.svg">
 </picture>
 
-**The fair "before" is our untrained student with thinking on (67.8 / 33.8), how every student is
-scored. No student, the oracle included, reached our untrained student with thinking off
-(79.0 / 47.8).** The dashed lines show both.
+Distillation moves a student toward the model it learns from. In our recreation, plain distillation
+moved the student 43 % of the way to the 7B surrogate on JEEBench (17 % on MATH500). The oracle,
+trained on the victim's real traces, reached about the same scores, only a fifth to a
+quarter of the way to the victim. Forged traces barely moved the student toward the victim (4 % on
+JEEBench) and set it back on MATH500. No student came close to the victim: a 2B student trained on
+3,616 problems was never going to match a 27B model, so the question is which data moves it
+furthest.
+
+**Every student is scored with thinking on, where our untrained student scores 67.8 / 33.8. No
+student, the oracle included, reached our untrained student with thinking off (79.0 / 47.8).** The
+dotted line shows it.
 
 Forged traces did beat what the attacker can see: the forged-trace student scored about 10 points
 above the students trained on the victim's answers or summaries on MATH500, and about 13 on
@@ -109,6 +92,31 @@ with the paper's 1.5B surrogate are in the full record:
 [`docs/results/phase6.md`](docs/results/phase6.md).
 
 </details>
+
+## How the attack works
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/pipeline-dark.svg">
+  <img alt="Two-stage pipeline. Stage 1: the surrogate (R1-Distill-Qwen-7B) solves 5,000 problems with visible traces; a compressor summarizes each trace; the inverter learns to map problem, answer and summary back to the trace. The surrogate's own traces also train the plain-distillation student. Stage 2: the victim (Qwen3.8-27B) solves 5,000 other problems, showing only its answer and a summary; the inverter forges the hidden traces; a Qwen3.5-2B student is fine-tuned on them and scored on MATH500 and JEEBench. The victim's real traces are used only for the oracle student." src="docs/assets/pipeline-light.svg">
+</picture>
+
+The inverter is never asked to solve anything, since it is handed the answer. Its only test is
+whether the traces it writes make a student better. Every student in our recreation is the same
+Qwen3.5-2B, fine-tuned on one of five kinds of data:
+
+| Training data | Role |
+|---|---|
+| the victim's answers only | no reasoning trace: what the attacker sees |
+| the victim's summaries + answers | no reasoning trace: what the attacker sees |
+| **forged traces** from the inverter | **the attack** |
+| the surrogate's own traces | plain distillation, the alternative the attack must beat |
+| the victim's real traces | the oracle, an upper bound no real attacker has |
+
+The victim-side students train on the 3,616 problems where every inverter produced a finished
+trace; the plain-distillation student trains on 3,616 of the surrogate's own problems. Every result
+file passed an automated gate before any number from it was used, and the gates caught three silent
+failures, including a chat template that quietly disabled thinking. The full record of every phase
+is in [`docs/results/`](docs/results/).
 
 ## Where the gap shows up: students that don't finish
 

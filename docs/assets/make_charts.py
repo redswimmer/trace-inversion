@@ -300,79 +300,102 @@ def chart_pipeline(mode):
     return svg(W, H, "\n".join(out), t, "Pipeline: surrogate, compressor, inverter, victim, student")
 
 
-# --------------------------------------------------------------------------- 3. results
-RES_ROWS = [  # label, run, colour role — forged sits directly above its own surrogate's row
-    ("Victim's answers only", "answer-only", "ref"),
-    ("Victim's summaries + answers", "summary-answer", "ref"),
-    ("Forged traces", "synth-7b-sum", "forged"),
-    ("Plain distillation", "surr-7b", "distilled"),
-    ("Oracle (victim's real traces)", "oracle", "oracle"),
+# --------------------------------------------------------------------------- 3. students vs teachers
+# The teacher models' own scores, cited from records rather than re-run (docs/results/phase6.md,
+# reference rows): the victim as the attack queried it (medium effort, 250-problem subset,
+# phase3.md §6) and the 7B surrogate (baselines.md, Phase 0). Both ran on llama.cpp, the students on
+# vLLM, so these two rows are approximate.
+VICTIM = {"MATH500": 97.2, "JEEBench": 82.0}
+SURR7 = {"MATH500": 92.6, "JEEBench": 60.6}
+
+LADDER = [  # label, key, colour role, teacher (for the share-of-the-way label), is_teacher_row
+    ("Victim (Qwen3.8-27B)", "victim", "oracle", None, True),
+    ("7B surrogate", "surrogate", "distilled", None, True),
+    ("Oracle (victim's real traces)", "oracle", "oracle", "victim", False),
+    ("Plain distillation", "surr-7b", "distilled", "surrogate", False),
+    ("Forged traces", "synth-7b-sum", "forged", "victim", False),
+    ("Untrained student", "baseline-think", "ref", None, False),
+    ("Victim's summaries + answers", "summary-answer", "ref", None, False),
+    ("Victim's answers only", "answer-only", "ref", None, False),
 ]
+
+
+def ladder_score(key, bench):
+    return {"victim": VICTIM, "surrogate": SURR7}[key][bench] if key in ("victim", "surrogate") \
+        else acc(key, bench)
+
+
+def share_toward(key, teacher, bench):
+    """How far a student moved from the untrained student toward its teacher, in %."""
+    start = THINK[bench]
+    return 100 * (acc(key, bench) - start) / (ladder_score(teacher, bench) - start)
 
 
 def chart_results(mode):
     t = THEME[mode]
-    W, LABEL_W, PANEL_W, GAP, TOP, ROW, BAR = 900, 256, 278, 44, 132, 32, 18
-    XMAX = 80.0
+    W, LABEL_W, PANEL_W, GAP, TOP, ROW, BAR = 900, 252, 282, 50, 156, 30, 16
+    XMAX = 100.0
     px = PANEL_W / XMAX
-    PLOT_H = len(RES_ROWS) * ROW
-    H = TOP + PLOT_H + 90
-    out = [text(24, 36, "Plain distillation matched the oracle; forged traces trailed both", t, 18, t["ink"], weight="700"),
-           text(24, 58, "Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems · 7B surrogate · "
-                "dashed: the untrained student, thinking on and off", t, 12.5,
-                t["muted"])]
-    out += swatch_legend(24, 86, [(t["ref"], "no trace"), (t["forged"], "forged traces (the "
-                                  "attack)"), (t["distilled"], "plain distillation"),
-                                  (t["oracle"], "oracle (victim's real traces)")], t)
+    SEP = 14  # gap between the teacher rows and the students
+    PLOT_H = len(LADDER) * ROW + SEP
+    H = TOP + PLOT_H + 108
+    ry = lambda r: TOP + r * ROW + (SEP if r >= 2 else 0)
+    out = [text(24, 36, "Plain distillation moved toward its teacher; forged traces didn't", t, 18,
+                t["ink"], weight="700"),
+           text(24, 58, "Our recreation, 7B surrogate · accuracy (%) · outlined bars: the teacher "
+                "models themselves", t, 12.5, t["muted"]),
+           text(24, 77, "(%) = share of the way from the untrained student to its teacher (the "
+                "surrogate for plain distillation, the victim for the rest)", t, 12.5, t["muted"])]
+    out += swatch_legend(24, 108, [(t["ref"], "untrained / no trace"),
+                                   (t["forged"], "forged traces (the attack)"),
+                                   (t["distilled"], "plain distillation"),
+                                   (t["oracle"], "oracle")], t, 13)
     for i, bench in enumerate(BENCHES):
         x0 = LABEL_W + i * (PANEL_W + GAP)
         out.append(text(x0, TOP - 12, bench, t, 13, t["ink"], weight="700"))
         for v in range(0, int(XMAX) + 1, 20):
             gx = x0 + v * px
             out.append(line(gx, TOP, gx, TOP + PLOT_H, t["axis"] if v == 0 else t["grid"]))
-            if min(abs(v - THINK[bench]), abs(v - NOTHINK[bench])) > 3:  # clear of refs
+            if abs(v - NOTHINK[bench]) > 3:
                 out.append(text(gx, TOP + PLOT_H + 15, str(v), t, 12, t["muted"],
                                 anchor="middle", tabular=True))
-        # untrained reference lines, labelled beneath the axis so they never meet a value label
-        # untrained references: thinking on (how students are served) and thinking off
-        gx = x0 + THINK[bench] * px
-        out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["ink2"], 1.5, "4 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 36, f"thinking on · {THINK[bench]:.1f}",
-                        t, 12, t["ink2"], anchor="end", weight="600", halo=True))
+        # the untrained student with thinking off: a reference line, labelled beneath the axis
         gx = x0 + NOTHINK[bench] * px
-        out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 40, t["muted"], 1.2, "2 3"))
-        out.append(text(gx - 4, TOP + PLOT_H + 54, f"thinking off · {NOTHINK[bench]:.1f}", t,
-                        12, t["muted"], anchor="end", weight="600", halo=True))
-        for r, (_, run, role) in enumerate(RES_ROWS):  # bars drawn over the reference lines
-            v = acc(run, bench)
-            out.append(hbar(x0, TOP + r * ROW + (ROW - BAR) / 2, v * px, BAR, t[role]))
-        # the 7B-distillation vs oracle tie: a bracket right of the two bars
-        r7, ro = RES_ROWS.index(("Plain distillation", "surr-7b", "distilled")), \
-            len(RES_ROWS) - 1
-        bxk = x0 + max(acc("surr-7b", bench), acc("oracle", bench)) * px + 38
-        y1, y2 = TOP + r7 * ROW + ROW / 2, TOP + ro * ROW + ROW / 2
-        out.append(f'<path d="M{bxk - 5},{y1} H{bxk} V{y2} H{bxk - 5}" fill="none" '
-                   f'stroke="{t["ink2"]}" stroke-width="1.4"/>')
-        out.append(text(bxk + 6, (y1 + y2) / 2 + 4, "tie", t, 13, t["ink2"], weight="700"))
-        for r, (_, run, role) in enumerate(RES_ROWS):
-            v = acc(run, bench)
-            ry = TOP + r * ROW + ROW / 2
+        out.append(line(gx, TOP - 2, gx, TOP + PLOT_H + 24, t["muted"], 1.2, "2 3"))
+        out.append(text(gx - 4, TOP + PLOT_H + 36, f"untrained, thinking off · {NOTHINK[bench]:.1f}",
+                        t, 12, t["muted"], anchor="end", weight="600", halo=True))
+        for r, (_, key, role, teacher, is_teacher) in enumerate(LADDER):
+            v = ladder_score(key, bench)
+            y = ry(r) + (ROW - BAR) / 2
+            if is_teacher:  # outlined: a reference point, not a trained student
+                out.append(rect(x0, y + 1, v * px, BAR - 2, t["page"], r=3, stroke=t[role], sw=2))
+            else:
+                out.append(hbar(x0, y, v * px, BAR, t[role]))
+            cy = ry(r) + ROW / 2
             end = v
-            if run == SEEDS[0]:  # range across 3 evaluation seeds, drawn where it was measured
+            if key == SEEDS[0]:  # range across 3 evaluation seeds, drawn where it was measured
                 vals = [acc(k, bench) for k in SEEDS]
                 lo, hi = x0 + min(vals) * px, x0 + max(vals) * px
-                out.append(line(lo, ry, hi, ry, t["ink"], 1.6))
-                out.append(line(lo, ry - 5, lo, ry + 5, t["ink"], 1.6))
-                out.append(line(hi, ry - 5, hi, ry + 5, t["ink"], 1.6))
+                out.append(line(lo, cy, hi, cy, t["ink"], 1.6))
+                out.append(line(lo, cy - 5, lo, cy + 5, t["ink"], 1.6))
+                out.append(line(hi, cy - 5, hi, cy + 5, t["ink"], 1.6))
                 end = max(vals)
-            out.append(text(x0 + end * px + 6, ry + 4.5, f"{v:.1f}", t, 13, t["ink"],
-                            tabular=True, halo=True))
-    for r, (label, run, role) in enumerate(RES_ROWS):
-        out.append(text(24, TOP + r * ROW + ROW / 2 + 4.5, label, t, 13.5, t["ink"]))
-    out.append(text(24, H - 12, f"⊢⊣ range across 3 evaluation seeds: {seed_range('MATH500'):.1f} (MATH500), "
-                    f"{seed_range('JEEBench'):.1f} (JEEBench) · every student is scored with thinking on",
-                    t, 12, t["muted"]))
-    return svg(W, H, "\n".join(out), t, "Student accuracy by training condition")
+            lab = f"{v:.1f}"
+            if teacher:
+                sh = share_toward(key, teacher, bench)
+                lab += f" ({sh:.0f} %)" if sh >= 0 else " (fell back)"
+            out.append(text(x0 + end * px + 6, cy + 4.5, lab, t, 13, t["ink"],
+                            weight="600" if teacher else "400", tabular=True, halo=True))
+    for r, (label, _, _, _, is_teacher) in enumerate(LADDER):
+        out.append(text(24, ry(r) + ROW / 2 + 4.5, label, t, 13.5, t["ink"],
+                        weight="600" if is_teacher else "400"))
+    out.append(line(24, TOP + 2 * ROW + SEP / 2, W - 24, TOP + 2 * ROW + SEP / 2, t["grid"]))
+    out.append(text(24, H - 32, f"⊢⊣ range across 3 evaluation seeds: {seed_range('MATH500'):.1f} "
+                    f"(MATH500), {seed_range('JEEBench'):.1f} (JEEBench) · every student is scored "
+                    "with thinking on", t, 12, t["muted"]))
+    out.append(text(24, H - 12, "Teacher scores are approximate: a different inference engine, and "
+                    "the victim on a 250-problem subset.", t, 12, t["muted"]))
+    return svg(W, H, "\n".join(out), t, "Students and teacher models on one scale, our recreation")
 
 
 # --------------------------------------------------------------------------- 4. termination
@@ -492,4 +515,7 @@ if __name__ == "__main__":
     gap = lambda b: [round(v[b][2] - v[b][1], 1) for _, _, v in HEAD_GROUPS]  # forged − distillation
     assert gap("JEEBench") == [16.6, -9.9] and gap("MATH500") == [8.6, -7.6]
     assert round(seed_range("MATH500"), 1) == 3.4 and round(seed_range("JEEBench"), 1) == 5.3
+    shares = [round(share_toward(k, tch, "JEEBench")) for k, tch in
+              (("surr-7b", "surrogate"), ("oracle", "victim"), ("synth-7b-sum", "victim"))]
+    assert shares == [43, 24, 4], shares
     print("self-check passed")
