@@ -24,18 +24,7 @@ adds a measured evaluation-noise band. Students are scored on **MATH500** (compe
 | **Surrogate** | R1-Distill-Qwen-7B | An open, weaker model whose reasoning the attacker can see. |
 | **Compressor** | Qwen3.5-4B | Summarizes reasoning traces: the surrogate's, to train the inverter, and the victim's hidden ones, since our victim has no summary feature. |
 | **Inverter** | Qwen3.5-4B + LoRA | Learns from the surrogate to write reasoning backwards from an answer and summary, then forges the victim's hidden reasoning. |
-| **Student** | Qwen3.5-2B | The small model being trained and scored. Unlike the paper's students, it already reasons natively, with a thinking mode that can be switched on or off. |
-
-**The students:** every student is the same Qwen3.5-2B, fine-tuned on one kind of data.
-
-| Student trained on | Why it's in the study |
-|---|---|
-| nothing (the untrained student) | the starting point |
-| the victim's answers only | no reasoning: what the attacker sees |
-| the victim's summaries + answers | no reasoning: what the attacker sees |
-| **forged traces**: the inverter's forgeries of the victim's hidden reasoning | **the attack** |
-| **the surrogate's traces** (plain distillation) | what an attacker can do anyway: the baseline the attack must beat |
-| **the victim's real traces** | the best case, which no real attacker has; possible only because we ran the victim ourselves |
+| **Student** | Qwen3.5-2B | The small model being trained and scored; each student is a copy trained on one kind of data. Unlike the paper's students, it already reasons natively, with a thinking mode that can be switched on or off. |
 
 | Victim answers kept | Students trained | Student evaluations | Compute |
 |:-:|:-:|:-:|:-:|
@@ -56,8 +45,9 @@ student worse off, so we use a 7B.
   Llama-3.1-8B). In our recreation, plain distillation beat forged traces by 7.6 and 9.9, both
   outside the noise band.
 - **In our recreation, the surrogate's traces took our student as far as the victim's real traces
-  did** (72.0 / 45.4 vs 73.4 / 45.6), although the victim itself scores 21 points higher on JEEBench
-  than the 7B surrogate (next chart).
+  did** (72.0 / 45.4 vs 73.4 / 45.6). Because our victim runs locally, we could train a student on
+  its real, hidden traces, which no real attacker can do; it marks the best case. Yet the victim
+  itself scores 21 points higher on JEEBench than the 7B surrogate (next chart).
 - **In our recreation, the students trained on forged traces often never finished.** On JEEBench,
   with or without the summary, they were cut off at the 32k-token limit on 29–31 % of problems,
   against 17 % for the student trained on the surrogate's traces and 8 % for the one trained on the
@@ -78,9 +68,9 @@ each; on MATH500, 14 % vs 19 %, a 1.4-point gap inside the noise band). The stud
 forged traces closed 4 % on JEEBench, inside the noise band, and fell below the untrained student on
 MATH500.
 
-Forged traces did beat what the attacker can see: the student trained on them scored about 10 points
-above the students trained on the victim's answers only or on its summaries + answers on MATH500,
-and about 13 on JEEBench (64.4 vs 54.2–54.8; 35.5 vs 21.6–22.9).
+Two more students were trained on only what the attacker sees without the attack: one on the
+victim's answers only, one on its summaries + answers. The student trained on forged traces beat
+both, by about 10 points on MATH500 and about 13 on JEEBench (64.4 vs 54.2–54.8; 35.5 vs 21.6–22.9).
 
 <details>
 <summary><strong>All evaluation runs in our recreation (7B surrogate)</strong></summary>
