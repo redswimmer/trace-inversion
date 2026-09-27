@@ -1,53 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="354" viewBox="0 0 900 354" role="img" aria-label="Forged traces minus plain distillation: paper positive, this reproduction negative">
-<title>Forged traces minus plain distillation: paper positive, this reproduction negative</title>
-<rect x="0.0" y="0.0" width="900.0" height="354.0" rx="10" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="448" viewBox="0 0 900 448" role="img" aria-label="Untrained student vs plain distillation vs forged traces, paper and reproduction">
+<title>Untrained student vs plain distillation vs forged traces, paper and reproduction</title>
+<rect x="0.0" y="0.0" width="900.0" height="448.0" rx="10" fill="#ffffff"/>
 <text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">Forged traces lost to plain distillation: the paper's gap reversed</text>
-<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Student accuracy trained on forged traces, minus accuracy trained on the surrogate's own traces (points) · with-summary inverter</text>
-<text x="220.0" y="88.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">MATH500</text>
-<rect x="307.4" y="100.0" width="82.4" height="142.0" rx="0" fill="#ecebe6"/>
-<line x1="262.9" y1="100.0" x2="262.9" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="262.9" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">-10</text>
-<line x1="348.6" y1="100.0" x2="348.6" y2="242.0" stroke="#c3c2b7" stroke-width="1.2"/>
-<text x="348.6" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
-<line x1="434.3" y1="100.0" x2="434.3" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="434.3" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">+10</text>
-<line x1="520.0" y1="100.0" x2="520.0" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="520.0" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">+20</text>
-<path d="M348.6,116.0 H418.3 a4,4 0 0 1 4,4 V134.0 a4,4 0 0 1 -4,4 H348.6 Z" fill="#2a78d6"/>
-<text x="429.3" y="132.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">+8.6</text>
-<path d="M348.6,162.0 H342.3 a4,4 0 0 0 -4,4 V180.0 a4,4 0 0 0 4,4 H348.6 Z" fill="#e34948"/>
-<text x="331.3" y="178.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">−1.2</text>
-<path d="M348.6,208.0 H287.4 a4,4 0 0 0 -4,4 V226.0 a4,4 0 0 0 4,4 H348.6 Z" fill="#e34948"/>
-<text x="276.4" y="224.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">−7.6</text>
-<text x="342.6" y="276.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#e34948" text-anchor="end" font-weight="600" style="">← distillation wins</text>
-<text x="354.6" y="276.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#2a78d6" text-anchor="start" font-weight="600" style="">forging wins →</text>
-<text x="564.0" y="88.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">JEEBench</text>
-<rect x="628.3" y="100.0" width="128.5" height="142.0" rx="0" fill="#ecebe6"/>
-<line x1="606.9" y1="100.0" x2="606.9" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="606.9" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">-10</text>
-<line x1="692.6" y1="100.0" x2="692.6" y2="242.0" stroke="#c3c2b7" stroke-width="1.2"/>
-<text x="692.6" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
-<line x1="778.3" y1="100.0" x2="778.3" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="778.3" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">+10</text>
-<line x1="864.0" y1="100.0" x2="864.0" y2="242.0" stroke="#e7e6e1" stroke-width="1"/>
-<text x="864.0" y="258.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">+20</text>
-<path d="M692.6,116.0 H830.9 a4,4 0 0 1 4,4 V134.0 a4,4 0 0 1 -4,4 H692.6 Z" fill="#2a78d6"/>
-<text x="841.9" y="132.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">+16.6</text>
-<path d="M692.6,162.0 H632.3 a4,4 0 0 0 -4,4 V180.0 a4,4 0 0 0 4,4 H692.6 Z" fill="#e34948"/>
-<text x="621.3" y="178.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">−7.5</text>
-<path d="M692.6,208.0 H611.7 a4,4 0 0 0 -4,4 V226.0 a4,4 0 0 0 4,4 H692.6 Z" fill="#e34948"/>
-<text x="600.7" y="224.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="end" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">−9.9</text>
-<text x="686.6" y="276.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#e34948" text-anchor="end" font-weight="600" style="">← distillation wins</text>
-<text x="698.6" y="276.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#2a78d6" text-anchor="start" font-weight="600" style="">forging wins →</text>
-<text x="24.0" y="125.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">Paper</text>
-<text x="24.0" y="141.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">R1-Distill-1.5B surrogate</text>
-<text x="24.0" y="171.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">This reproduction</text>
-<text x="24.0" y="187.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">same 1.5B surrogate</text>
-<text x="24.0" y="217.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">This reproduction</text>
-<text x="24.0" y="233.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">7B surrogate</text>
-<line x1="24.0" y1="150.0" x2="876.0" y2="150.0" stroke="#e7e6e1" stroke-width="1"/>
-<rect x="24.0" y="292.0" width="13.0" height="11.0" rx="2" fill="#ecebe6"/>
-<text x="44.0" y="302.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">shaded: noise for a gap between two runs (√2 × the 3-seed range: ±4.8 MATH500, ±7.5 JEEBench) · the paper reports single runs</text>
-<text x="24.0" y="322.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Paper: R1 victim, Qwen2.5-7B student · here: 27B victim, Qwen3.5-2B student that already reasons · compare signs, not sizes</text>
-<text x="24.0" y="342.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#52514e" text-anchor="start" font-weight="600" style="">The paper's distillation baseline scored below its own untrained student (63.2 vs 71.2 MATH500; 19.7 vs 28.3 JEEBench)</text>
+<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Student accuracy (%) before and after training · (±) = change from the untrained student</text>
+<rect x="24.0" y="79.0" width="12.0" height="12.0" rx="3" fill="#a8a69f"/>
+<text x="42.0" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#52514e" text-anchor="start" font-weight="normal" style="">untrained student</text>
+<rect x="192.2" y="79.0" width="12.0" height="12.0" rx="3" fill="#eb6834"/>
+<text x="210.2" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#52514e" text-anchor="start" font-weight="normal" style="">plain distillation</text>
+<rect x="367.9" y="79.0" width="12.0" height="12.0" rx="3" fill="#2a78d6"/>
+<text x="385.9" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#52514e" text-anchor="start" font-weight="normal" style="">forged traces (the attack)</text>
+<text x="210.0" y="120.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">MATH500</text>
+<line x1="210.0" y1="130.0" x2="210.0" y2="364.0" stroke="#c3c2b7" stroke-width="1.0"/>
+<text x="210.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
+<line x1="282.5" y1="130.0" x2="282.5" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="282.5" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">20</text>
+<line x1="355.0" y1="130.0" x2="355.0" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="355.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">40</text>
+<line x1="427.5" y1="130.0" x2="427.5" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="427.5" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">60</text>
+<line x1="500.0" y1="130.0" x2="500.0" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="500.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">80</text>
+<path d="M210.0,134.5 H464.1 a4,4 0 0 1 4,4 V145.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#a8a69f"/>
+<text x="474.1" y="146.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">71.2</text>
+<path d="M210.0,154.5 H435.1 a4,4 0 0 1 4,4 V165.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#eb6834"/>
+<text x="445.1" y="166.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">63.2 (−8.0)</text>
+<path d="M210.0,174.5 H466.3 a4,4 0 0 1 4,4 V185.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#2a78d6"/>
+<text x="476.3" y="186.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">71.8 (+0.6)</text>
+<path d="M210.0,220.5 H451.8 a4,4 0 0 1 4,4 V231.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#a8a69f"/>
+<text x="461.8" y="232.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">67.8</text>
+<path d="M210.0,240.5 H431.5 a4,4 0 0 1 4,4 V251.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#eb6834"/>
+<text x="441.5" y="252.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">62.2 (−5.6)</text>
+<path d="M210.0,260.5 H427.1 a4,4 0 0 1 4,4 V271.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#2a78d6"/>
+<text x="437.1" y="272.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">61.0 (−6.8)</text>
+<path d="M210.0,306.5 H451.8 a4,4 0 0 1 4,4 V317.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#a8a69f"/>
+<text x="461.8" y="318.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">67.8</text>
+<path d="M210.0,326.5 H467.0 a4,4 0 0 1 4,4 V337.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#eb6834"/>
+<text x="477.0" y="338.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">72.0 (+4.2)</text>
+<path d="M210.0,346.5 H439.5 a4,4 0 0 1 4,4 V357.5 a4,4 0 0 1 -4,4 H210.0 Z" fill="#2a78d6"/>
+<text x="449.5" y="358.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">64.4 (−3.4)</text>
+<text x="560.0" y="120.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="700" style="">JEEBench</text>
+<line x1="560.0" y1="130.0" x2="560.0" y2="364.0" stroke="#c3c2b7" stroke-width="1.0"/>
+<text x="560.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
+<line x1="632.5" y1="130.0" x2="632.5" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="632.5" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">20</text>
+<line x1="705.0" y1="130.0" x2="705.0" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="705.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">40</text>
+<line x1="777.5" y1="130.0" x2="777.5" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="777.5" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">60</text>
+<line x1="850.0" y1="130.0" x2="850.0" y2="364.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="850.0" y="380.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">80</text>
+<path d="M560.0,134.5 H658.6 a4,4 0 0 1 4,4 V145.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#a8a69f"/>
+<text x="668.6" y="146.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">28.3</text>
+<path d="M560.0,154.5 H627.4 a4,4 0 0 1 4,4 V165.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#eb6834"/>
+<text x="637.4" y="166.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">19.7 (−8.6)</text>
+<path d="M560.0,174.5 H687.6 a4,4 0 0 1 4,4 V185.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#2a78d6"/>
+<text x="697.6" y="186.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">36.3 (+8.0)</text>
+<path d="M560.0,220.5 H678.5 a4,4 0 0 1 4,4 V231.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#a8a69f"/>
+<text x="688.5" y="232.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">33.8</text>
+<path d="M560.0,240.5 H673.5 a4,4 0 0 1 4,4 V251.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#eb6834"/>
+<text x="683.5" y="252.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">32.4 (−1.4)</text>
+<path d="M560.0,260.5 H646.3 a4,4 0 0 1 4,4 V271.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#2a78d6"/>
+<text x="656.3" y="272.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">24.9 (−8.9)</text>
+<path d="M560.0,306.5 H678.5 a4,4 0 0 1 4,4 V317.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#a8a69f"/>
+<text x="688.5" y="318.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="400" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">33.8</text>
+<path d="M560.0,326.5 H720.6 a4,4 0 0 1 4,4 V337.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#eb6834"/>
+<text x="730.6" y="338.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">45.4 (+11.6)</text>
+<path d="M560.0,346.5 H684.7 a4,4 0 0 1 4,4 V357.5 a4,4 0 0 1 -4,4 H560.0 Z" fill="#2a78d6"/>
+<text x="694.7" y="358.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#0b0b0b" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;" paint-order="stroke" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">35.5 (+1.7)</text>
+<text x="24.0" y="160.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">Paper</text>
+<text x="24.0" y="176.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">R1-Distill-1.5B surrogate</text>
+<text x="24.0" y="246.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">This reproduction</text>
+<text x="24.0" y="262.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">same 1.5B surrogate</text>
+<line x1="24.0" y1="205.0" x2="876.0" y2="205.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="24.0" y="332.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">This reproduction</text>
+<text x="24.0" y="348.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">7B surrogate</text>
+<line x1="24.0" y1="291.0" x2="876.0" y2="291.0" stroke="#e7e6e1" stroke-width="1.0"/>
+<text x="24.0" y="416.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Noise: 3 evaluation seeds moved one student's score by 3.4 (MATH500) and 5.3 (JEEBench) points; the paper reports single runs.</text>
+<text x="24.0" y="436.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#6f6e69" text-anchor="start" font-weight="normal" style="">Our untrained student is scored with thinking on, as every student is; with thinking off it scores 79.0 / 47.8, above every trained student.</text>
 </svg>

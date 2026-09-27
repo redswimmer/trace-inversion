@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="446" viewBox="0 0 900 446" role="img" aria-label="Student accuracy by training condition">
 <title>Student accuracy by training condition</title>
 <rect x="0.0" y="0.0" width="900.0" height="446.0" rx="10" fill="#0d1117"/>
-<text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Distilling an open 7B matched the victim's real traces; forgeries trailed both</text>
-<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="">Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per condition · dashed: untrained, as served (thinking on) and thinking off</text>
+<text x="24.0" y="36.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="18" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Plain distillation from the 7B matched the oracle; forged traces trailed both</text>
+<text x="24.0" y="58.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#9a9992" text-anchor="start" font-weight="normal" style="">Qwen3.5-2B accuracy (%) after fine-tuning on 3,616 problems per condition · dashed: the untrained student, thinking on and off</text>
 <rect x="24.0" y="77.0" width="12.0" height="12.0" rx="3" fill="#6e6d68"/>
 <text x="42.0" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">no trace</text>
 <rect x="119.7" y="77.0" width="12.0" height="12.0" rx="3" fill="#3987e5"/>
 <text x="137.7" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">forged traces (the attack)</text>
 <rect x="340.6" y="77.0" width="12.0" height="12.0" rx="3" fill="#d95926"/>
-<text x="358.6" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">surrogate's traces (plain distillation)</text>
-<rect x="652.1" y="77.0" width="12.0" height="12.0" rx="3" fill="#199e70"/>
-<text x="670.1" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">victim's real traces</text>
+<text x="358.6" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">plain distillation</text>
+<rect x="505.9" y="77.0" width="12.0" height="12.0" rx="3" fill="#199e70"/>
+<text x="523.9" y="87.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">oracle (victim's real traces)</text>
 <text x="256.0" y="120.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">MATH500</text>
 <line x1="256.0" y1="132.0" x2="256.0" y2="356.0" stroke="#45443f" stroke-width="1.0"/>
 <text x="256.0" y="371.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
@@ -22,7 +22,7 @@
 <text x="464.5" y="371.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">60</text>
 <line x1="534.0" y1="132.0" x2="534.0" y2="356.0" stroke="#2a2a28" stroke-width="1.0"/>
 <line x1="491.6" y1="130.0" x2="491.6" y2="380.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 3"/>
-<text x="487.6" y="392.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">as served · 67.8</text>
+<text x="487.6" y="392.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">thinking on · 67.8</text>
 <line x1="530.5" y1="130.0" x2="530.5" y2="396.0" stroke="#9a9992" stroke-width="1.2" stroke-dasharray="2 3"/>
 <text x="526.5" y="410.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">thinking off · 79.0</text>
 <path d="M256.0,139.0 H440.3 a4,4 0 0 1 4,4 V153.0 a4,4 0 0 1 -4,4 H256.0 Z" fill="#6e6d68"/>
@@ -56,7 +56,7 @@
 <line x1="856.0" y1="132.0" x2="856.0" y2="356.0" stroke="#2a2a28" stroke-width="1.0"/>
 <text x="856.0" y="371.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">80</text>
 <line x1="695.5" y1="130.0" x2="695.5" y2="380.0" stroke="#c3c2b7" stroke-width="1.5" stroke-dasharray="4 3"/>
-<text x="691.5" y="392.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">as served · 33.8</text>
+<text x="691.5" y="392.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#c3c2b7" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">thinking on · 33.8</text>
 <line x1="744.1" y1="130.0" x2="744.1" y2="396.0" stroke="#9a9992" stroke-width="1.2" stroke-dasharray="2 3"/>
 <text x="740.1" y="410.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12" fill="#9a9992" text-anchor="end" font-weight="600" style="" paint-order="stroke" stroke="#0d1117" stroke-width="3" stroke-linejoin="round">thinking off · 47.8</text>
 <path d="M578.0,139.0 H653.6 a4,4 0 0 1 4,4 V153.0 a4,4 0 0 1 -4,4 H578.0 Z" fill="#6e6d68"/>
@@ -81,9 +81,9 @@
 <text x="24.0" y="152.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Victim's answers only</text>
 <text x="24.0" y="184.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Victim's summaries + answers</text>
 <text x="24.0" y="216.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Forged traces · 1.5B surrogate</text>
-<text x="24.0" y="248.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Surrogate's own traces · 1.5B</text>
+<text x="24.0" y="248.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Plain distillation · 1.5B surrogate</text>
 <text x="24.0" y="280.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Forged traces · 7B surrogate</text>
-<text x="24.0" y="312.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Surrogate's own traces · 7B</text>
-<text x="24.0" y="344.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Victim's real traces (oracle)</text>
-<text x="24.0" y="434.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#9a9992" text-anchor="start" font-weight="normal" style="">⊢⊣ range across 3 evaluation seeds on one cell: 3.4 (MATH500), 5.3 (JEEBench) points. Forged rows use the with-summary inverter.</text>
+<text x="24.0" y="312.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Plain distillation · 7B surrogate</text>
+<text x="24.0" y="344.5" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13.5" fill="#f0f0ee" text-anchor="start" font-weight="normal" style="">Oracle (victim's real traces)</text>
+<text x="24.0" y="434.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11" fill="#9a9992" text-anchor="start" font-weight="normal" style="">⊢⊣ range across 3 evaluation seeds on one student: 3.4 (MATH500), 5.3 (JEEBench) points. Every student is scored with thinking on. Forged rows use the with-summary inverter.</text>
 </svg>
