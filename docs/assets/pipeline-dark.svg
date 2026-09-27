@@ -35,7 +35,7 @@
 <rect x="28.0" y="286.0" width="128.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
 <text x="42.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Problems B</text>
 <text x="42.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">OpenThoughts</text>
-<text x="42.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">5,045 answers kept</text>
+<text x="42.0" y="354.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">5,045 prompts answered</text>
 <rect x="196.0" y="286.0" width="190.0" height="98.0" rx="10" fill="#0d1117" stroke="#45443f" stroke-width="1.2"/>
 <text x="210.0" y="313.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="15" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">Victim</text>
 <text x="210.0" y="336.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="12.5" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">Qwen3.8-27B, 4-bit</text>

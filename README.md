@@ -45,7 +45,7 @@ adds a measured evaluation-noise band. Students are scored on **MATH500** (compe
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/headline-dark.svg">
-  <img alt="Student accuracy before and after training. The paper, 1.5B surrogate: untrained 71.2 MATH500 / 28.3 JEEBench; plain distillation 63.2 / 19.7 (−8.0 / −8.6); forged traces 71.8 / 36.3 (+0.6 / +8.0). Our recreation, 7B surrogate: untrained 67.8 / 33.8; plain distillation 72.0 / 45.4 (+4.2 / +11.6); forged traces 64.4 / 35.5 (−3.4 / +1.7)." src="docs/assets/headline-light.svg">
+  <img alt="Student accuracy before and after training. The paper, 1.5B surrogate: untrained 71.2 MATH500 / 28.3 JEEBench; trained on the surrogate's traces 63.2 / 19.7 (−8.0 / −8.6); trained on forged traces 71.8 / 36.3 (+0.6 / +8.0). Our recreation, 7B surrogate: untrained 67.8 / 33.8; trained on the surrogate's traces 72.0 / 45.4 (+4.2 / +11.6); trained on forged traces 64.4 / 35.5 (−3.4 / +1.7)." src="docs/assets/headline-light.svg">
 </picture>
 
 We also tested the paper's 1.5B surrogate; both forged traces and plain distillation left our
@@ -108,7 +108,7 @@ with the paper's 1.5B surrogate are in the full record:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/pipeline-dark.svg">
-  <img alt="Two-stage pipeline. Stage 1: the surrogate (R1-Distill-Qwen-7B) solves 5,000 problems with visible traces; a compressor summarizes each trace; the inverter learns to map problem, answer and summary back to the trace. The surrogate's own traces also train a student directly (plain distillation). Stage 2: the victim (Qwen3.8-27B) solves 5,000 other problems, showing only its answer and a summary; the inverter forges the hidden traces; a Qwen3.5-2B student is fine-tuned on them and scored on MATH500 and JEEBench. The victim's real traces are used only to train one comparison student." src="docs/assets/pipeline-light.svg">
+  <img alt="Two-stage pipeline. Stage 1: the surrogate (R1-Distill-Qwen-7B) solves 5,000 problems with visible traces; a compressor summarizes each trace; the inverter learns to map problem, answer and summary back to the trace. The surrogate's own traces also train a student directly (plain distillation). Stage 2: the victim (Qwen3.8-27B) answers 5,045 other problems, showing only its answer and a summary; the inverter forges the hidden traces; a Qwen3.5-2B student is fine-tuned on them and scored on MATH500 and JEEBench. The victim's real traces are used only to train one comparison student." src="docs/assets/pipeline-light.svg">
 </picture>
 
 The inverter is never asked to solve anything, since it is handed the answer. Its only test is
@@ -132,25 +132,23 @@ Untrained and in thinking mode, our student is cut off at the 32k-token limit on
 JEEBench, so in our recreation every student is partly learning to *finish* its reasoning.
 Among the students trained on reasoning traces, those that finished least scored lowest.
 
-**In our recreation, length alone doesn't explain the gap to plain distillation.** Counting trace plus answer, the
-surrogate's own training examples are as long as the forged ones (median ~3.4k vs ~3.0–3.2k
-tokens), yet the student trained on the surrogate's traces is cut off about half as often. One visible difference
-is how they were made: the surrogate's traces end at its own answer, while forgeries are written
-backwards toward an answer the inverter was handed, and about 5 % of them argue their way to a
-different one. The two sets also cover different problems, so this is a candidate explanation, not
-a measured cause. Our forgeries also overshoot the real traces they replace (median 2.4–2.6×
-longer), where the paper's came in *under* the real length (81–89 %). Both flaws were on record
-before any student trained.
+**In our recreation, length alone doesn't explain the gap to plain distillation.** Counting trace
+plus answer, the surrogate's own training examples are as long as the forged ones (median ~3.4k vs
+~3.0–3.2k tokens), yet the student trained on the surrogate's traces is cut off about half as often.
+One visible difference is how they were made: the surrogate's traces end at its own answer, while
+forgeries are written backwards toward an answer the inverter was handed, and about 5 % of them
+argue their way to a different one. The two sets also cover different problems, so this is a
+candidate explanation, not a measured cause.
 
 ## What it means
 
 **The takeaway: an attack on hidden reasoning is only as convincing as its weakest baseline.** In
 the paper, the margins were measured against a student trained on its surrogate's traces that scored
 below the untrained student. In our recreation, plain distillation from an open 7B matched the
-victim's real traces and left forging little room, and for a student that already reasons, fine-
-tuning mainly taught it to finish its reasoning. So credit a trace-stealing attack only if it beats
-both the untrained student and plain distillation from the best open model. The evidence, from both
-sides:
+victim's real traces and left forging little room, and for a student that already reasons,
+fine-tuning mainly taught it to finish its reasoning. So credit a trace-stealing attack only if it
+beats both the untrained student and plain distillation from the best open model. The evidence, from
+both sides:
 
 **The paper: much of its margin was recovered ground.** Its student trained on its surrogate's
 traces scored 63.2 vs its untrained student's 71.2 on MATH500 and 19.7 vs 28.3 on JEEBench. Measured
@@ -166,7 +164,9 @@ trained on forged traces with the summary is +1.5 on JEEBench).
 
 - **Not separable:** *why*. Our forged and real traces differ in length, voice and answer
   consistency, the student trained on the surrogate's traces saw different problems and answers, and
-  no length-matched control was run.
+  no length-matched control was run. Our forgeries also run 2.4–2.6× longer than the real traces
+  they replace (median), where the paper's came in *under* the real length (81–89 %); this was on
+  record before any student trained.
 - **Noise:** each condition was trained once, and the band we measured (3.4 MATH500, 5.3 JEEBench)
   is evaluation-seed spread only. The paper reports single runs, and where its students trained on
   forged traces beat its students trained on the victim's real traces, the margins were only 0.4–2.4
@@ -176,8 +176,7 @@ trained on forged traces with the summary is +1.5 on JEEBench).
 - **Data:** our students train on 3,616 problems, about a third of the paper's 10k. The paper's own
   scaling curve (a different victim, no plain-distillation comparison) puts its attack 10.6 points
   lower on MATH500 at 5k than at 10k, so the margin of forged traces over plain distillation may
-  depend on scale. Whether it
-  would change sign is untested.
+  depend on scale. Whether it would change sign is untested.
 - **The 32k-token limit matters:** about half of our untrained student's JEEBench cut-offs were not
   stuck repeating themselves and might finish with a larger budget.
 - **Scale:** our models are smaller and newer than the paper's, so compare directions, not sizes.

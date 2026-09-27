@@ -165,7 +165,7 @@ def chart_headline(mode):
            text(24, 58, "Student accuracy (%) before and after training · (±) = change from the "
                 "untrained student", t, 12.5, t["muted"])]
     out += swatch_legend(24, 88, [(t["ref"], "untrained student"),
-                                  (t["distilled"], "trained on the surrogate's traces"),
+                                  (t["distilled"], "trained on the surrogate's traces (plain distillation)"),
                                   (t["forged"], "trained on forged traces (the attack)")], t, 13)
     for i, bench in enumerate(BENCHES):
         x0 = LABEL_W + i * (PANEL_W + GAP)
@@ -245,7 +245,7 @@ def chart_pipeline(mode):
                ("Compressor", ["Qwen3.5-4B, zero-shot", "summarizes each trace"], None, False),
                ("Inverter: train", ["Qwen3.5-4B + LoRA", "problem, answer, summary",
                                        "→ reasoning trace"], t["forged"], True)]),
-        (BY2, [("Problems B", ["OpenThoughts", "5,045 answers kept"], None, False),
+        (BY2, [("Problems B", ["OpenThoughts", "5,045 prompts answered"], None, False),
                ("Victim", ["Qwen3.8-27B, 4-bit", "shows answer + summary*", "hides its trace"],
                 None, False),
                ("Inverter: apply", ["the trained adapter", "forges the hidden trace"], t["forged"],

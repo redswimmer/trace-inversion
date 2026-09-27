@@ -6,9 +6,9 @@
 <rect x="24.0" y="79.0" width="12.0" height="12.0" rx="3" fill="#6e6d68"/>
 <text x="42.0" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">untrained student</text>
 <rect x="192.2" y="79.0" width="12.0" height="12.0" rx="3" fill="#d95926"/>
-<text x="210.2" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">trained on the surrogate's traces</text>
-<rect x="481.0" y="79.0" width="12.0" height="12.0" rx="3" fill="#3987e5"/>
-<text x="499.0" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">trained on forged traces (the attack)</text>
+<text x="210.2" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">trained on the surrogate's traces (plain distillation)</text>
+<rect x="639.3" y="79.0" width="12.0" height="12.0" rx="3" fill="#3987e5"/>
+<text x="657.3" y="89.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#c3c2b7" text-anchor="start" font-weight="normal" style="">trained on forged traces (the attack)</text>
 <text x="210.0" y="120.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="13" fill="#f0f0ee" text-anchor="start" font-weight="700" style="">MATH500</text>
 <line x1="210.0" y1="130.0" x2="210.0" y2="278.0" stroke="#45443f" stroke-width="1.0"/>
 <text x="210.0" y="294.0" font-family='system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif' font-size="11.5" fill="#9a9992" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">0</text>
