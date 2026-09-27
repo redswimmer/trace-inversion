@@ -2,13 +2,15 @@
 
 **We recreated the paper's attack end to end. In our recreation, its central result reversed.**
 
-Commercial reasoning models hide their chain of thought and return only an answer, sometimes with a
-short summary of the thinking. The paper, [*How to Steal Reasoning Without Reasoning Traces*](https://arxiv.org/abs/2603.07267)
-(Zhang, Morris, Shmatikov, 2026), says hiding the trace isn't enough. Its attacker trains an
-**inverter** to run reasoning backwards: given a problem, the answer and the summary, it writes a
-trace that could have produced them. In the paper, a student fine-tuned on these forged traces beats
-**plain distillation**, which fine-tunes the same student on the visible traces of the attacker's
-own weaker open model (the **surrogate**).
+The cheapest way to copy a strong model's reasoning is to train a smaller model on its reasoning
+traces, the step-by-step working behind each answer. That's why commercial reasoning models hide
+those traces and return only an answer, sometimes with a short summary. The paper,
+[*How to Steal Reasoning Without Reasoning Traces*](https://arxiv.org/abs/2603.07267) (Zhang,
+Morris, Shmatikov, 2026), says hiding them isn't enough: an attacker can **reconstruct** the hidden
+traces and train on those instead. It trains an **inverter** to run reasoning backwards: given a
+problem, the answer and the summary, it writes a trace that could have produced them. In the paper,
+a student trained on these forged traces beats **plain distillation**, which trains the same
+student on the visible traces of the attacker's own weaker open model (the **surrogate**).
 
 **Our recreation** runs the whole attack end to end (surrogate, inverter, victim and students) and
 adds a measured evaluation-noise band. Students are scored on **MATH500** (competition math) and
