@@ -25,7 +25,7 @@ JEEBench, so every student in our recreation is partly learning to *finish* its 
 |---|---|---|
 | **Victim** | Qwen3.8-27B | The strong model being stolen from. It shows only its answer and a short summary; its reasoning stays hidden. |
 | **Surrogate** | R1-Distill-Qwen-7B | An open, weaker model whose reasoning the attacker can see. |
-| **Compressor** | Qwen3.5-4B | Summarizes the surrogate's reasoning, so the inverter learns from summaries like the victim's. |
+| **Compressor** | Qwen3.5-4B | Summarizes reasoning traces: the surrogate's, to train the inverter, and the victim's hidden ones, since our victim has no summary feature. |
 | **Inverter** | Qwen3.5-4B + LoRA | Learns from the surrogate to write reasoning backwards from an answer and summary, then forges the victim's hidden reasoning. |
 | **Student** | Qwen3.5-2B | The small model being trained and scored. |
 
@@ -50,8 +50,7 @@ student worse off, so we use a 7B.
 - **In our recreation, plain distillation matched the oracle.** Our student distilled from the 7B
   surrogate (72.0 / 45.4) tied one trained on the victim's *real* hidden traces, the **oracle**
   (73.4 / 45.6), although the victim itself scores 21 points higher on JEEBench than the 7B
-  surrogate (next chart). For our 2B student, the victim's stronger reasoning bought nothing
-  measurable over the 7B's.
+  surrogate (next chart).
 - **In our recreation, the forged-trace students often never finished.** On JEEBench they were cut
   off at the 32k-token limit on 29–31 % of problems, against 17 % for plain distillation and 8 %
   for the oracle. Across our four students trained on reasoning traces, cut-off rate tracks
@@ -66,7 +65,8 @@ student worse off, so we use a 7B.
 </picture>
 
 In our recreation, plain distillation and the oracle closed the same share of the gap between our
-untrained student and the victim on JEEBench (24 % each; 14 % vs 19 % on MATH500). The victim scores
+untrained student and the victim on JEEBench (24 % each; on MATH500, 14 % vs 19 %, a 1.4-point gap
+inside the noise band). The victim scores
 21 points above the 7B surrogate on JEEBench, yet its real traces moved our student no further than
 the surrogate's. Forged traces closed 4 % on JEEBench, inside the noise band, and fell below the
 untrained student on MATH500.
@@ -198,7 +198,7 @@ from 24 GB of VRAM. Full log with reasons:
 |---|---|---|---|
 | Victim | DeepSeek-R1 (685B) | Qwen3.8-27B, 4-bit GGUF, local | R1 can't run in 24 GB |
 | Surrogate | R1-Distill-Qwen-1.5B | R1-Distill-Qwen-7B (the 1.5B was also run) | the 1.5B scores below our student on JEEBench |
-| Compressor / inverter | Qwen2.5-7B-Instruct, full SFT | Qwen3.5-4B, LoRA r=64 | 7B full fine-tuning needs ~58 GB |
+| Compressor / inverter | Qwen2.5-7B-Instruct, full SFT | Qwen3.5-4B (compressor zero-shot; inverter LoRA r=64) | 7B full fine-tuning needs ~58 GB |
 | Student | Qwen2.5-7B, Llama-3.1-8B, full SFT | Qwen3.5-2B, full SFT at 16k context | fits full fine-tuning; reasons natively, which changes the question (see top) |
 | Data | 2 × 10k prompts | 2 × 5k queried; students train on 3,616 | cost. The paper's own curve (GPT-5.4 mini victim) falls from 77.6 to 67.0 on MATH500 at 5k, below its untrained 71.2 |
 | Framework | LLaMA-Factory + DeepSpeed | TRL `SFTTrainer` | single-GPU training |
